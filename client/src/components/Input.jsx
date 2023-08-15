@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+
 const Input = ({
   icon,
   type,
@@ -8,18 +9,20 @@ const Input = ({
   currentRef,
   autoComplete,
   required,
-  id
+  id,
 }) => {
   useEffect(() => {
     if (currentRef) {
       currentRef.current.focus();
     }
   }, []);
+
   return (
     <div
       className={`border border-grey-300 max-w-[280px] w-5/6 h-8 rounded-full shadow-md my-2 flex justify-around items-center overflow-hidden py-2 ${
         icon ? "" : "px-5"
-      }`}>
+      }`}
+    >
       {icon ? icon : null}
       <input
         className="w-full h-8 bg-transparent outline-none pr-2 text-sm"
