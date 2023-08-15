@@ -1,17 +1,20 @@
 import { createContext, useState, useEffect } from "react";
-import SignupMain from "../components/Signup/SignupMain";
-import SignupData from "../components/Signup/SignupData";
+import axios from "../api/axios";
+
 import {
   isValidData,
   isValidPassword,
-  isValidEmail
+  isValidEmail,
 } from "../utils/Validation";
-import axios from "../api/axios";
+
+import SignupMain from "../components/Signup/SignupMain";
+import SignupData from "../components/Signup/SignupData";
 
 const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
   const [step, setStep] = useState(1);
+
   // Intialize the user data
   const [userData, setUserData] = useState({
     firstName: "",
@@ -25,13 +28,13 @@ export const AuthProvider = ({ children }) => {
     idImage: null,
     licenseNumber: "",
     licenseImage: null,
-    speciality: ""
+    speciality: "",
   });
 
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
-    rememberMe: false
+    rememberMe: false,
   });
 
   const LOGIN_URL = "/login";
@@ -40,14 +43,14 @@ export const AuthProvider = ({ children }) => {
   // Signup Error State
   const [signupMessage, setSignupMessage] = useState({
     message: "",
-    error: false
+    error: false,
   });
 
   // Login Error State
 
   const [loginMessage, setLoginMessage] = useState({
     message: "",
-    error: false
+    error: false,
   });
 
   // Validate Signup Email while typing
@@ -70,52 +73,61 @@ export const AuthProvider = ({ children }) => {
 
   const handleUserLogin = async (e) => {
     e.preventDefault();
+
     const { email, password, rememberMe } = loginData;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (email.length === 0)
       return setLoginMessage({
         message: "Please enter your email",
-        error: true
+        error: true,
       });
+
     if (password.length === 0)
       return setLoginMessage({
         message: "Please enter your password",
-        error: true
+        error: true,
       });
+
     if (!emailRegex.test(email))
       return setSignupMessage({
         message: "Please enter a valid email",
-        error: true
+        error: true,
       });
+
     try {
       const response = await axios.post(LOGIN_URL, loginData, {
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        withCredentials: true
+        withCredentials: true,
       });
+
       console.log(response.data.message);
       setLoginMessage({ message: response.data.message, error: false });
       console.log(response.data.accessToken);
+
       // Empty the fields after successful login
       setLoginData({
         email: "",
         password: "",
-        rememberMe: false
+        rememberMe: false,
       });
     } catch (err) {
-      if (!err?.response) {
-        setLoginMessage({ message: err.response.data.message, error: true });
-      } else if (err.response?.status === 400) {
-        setLoginMessage({ message: err.response.data.message, error: true });
-      } else if (err.response?.status === 401) {
-        setLoginMessage({ message: err.response.data.message, error: true });
-      } else if (err.response?.status === 404) {
-        setLoginMessage({ message: err.response.data.message, error: true });
-      } else if (err.response?.status === 500) {
-        setLoginMessage({ message: "Server Error", error: true });
-      } else {
-        setLoginMessage({ message: "Login Failed", error: true });
+      switch (err.response?.status) {
+        case undefined:
+          setLoginMessage({ message: err.response.data.message, error: true });
+          break;
+        case 400:
+        case 401:
+        case 404:
+          setLoginMessage({ message: err.response.data.message, error: true });
+          break;
+        case 500:
+          setLoginMessage({ message: "Server Error", error: true });
+          break;
+        default:
+          setLoginMessage({ message: "Login Failed", error: true });
       }
     }
   };
@@ -125,19 +137,25 @@ export const AuthProvider = ({ children }) => {
   const handleUserSignup = async (e) => {
     e.preventDefault();
     if (!isValidData(userData, setSignupMessage, step)) return;
+
     if (step === 1) {
       console.log("Submitting Patient");
+
       try {
         const formData = new FormData();
         formData.append("userData", JSON.stringify(userData));
+
         const response = await axios.post(REGISTER_URL, formData, {
           headers: {
-            "Content-Type": "multipart/form-data"
+            "Content-Type": "multipart/form-data",
           },
-          withCredentials: true
+          withCredentials: true,
         });
+
         console.log(response.data);
+
         setSignupMessage({ message: response.data.message, error: false });
+
         // Empty the fields after successful signup
         setUserData({
           firstName: "",
@@ -151,39 +169,58 @@ export const AuthProvider = ({ children }) => {
           idImage: null,
           licenseNumber: "",
           licenseImage: null,
-          speciality: ""
+          speciality: "",
         });
       } catch (err) {
-        if (!err?.response) {
-          setSignupMessage({ message: err.response.data.message, error: true });
-        } else if (err.response?.status === 409) {
-          setSignupMessage({ message: err.response.data.message, error: true });
-          setStep(1);
-        } else if (err.response?.status === 500) {
-          setSignupMessage({ message: "Server Error", error: true });
-        } else if (err.response?.status === 400) {
-          setSignupMessage({ message: err.response.data.message, error: true });
-        } else {
-          setSignupMessage({ message: "Registration Failed", error: true });
+        switch (err.response?.status) {
+          case undefined:
+            setSignupMessage({
+              message: err.response.data.message,
+              error: true,
+            });
+            break;
+          case 409:
+            setSignupMessage({
+              message: err.response.data.message,
+              error: true,
+            });
+            setStep(1);
+            break;
+          case 500:
+            setSignupMessage({ message: "Server Error", error: true });
+            break;
+          case 400:
+            setSignupMessage({
+              message: err.response.data.message,
+              error: true,
+            });
+            break;
+          default:
+            setSignupMessage({ message: "Registration Failed", error: true });
         }
       }
     } else if (step === 2) {
       // In case it's a doctor signing up
       if (!isValidData(userData, setSignupMessage, step)) return;
+
       try {
         console.log("Submitting Doctor");
+
         const formData = new FormData();
         formData.append("userData", JSON.stringify(userData));
         formData.append("idImage", userData.idImage);
         formData.append("licenseImage", userData.licenseImage);
+
         const response = await axios.post(REGISTER_URL, formData, {
           headers: {
-            "Content-Type": "multipart/form-data"
+            "Content-Type": "multipart/form-data",
           },
-          withCredentials: true
+          withCredentials: true,
         });
+
         console.log(response.data);
         setSignupMessage({ message: response.data.message, error: false });
+
         // Empty the fields after successful signup
         setUserData({
           firstName: "",
@@ -197,20 +234,34 @@ export const AuthProvider = ({ children }) => {
           idImage: null,
           licenseNumber: "",
           licenseImage: null,
-          speciality: ""
+          speciality: "",
         });
       } catch (err) {
-        if (!err?.response) {
-          setSignupMessage({ message: err.response.data.message, error: true });
-        } else if (err.response?.status === 409) {
-          setSignupMessage({ message: err.response.data.message, error: true });
-          setStep(1);
-        } else if (err.response?.status === 500) {
-          setSignupMessage({ message: "Server Error", error: true });
-        } else if (err.response?.status === 400) {
-          setSignupMessage({ message: err.response.data.message, error: true });
-        } else {
-          setSignupMessage({ message: "Registration Failed", error: true });
+        switch (err.response?.status) {
+          case undefined:
+            setSignupMessage({
+              message: err.response.data.message,
+              error: true,
+            });
+            break;
+          case 409:
+            setSignupMessage({
+              message: err.response.data.message,
+              error: true,
+            });
+            setStep(1);
+            break;
+          case 500:
+            setSignupMessage({ message: "Server Error", error: true });
+            break;
+          case 400:
+            setSignupMessage({
+              message: err.response.data.message,
+              error: true,
+            });
+            break;
+          default:
+            setSignupMessage({ message: "Registration Failed", error: true });
         }
       }
     }
@@ -245,9 +296,12 @@ export const AuthProvider = ({ children }) => {
   // Change Signup Steps
   const changeStep = (e) => {
     e.preventDefault();
+
     setSignupMessage({ message: "", error: false });
+
     if (e.target.name === "userSubmit") {
     }
+    
     if (e.target.name === "back") {
       step > 1 ? setStep((prev) => prev - 1) : setStep(1);
       setUserData({ ...userData, password: "", confirmPassword: "" });
@@ -283,8 +337,9 @@ export const AuthProvider = ({ children }) => {
         handleUserSignup,
         handleUserLogin,
         loginMessage,
-        setLoginMessage
-      }}>
+        setLoginMessage,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
