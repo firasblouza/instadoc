@@ -1,18 +1,22 @@
+import { useContext, useRef } from "react";
+import { Link } from "react-router-dom";
+
 import { logo } from "../assets";
 import { FaUser, FaLock } from "react-icons/fa6";
-import { Link } from "react-router-dom";
+
 import AuthContext from "../context/AuthContext";
-import { useContext, useEffect, useRef } from "react";
 import Input from "./Input";
 
 const Login = () => {
   const { loginMessage, loginData, setLoginData, handleUserLogin } =
     useContext(AuthContext);
   const currentRef = useRef();
+
   return (
     <section
       id="login"
-      className="w-screen h-screen bg-gradient-to-r from-cyan-500 from-10% via-sky-500 via-30% to-emerald-500 to-90% opacity-60 flex justify-center items-center">
+      className="w-screen h-screen bg-gradient-to-r from-cyan-500 from-10% via-sky-500 via-30% to-emerald-500 to-90% opacity-60 flex justify-center items-center"
+    >
       <div className="login-container w-full h-full sm:w-1/5 sm:min-w-[300px] sm:h-auto bg-white rounded-lg shadow-lg flex flex-col">
         <div className="logo-section w-full h-auto max-h-[120px] flex items-center justify-center">
           <img
@@ -28,12 +32,14 @@ const Login = () => {
           <h1
             className={`${
               loginMessage.error ? "text-red-500" : "text-green-500"
-            } text-sm md:text-1xl font-bold `}>
+            } text-sm md:text-1xl font-bold `}
+          >
             {loginMessage.message}
           </h1>
           <form
             onSubmit={handleUserLogin}
-            className="w-full h-full flex flex-col justify-center items-center">
+            className="w-full h-full flex flex-col justify-center items-center"
+          >
             <Input
               icon={<FaUser className="mx-3" />}
               type="email"

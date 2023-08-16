@@ -5,7 +5,8 @@ const Hero = () => {
     <section
       id="hero"
       style={{ backgroundImage: `url(${doctors})` }}
-      className="relative w-full h-[400px] lg:h-screen bg-top bg-cover bg-no-repeat flex flex-col justify-center items-center">
+      className="relative w-full h-[400px] lg:h-screen bg-top bg-cover bg-no-repeat flex flex-col justify-center items-center"
+    >
       <div className="absolute inset-0 w-full h-auto flex flex-col items-center justify-center bg-gradient-to-r from-cyan-500 from-10% via-sky-500 via-30% to-emerald-500 to-90% opacity-60"></div>
 
       <div className="hero__info w-full h-full flex flex-col items-center lg:items-start justify-start lg:justify-center mt-20 lg:mt-0 lg:px-28 z-10">

@@ -1,12 +1,13 @@
-import React from "react";
 import { Link } from "react-router-dom";
+import { useRef } from "react";
+
 import Input from "../Input";
-import { useRef, useEffect } from "react";
+
 const SignupMain = ({
   changeStep,
   userData,
   setUserData,
-  handleUserSignup
+  handleUserSignup,
 }) => {
   const currentRef = useRef();
 
@@ -14,7 +15,8 @@ const SignupMain = ({
     <>
       <form
         onSubmit={handleUserSignup}
-        className="w-full h-full flex flex-col justify-start items-center">
+        className="w-full h-full flex flex-col justify-start items-center"
+      >
         <Input
           currentRef={currentRef}
           id="firstName"
@@ -74,7 +76,8 @@ const SignupMain = ({
           name="role"
           id="role"
           value={userData.role}
-          onChange={(e) => setUserData({ ...userData, role: e.target.value })}>
+          onChange={(e) => setUserData({ ...userData, role: e.target.value })}
+        >
           <option value="default">Select your role</option>
           <option value="patient">Patient</option>
           <option value="doctor">Doctor</option>
@@ -85,7 +88,8 @@ const SignupMain = ({
           className="bg-blue-400 max-w-[280px] w-5/6 h-8 text-white font-bold text-[16px] px-4 rounded-md my-3"
           {...(userData.role === "patient"
             ? {}
-            : { onClick: (e) => changeStep(e) })}>
+            : { onClick: (e) => changeStep(e) })}
+        >
           {userData.role === "patient" ? "Sign Up" : "Next"}
         </button>
         <p className="w-5/6 mb-3 text-center text-[#1E1E1E] text-sm ">

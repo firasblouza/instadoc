@@ -1,5 +1,6 @@
 import { EnvelopeClosedIcon, MobileIcon } from "@radix-ui/react-icons";
-import { logo } from "../assets";
+import { logo } from "../../assets";
+
 const UpperHeader = () => {
   return (
     <div className="UpperHeader w-full items-center justify-center lg:justify-between flex flex-row border-b border-opacity-30 border-black">
