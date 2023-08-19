@@ -5,15 +5,21 @@ const userController = require("../controllers/userController");
 const doctorController = require("../controllers/doctorController");
 const verifyRole = require("../middleware/verifyRole");
 
-router.delete("/user/:id", verifyRole("admin"), userController.deleteUserById);
+router.delete(
+  "/patient/:id",
+  verifyRole("admin"),
+  userController.deleteUserById
+);
 router.delete(
   "/doctor/:id",
   verifyRole("admin"),
   doctorController.deleteDoctorById
 );
-router.get("/users", verifyRole("admin"), userController.getAllUsers);
+
+router.get("/statistics", verifyRole("admin"), adminController.fetchStatistics);
+router.get("/patients", verifyRole("admin"), userController.getAllUsers);
 router.get("/doctors", verifyRole("admin"), doctorController.getAllDoctors);
-router.put("/user/:id", verifyRole("admin"), userController.modifyUserById);
+router.put("/patient/:id", verifyRole("admin"), userController.modifyUserById);
 router.put(
   "/doctor/:id",
   verifyRole("admin"),

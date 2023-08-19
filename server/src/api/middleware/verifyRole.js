@@ -11,6 +11,7 @@ const verifyRole = (requiredRole) => (req, res, next) => {
       // Verify the token and decode it's payload
       const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
       // Check if the decoded token has the required role
+      console.log(decodedToken.UserInfo);
       if (
         decodedToken.UserInfo.role == requiredRole ||
         decodedToken.UserInfo.role == "admin"

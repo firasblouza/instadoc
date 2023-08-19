@@ -18,18 +18,22 @@ const handleLogout = async (req, res) => {
     const doctor = await Doctor.findOne({ refreshToken }).exec();
     // If we did have a cookie, but it's not for a doctor nor a user, clear the cookie and return 204
     if (!doctor) {
-      res.clearCookie("jwt", { httpOnly: true, sameSite: "None" });
+      res.clearCookie("jwt", {
+        httpOnly: true,
+        sameSite: "None",
+        secure: true
+      });
       return res.sendStatus(204);
     }
     doctor.refreshToken = ""; // Delete the refresh token from the doctor
     await doctor.save(); // Save the changes to database
-    res.clearCookie("jwt", { httpOnly: true, sameSite: "None" }); // Clear the cookie
+    res.clearCookie("jwt", { httpOnly: true, secure: true, sameSite: "None" }); // Clear the cookie
     res.sendStatus(204); // Return 204
     console.log(`Doctor ${doctor.email} logged out`);
   } else {
     user.refreshToken = ""; // Delete the refresh token from the user
     await user.save(); // Save the changes to database
-    res.clearCookie("jwt", { httpOnly: true, sameSite: "None" }); // Clear the cookie
+    res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true }); // Clear the cookie
     res.sendStatus(204); // Return 204
     console.log(`User ${user.email} logged out`);
   }

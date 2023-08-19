@@ -7,7 +7,7 @@ const SignupMain = ({
   changeStep,
   userData,
   setUserData,
-  handleUserSignup,
+  handleUserSignup
 }) => {
   const currentRef = useRef();
 

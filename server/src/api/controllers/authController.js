@@ -7,12 +7,18 @@ const Doctor = require("../models/Doctor");
 
 const handleAuth = async (req, res) => {
   // Get the email and password from the request body
-  const { email, password } = req.body;
+  const { email, password, rememberMe } = req.body;
+  let accessTokenDuration;
 
   // If the email or password is missing, return 400
   if (!email || !password)
     return res.status(400).json({ message: "Missing email or password" });
 
+  if (rememberMe) {
+    accessTokenDuration = "15m";
+  } else {
+    accessTokenDuration = "20s";
+  }
   // Check if the email belongs to a user or a doctor first
   const user = await User.findOne({ email }).exec();
 
@@ -35,17 +41,19 @@ const handleAuth = async (req, res) => {
           {
             UserInfo: {
               email: doctor.email,
+              fullName: `${doctor.firstName} ${doctor.lastName}`,
               role: doctor.role
             }
           },
           process.env.ACCESS_TOKEN_SECRET,
-          { expiresIn: "30s" }
+          { expiresIn: accessTokenDuration }
         );
 
         const refreshToken = jwt.sign(
           {
             UserInfo: {
               email: doctor.email,
+              fullName: `${doctor.firstName} ${doctor.lastName}`,
               role: doctor.role
             }
           },
@@ -62,13 +70,16 @@ const handleAuth = async (req, res) => {
         // Send the access token and refresh token to the client, currently just logging them
         res.cookie("jwt", refreshToken, {
           httpOnly: true,
+          secure: true,
           sameSite: "None",
-          maxAge: 1000 * 60 * 60 * 24
+          maxAge: 24 * 60 * 60 * 1000
         });
 
-        res
-          .status(200)
-          .json({ message: "Logged in successfully", accessToken });
+        res.status(200).json({
+          message: "Logged in successfully",
+          role: doctor.role,
+          accessToken
+        });
 
         console.log(
           `Doctor ${doctor.firstName} ${doctor.lastName} logged in successfully`
@@ -87,17 +98,19 @@ const handleAuth = async (req, res) => {
         {
           UserInfo: {
             email: user.email,
+            fullName: `${user.firstName} ${user.lastName}`,
             role: user.role
           }
         },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "30s" }
+        { expiresIn: accessTokenDuration }
       );
 
       const refreshToken = jwt.sign(
         {
           UserInfo: {
             email: user.email,
+            fullName: `${user.firstName} ${user.lastName}`,
             role: user.role
           }
         },
@@ -115,11 +128,15 @@ const handleAuth = async (req, res) => {
 
       res.cookie("jwt", refreshToken, {
         httpOnly: true,
+        secure: true,
         sameSite: "None",
-        maxAge: 1000 * 60 * 60 * 24
+        maxAge: 24 * 60 * 60 * 1000
       });
-
-      res.status(200).json({ message: "Logged in successfully", accessToken });
+      res.status(200).json({
+        message: "Logged in successfully",
+        role: user.role,
+        accessToken
+      });
 
       console.log(
         `User ${user.firstName} ${user.lastName} logged in successfully`

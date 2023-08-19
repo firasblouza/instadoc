@@ -1,5 +1,5 @@
 import Input from "../Input";
-import doctorSpecialties from "../../data/doctorSpecialities";
+import { doctorSpecialties } from "../../data/data";
 import { FaUpload } from "react-icons/fa";
 import { useState, useRef } from "react";
 
@@ -7,7 +7,7 @@ const SignupData = ({
   userData,
   setUserData,
   changeStep,
-  handleUserSignup,
+  handleUserSignup
 }) => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const currentRef = useRef();

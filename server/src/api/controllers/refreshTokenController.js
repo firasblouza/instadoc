@@ -7,14 +7,14 @@ const Doctor = require("../models/Doctor");
 const handleRefreshToken = async (req, res) => {
   // Get the email and password from the request body
   const cookies = req.cookies;
+
   // If the email or password is missing, return 400
   if (!cookies?.jwt) return res.sendStatus(401);
-  console.log(cookies.jwt);
 
   const refreshToken = cookies.jwt;
   // Check if the email belongs to a user or a doctor first
   const user = await User.findOne({ refreshToken }).exec();
-
+  console.log(user);
   if (!user) {
     // If it's not for a user, check if it's for a doctor
     const doctor = await Doctor.findOne({ refreshToken }).exec();
@@ -27,18 +27,20 @@ const handleRefreshToken = async (req, res) => {
         refreshToken,
         process.env.REFRESH_TOKEN_SECRET,
         (err, decoded) => {
-          if (err || decoded.email !== doctor.email) return res.sendStatus(403); // Forbidden
+          if (err || decoded.UserInfo.email !== doctor.email)
+            return res.sendStatus(403); // Forbidden
           const accessToken = jwt.sign(
             {
               UserInfo: {
                 email: doctor.email,
+                fullName: `${doctor.firstName} ${doctor.lastName}`,
                 role: doctor.role
               }
             },
             process.env.ACCESS_TOKEN_SECRET,
-            { expiresIn: "30s" }
+            { expiresIn: "15m" }
           );
-          res.json({ accessToken });
+          res.json({ role: doctor.role, accessToken });
         }
       );
     }
@@ -48,18 +50,21 @@ const handleRefreshToken = async (req, res) => {
       refreshToken,
       process.env.REFRESH_TOKEN_SECRET,
       (err, decoded) => {
-        if (err || decoded.email !== user.email) return res.sendStatus(403); // Forbidden
+        console.log("last before forbid");
+        if (err || decoded.UserInfo.email !== user.email)
+          return res.sendStatus(403); // Forbidden
         const accessToken = jwt.sign(
           {
             UserInfo: {
               email: user.email,
+              fullName: `${user.firstName} ${user.lastName}`,
               role: user.role
             }
           },
           process.env.ACCESS_TOKEN_SECRET,
-          { expiresIn: "30s" }
+          { expiresIn: "15m" }
         );
-        res.json({ accessToken });
+        res.json({ role: user.role, accessToken });
       }
     );
   }

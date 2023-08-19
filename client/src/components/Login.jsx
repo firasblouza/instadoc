@@ -1,4 +1,4 @@
-import { useContext, useRef } from "react";
+import { useContext, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 import { logo } from "../assets";
@@ -8,9 +8,20 @@ import AuthContext from "../context/AuthContext";
 import Input from "./Input";
 
 const Login = () => {
-  const { loginMessage, loginData, setLoginData, handleUserLogin } =
-    useContext(AuthContext);
+  const {
+    loginMessage,
+    setLoginMessage,
+    loginData,
+    setLoginData,
+    handleUserLogin
+  } = useContext(AuthContext);
   const currentRef = useRef();
+
+  // Empty the login message on component mount
+
+  useEffect(() => {
+    setLoginMessage({ message: "", error: false });
+  }, []);
 
   return (
     <section

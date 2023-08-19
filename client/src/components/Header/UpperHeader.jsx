@@ -22,7 +22,7 @@ const UpperHeader = () => {
         </div>
         <div className="UpperHeader__Right__Item  gap-1 px-2 flex flex-row items-center justify-center">
           <button className="bg-blue-400 text-white font-bold text-[16px] px-4 py-2 rounded-md">
-            Prendre un rendez-vous
+            Demande une consultation
           </button>
         </div>
       </div>

@@ -13,4 +13,19 @@ const doctorSpecialties = [
   // Add more specialties as needed
 ];
 
-export default doctorSpecialties;
+const userData = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  role: "",
+  idType: "",
+  idNumber: "",
+  idImage: null,
+  licenseNumber: "",
+  licenseImage: null,
+  speciality: ""
+};
+
+export { userData, doctorSpecialties };

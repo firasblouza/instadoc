@@ -10,7 +10,7 @@ const Hero = () => {
       <div className="absolute inset-0 w-full h-auto flex flex-col items-center justify-center bg-gradient-to-r from-cyan-500 from-10% via-sky-500 via-30% to-emerald-500 to-90% opacity-60"></div>
 
       <div className="hero__info w-full h-full flex flex-col items-center lg:items-start justify-start lg:justify-center mt-20 lg:mt-0 lg:px-28 z-10">
-        <h1 className="hero__title text-white text-3xl lg:text-4xl font-bold mb-5">
+        <h1 className="hero__title text-center text-white text-3xl lg:text-4xl font-bold mb-5">
           Healthcare at your fingertips
         </h1>
 
