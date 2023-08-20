@@ -5,12 +5,11 @@ const jwt = require("jsonwebtoken");
 const upload = require("../middleware/multer");
 
 const handleSignup = async (req, res) => {
-  const { email, password, firstName, lastName, role } = JSON.parse(
-    req.body.userData
-  );
+  const { email, password, firstName, lastName, role, dateOfBirth } =
+    JSON.parse(req.body.userData);
   console.log(JSON.parse(req.body.userData));
 
-  if (!email || !password || !firstName || !lastName || !role) {
+  if (!email || !password || !firstName || !lastName || !role || !dateOfBirth) {
     return res.status(400).json({ message: "Please fill in all fields1" });
   }
   if (role === "doctor") {
@@ -19,9 +18,8 @@ const handleSignup = async (req, res) => {
     );
 
     const licenseImage = req.files["licenseImage"][0].filename;
+    const profileImage = req.files["profileImage"][0].filename;
     const idImage = req.files["idImage"][0].filename;
-    console.log(licenseImage + " test ");
-    console.log(idImage + " test ");
 
     if (
       !speciality ||
@@ -29,9 +27,10 @@ const handleSignup = async (req, res) => {
       !idType ||
       !idImage ||
       !licenseNumber ||
-      !licenseImage
+      !licenseImage ||
+      !profileImage
     ) {
-      return res.status(400).json({ message: "Please fill in all fields 2" });
+      return res.status(400).json({ message: "Please fill in all fields" });
     }
 
     // Check for duplicate Email.
@@ -48,11 +47,13 @@ const handleSignup = async (req, res) => {
       const newDoctor = await Doctor.create({
         email,
         password: docHashedPw,
+        dateOfBirth,
         firstName,
         lastName,
         idType,
         idNumber,
         idImage: req.files["idImage"][0].filename,
+        profileImage: req.files["profileImage"][0].filename,
         licenseNumber,
         licenseImage: req.files["licenseImage"][0].filename,
         speciality
@@ -77,6 +78,7 @@ const handleSignup = async (req, res) => {
     const newUser = await User.create({
       email,
       password: userHashedPw,
+      dateOfBirth,
       firstName,
       lastName
     });

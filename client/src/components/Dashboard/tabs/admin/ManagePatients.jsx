@@ -92,10 +92,10 @@ const ManagePatients = () => {
                 <tbody>
                   {patients.map((patient, index) => (
                     <tr key={index}>
-                      <td className="px-4 py-2">{patient.lastName}</td>
-                      <td className="px-4 py-2">{patient.firstName}</td>
-                      <td className="px-4 py-2">{patient.email}</td>
-                      <td className="px-4 py-2 flex flex-row gap-3">
+                      <td className="border px-4 py-2">{patient.lastName}</td>
+                      <td className="border px-4 py-2">{patient.firstName}</td>
+                      <td className="border px-4 py-2">{patient.email}</td>
+                      <td className="border px-4 py-2 flex flex-row gap-3">
                         <FaEye className="cursor-pointer hover:text-gray-300" />
                         <FaEdit className="cursor-pointer hover:text-gray-300" />
                         <FaTrashAlt

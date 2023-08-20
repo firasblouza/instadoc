@@ -16,7 +16,8 @@ const errorMessages = {
   noNumber: "Password must contain at least one number",
   noUppercase: "Password must contain at least one uppercase letter",
   noSpecial: "Password must contain at least one special character",
-  noMatch: "Passwords do not match"
+  noMatch: "Passwords do not match",
+  noProfileImage: "Please upload your profile image"
 };
 
 const isValidEmail = (email, setSignupMessage) => {
@@ -126,6 +127,16 @@ const isValidData = (data, setSignupMessage, step) => {
         error: true
       });
     }
+    if (!data.dateOfBirth) {
+      return setSignupMessage({
+        message: "Please select your date of birth",
+        error: true
+      });
+    }
+    setSignupMessage({
+      message: "",
+      error: false
+    });
     return true;
   } else if (step === 2) {
     if (!data.idType) {
@@ -164,12 +175,25 @@ const isValidData = (data, setSignupMessage, step) => {
         error: true
       });
     }
+  } else if (step === 3) {
+    console.log("checking here");
+    if (!data.profileImage) {
+      return setSignupMessage({
+        message: "Please upload your profile image",
+        error: true
+      });
+    }
     setSignupMessage({
       message: "",
       error: false
     });
     return true;
   }
+  setSignupMessage({
+    message: "",
+    error: false
+  });
+  return true;
 };
 
 export { isValidData, isValidEmail, isValidPassword };

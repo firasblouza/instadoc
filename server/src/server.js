@@ -10,7 +10,9 @@ const verifyJWT = require("./api/middleware/verifyJWT");
 const cookieParser = require("cookie-parser");
 const credentials = require("./api/middleware/credentials");
 
-// Middleware for file upload
+// Server static files
+
+app.use("/uploads", express.static("uploads"));
 
 // Handle 'Access-Control-Allow-Credentials' option for Cors
 app.use(credentials);

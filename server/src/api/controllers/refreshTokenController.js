@@ -32,6 +32,7 @@ const handleRefreshToken = async (req, res) => {
           const accessToken = jwt.sign(
             {
               UserInfo: {
+                id: doctor._id,
                 email: doctor.email,
                 fullName: `${doctor.firstName} ${doctor.lastName}`,
                 role: doctor.role
@@ -56,6 +57,7 @@ const handleRefreshToken = async (req, res) => {
         const accessToken = jwt.sign(
           {
             UserInfo: {
+              id: user._id,
               email: user.email,
               fullName: `${user.firstName} ${user.lastName}`,
               role: user.role

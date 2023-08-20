@@ -71,6 +71,18 @@ const SignupMain = ({
             setUserData({ ...userData, confirmPassword: e.target.value })
           }
         />
+        {/* Add date of birth input  */}
+        <Input
+          id="dateOfBirth"
+          type="date"
+          placeholder="Date of Birth"
+          autoComplete={false}
+          required={true}
+          value={userData.dateOfBirth}
+          onChange={(e) =>
+            setUserData({ ...userData, dateOfBirth: e.target.value })
+          }
+        />
         <select
           className="border border-grey-300 max-w-[280px] w-5/6 h-8 rounded-full shadow-md my-3 flex justify-around items-center px-3 outline-none"
           name="role"

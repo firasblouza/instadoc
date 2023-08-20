@@ -154,11 +154,12 @@ const SignupData = ({
             Back
           </button>
           <button
-            name="doctorSignup"
-            type="submit"
+            name="doctor_next"
+            type="button"
             className="bg-blue-400 hover:bg-blue-300 max-w-[140px] w-full h-8 text-white font-bold text-[16px] px-4 rounded-md"
+            onClick={(e) => changeStep(e)}
           >
-            Sign Up
+            Next
           </button>
         </div>
       </form>

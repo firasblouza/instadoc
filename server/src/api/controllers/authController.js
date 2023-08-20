@@ -15,7 +15,7 @@ const handleAuth = async (req, res) => {
     return res.status(400).json({ message: "Missing email or password" });
 
   if (rememberMe) {
-    accessTokenDuration = "15m";
+    accessTokenDuration = "30m";
   } else {
     accessTokenDuration = "20s";
   }
@@ -40,6 +40,7 @@ const handleAuth = async (req, res) => {
         const accessToken = jwt.sign(
           {
             UserInfo: {
+              id: doctor._id,
               email: doctor.email,
               fullName: `${doctor.firstName} ${doctor.lastName}`,
               role: doctor.role
@@ -52,6 +53,7 @@ const handleAuth = async (req, res) => {
         const refreshToken = jwt.sign(
           {
             UserInfo: {
+              id: doctor._id,
               email: doctor.email,
               fullName: `${doctor.firstName} ${doctor.lastName}`,
               role: doctor.role
@@ -97,6 +99,7 @@ const handleAuth = async (req, res) => {
       const accessToken = jwt.sign(
         {
           UserInfo: {
+            id: user._id,
             email: user.email,
             fullName: `${user.firstName} ${user.lastName}`,
             role: user.role
@@ -109,6 +112,7 @@ const handleAuth = async (req, res) => {
       const refreshToken = jwt.sign(
         {
           UserInfo: {
+            id: user._id,
             email: user.email,
             fullName: `${user.firstName} ${user.lastName}`,
             role: user.role

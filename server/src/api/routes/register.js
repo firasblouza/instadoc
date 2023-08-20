@@ -5,7 +5,11 @@ const upload = require("../middleware/multer");
 
 router.post(
   "/",
-  upload.fields([{ name: "idImage" }, { name: "licenseImage" }]),
+  upload.fields([
+    { name: "idImage" },
+    { name: "licenseImage" },
+    { name: "profileImage" }
+  ]),
   registerController.handleSignup
 );
 

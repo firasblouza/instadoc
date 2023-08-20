@@ -6,11 +6,7 @@ const getAllDoctors = async (req, res) => {
   const limit = 10;
   const skip = (page - 1) * limit;
   try {
-    const doctors = await Doctor.find({})
-      .select("-password")
-      .skip(skip)
-      .limit(limit)
-      .exec();
+    const doctors = await Doctor.find({}).select("-password").exec();
     res.status(200).json(doctors);
   } catch (err) {
     res.status(500).json({ message: "Error while fetching doctors" });

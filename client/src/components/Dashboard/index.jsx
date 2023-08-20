@@ -5,6 +5,7 @@ import useAuth from "../../hooks/useAuth";
 import ManagePatients from "./tabs/admin/ManagePatients";
 import Home from "./tabs/admin/Home";
 import ManageDoctors from "./tabs/admin/ManageDoctors";
+import Profile from "./tabs/Profile";
 
 const Dashboard = () => {
   const [selectedTab, setSelectedTab] = useState("home");
@@ -61,6 +62,7 @@ const Dashboard = () => {
         <div className="w-full md:w-4/5 p-4 max-h-[calc(100vh-60px)] overflow-y-hidden">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/admin/patients" element={<ManagePatients />} />
             <Route path="/admin/doctors" element={<ManageDoctors />} />
           </Routes>

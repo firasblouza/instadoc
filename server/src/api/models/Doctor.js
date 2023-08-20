@@ -14,9 +14,17 @@ const doctorSchema = new Schema({
     type: String,
     required: true
   },
+  dateOfBirth: {
+    type: Date,
+    required: true
+  },
   role: {
     type: String,
     default: "doctor"
+  },
+  profileImage: {
+    type: String, // This is going to be a file path for the doctor's profile.
+    required: true
   },
   firstName: {
     type: String,

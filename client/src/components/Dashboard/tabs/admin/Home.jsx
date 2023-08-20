@@ -49,7 +49,7 @@ const Home = () => {
   }, []);
 
   return (
-    <section className="admin-home w-full">
+    <section className="admin-home w-full h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] overflow-scroll overflow-y-scroll">
       <h1 className="text-1xl font-bold text-[#1E1E1E] text-center my-3">
         Bienvenue sur votre espace administrateur
       </h1>

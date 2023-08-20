@@ -12,6 +12,7 @@ import {
 
 import SignupMain from "../components/Signup/SignupMain";
 import SignupData from "../components/Signup/SignupData";
+import SignupFinish from "../components/Signup/SignupFinish";
 
 const AuthContext = createContext({});
 
@@ -21,9 +22,11 @@ export const AuthProvider = ({ children }) => {
     firstName: "",
     lastName: "",
     email: "",
+    dateOfBirth: "",
     password: "",
     confirmPassword: "",
     role: "",
+    profileImage: null,
     idType: "",
     idNumber: "",
     idImage: null,
@@ -205,6 +208,11 @@ export const AuthProvider = ({ children }) => {
         formData.append("idImage", userData.idImage);
         formData.append("licenseImage", userData.licenseImage);
       }
+      if (step === 3) {
+        formData.append("idImage", userData.idImage);
+        formData.append("licenseImage", userData.licenseImage);
+        formData.append("profileImage", userData.profileImage);
+      }
 
       const response = await axios.post(REGISTER_URL, formData, {
         headers: {
@@ -215,15 +223,20 @@ export const AuthProvider = ({ children }) => {
 
       console.log(response.data);
       setSignupMessage({ message: response.data.message, error: false });
-
+      setTimeout(() => {
+        navigate("/login");
+        setLoginMessage({ message: "Please Login", error: false });
+      }, 2000);
       // Empty the fields after successful signup
       setUserData({
         firstName: "",
         lastName: "",
         email: "",
+        dateOfBirth: "",
         password: "",
         confirmPassword: "",
         role: "",
+        profileImage: "",
         idType: "",
         idNumber: "",
         idImage: null,
@@ -282,8 +295,24 @@ export const AuthProvider = ({ children }) => {
             handleUserSignup={handleUserSignup}
           />
         );
+      case 3:
+        return (
+          <SignupFinish
+            userData={userData}
+            setUserData={setUserData}
+            changeStep={changeStep}
+            handleUserSignup={handleUserSignup}
+          />
+        );
       default:
-        return <SignupMain />;
+        return (
+          <SignupMain
+            changeStep={changeStep}
+            userData={userData}
+            setUserData={setUserData}
+            handleUserSignup={handleUserSignup}
+          />
+        );
     }
   };
 
@@ -294,7 +323,11 @@ export const AuthProvider = ({ children }) => {
     setSignupMessage({ message: "", error: false });
 
     if (e.target.name === "back") {
-      step > 1 ? setStep((prev) => prev - 1) : setStep(1);
+      step > 1
+        ? step === 3
+          ? setStep(1)
+          : setStep((prev) => prev - 1)
+        : setStep(1);
       setUserData({ ...userData, password: "", confirmPassword: "" });
       return setSignupMessage({ message: "", error: false });
     }
