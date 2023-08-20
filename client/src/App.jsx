@@ -10,7 +10,13 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import RequireAuth from "./components/RequireAuth";
 import PersistLogin from "./components/PersistLogin";
+
+// Dashboard
 import Dashboard from "./components/Dashboard";
+import AdminHome from "./components/Dashboard/tabs/admin/AdminHome";
+import Profile from "./components/Dashboard/tabs/Profile";
+import ManagePatients from "./components/Dashboard/tabs/admin/ManagePatients";
+import ManageDoctors from "./components/Dashboard/tabs/admin/ManageDoctors";
 
 const App = () => {
   const location = useLocation();
@@ -39,7 +45,12 @@ const App = () => {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
         </Route>
-        <Route path="dashboard/*" element={<Dashboard />} />
+        <Route path="dashboard/*" element={<Dashboard />}>
+          <Route index element={<AdminHome />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="admin/patients" element={<ManagePatients />} />
+          <Route path="admin/doctors" element={<ManageDoctors />} />
+        </Route>
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<Signup />} />
 

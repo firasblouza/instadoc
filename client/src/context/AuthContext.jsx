@@ -163,6 +163,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("accessToken", accessToken);
 
       setAuth({
+        id: decodedToken.UserInfo.id,
         email: loginData.email,
         fullName: decodedToken.UserInfo.fullName,
         password: loginData.password,

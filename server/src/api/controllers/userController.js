@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const jwt = require("jsonwebtoken");
 
 const getAllUsers = async (req, res) => {
   // Parameters for the pagination
@@ -18,7 +19,16 @@ const getAllUsers = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
-  const id = req.params.id;
+  let id = req.params.id;
+  if (!id) {
+    const token = req.headers["authorization"].split(" ")[1];
+    if (!token) return res.status(401).json({ message: "Unauthorized" });
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    if (decoded) {
+      id = decoded.UserInfo.id;
+    }
+  }
+  console;
   try {
     const user = await User.findById(id).select("-password").exec();
     if (user) {
@@ -32,7 +42,10 @@ const getUserById = async (req, res) => {
 };
 
 const modifyUserById = async (req, res) => {
-  const id = req.params.id;
+  let id = req.params.id;
+  const uploadedImage = req.files["profileImage"]
+    ? req.files["profileImage"][0].filename
+    : null;
   const {
     email,
     firstName,
@@ -42,18 +55,18 @@ const modifyUserById = async (req, res) => {
     age,
     sex,
     medicalHistory
-  } = req.body;
+  } = req.body.user;
+
+  const userData = JSON.parse(req.body.user);
+
+  if (uploadedImage) {
+    userData.profileImage = uploadedImage;
+  }
+
+  console.log(userData);
+
   try {
-    const user = await User.findByIdAndUpdate(id, {
-      email,
-      firstName,
-      lastName,
-      phoneNumber,
-      age,
-      sex,
-      allergies,
-      medicalHistory
-    });
+    const user = await User.findByIdAndUpdate(id, userData);
     if (user) {
       res.status(200).json({ message: "User updated successfully" });
     } else {
@@ -65,7 +78,7 @@ const modifyUserById = async (req, res) => {
 };
 
 const deleteUserById = async (req, res) => {
-  const id = req.params.id;
+  let id = req.params.id;
   try {
     const user = await User.findByIdAndDelete(id).exec();
     if (user) {

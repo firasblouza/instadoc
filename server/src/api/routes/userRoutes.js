@@ -2,9 +2,14 @@ const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
 const verifyRole = require("../middleware/verifyRole");
+const upload = require("../middleware/multer");
 
 router.get("/:id", userController.getUserById);
-router.put("/:id", userController.modifyUserById);
+router.put(
+  "/:id",
+  upload.fields([{ name: "profileImage" }]),
+  userController.modifyUserById
+);
 
 // Admin related routes
 router.get("/", verifyRole("admin"), userController.getAllUsers);

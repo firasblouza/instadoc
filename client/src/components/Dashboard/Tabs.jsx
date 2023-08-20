@@ -16,17 +16,17 @@ const getTabs = (role) => {
       {
         name: "Mes Consultations",
         id: "consultations",
-        path: "/consultations"
+        path: "consultations"
       },
       {
         name: "Mes Résultats",
         id: "results",
-        path: "/results"
+        path: "results"
       },
       {
         name: "Paramètres",
         id: "settings",
-        path: "/settings"
+        path: "settings"
       },
       {
         name: "Déconnexion",
@@ -49,17 +49,17 @@ const getTabs = (role) => {
       {
         name: "Mes Demandes",
         id: "consultations",
-        path: "/consultations"
+        path: "consultations"
       },
       {
         name: "Mes Patients",
         id: "patients",
-        path: "/patients"
+        path: "patients"
       },
       {
         name: "Paramètres",
         id: "settings",
-        path: "/settings"
+        path: "settings"
       },
       {
         name: "Déconnexion",
@@ -102,7 +102,7 @@ const getTabs = (role) => {
       {
         name: "Paramètres",
         id: "settings",
-        path: "/settings"
+        path: "settings"
       },
       {
         name: "Déconnexion",

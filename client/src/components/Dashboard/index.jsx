@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import useAuth from "../../hooks/useAuth";
 import ManagePatients from "./tabs/admin/ManagePatients";
-import Home from "./tabs/admin/Home";
+import Home from "./tabs/admin/AdminHome";
 import ManageDoctors from "./tabs/admin/ManageDoctors";
 import Profile from "./tabs/Profile";
 
@@ -60,12 +60,7 @@ const Dashboard = () => {
           role={auth.role}
         />
         <div className="w-full md:w-4/5 p-4 max-h-[calc(100vh-60px)] overflow-y-hidden">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/admin/patients" element={<ManagePatients />} />
-            <Route path="/admin/doctors" element={<ManageDoctors />} />
-          </Routes>
+          <Outlet />
         </div>
       </div>
     </section>

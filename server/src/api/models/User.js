@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema({
     required: true,
     default: Date.now
   },
+  profileImage: {
+    type: String // This is going to be a file path for the doctor's profile.
+  },
   role: {
     type: String,
     enum: ["user", "doctor", "admin"],

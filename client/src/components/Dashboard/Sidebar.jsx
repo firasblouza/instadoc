@@ -31,7 +31,7 @@ const Sidebar = ({ selectedTab, onTabSelect, isOpen, role }) => {
             className={` cursor-pointer   hover:bg-gray-700 ${
               selectedTab === tab.id ? activeTab : ""
             }`}
-            onClick={() => handleTabClick(tab.name)}
+            onClick={() => handleTabClick(tab.id)}
           >
             <Link className="w-full block p-4" to={tab.path}>
               {tab.name}
