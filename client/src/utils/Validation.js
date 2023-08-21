@@ -43,37 +43,40 @@ const isValidEmail = (email, setSignupMessage) => {
   return true;
 };
 
-const isValidPassword = (password, confirmPassword, setSignupMessage) => {
-  if (password.length === 0) {
-    setSignupMessage({
-      message: errorMessages.password,
-      error: true
-    });
-    return false;
+const isValidPassword = ({ from, password, confirmPassword, setMessage }) => {
+  if (!from || from !== "settings") {
+    if (password.length === 0) {
+      setMessage({
+        message: errorMessages.password,
+        error: true
+      });
+      return false;
+    }
   }
+
   if (password.length < 8) {
-    setSignupMessage({
+    setMessage({
       message: errorMessages.shortPassword,
       error: true
     });
     return false;
   }
   if (!/[0-9]/.test(password)) {
-    setSignupMessage({
+    setMessage({
       message: errorMessages.noNumber,
       error: true
     });
     return false;
   }
   if (!/[A-Z]/.test(password)) {
-    setSignupMessage({
+    setMessage({
       message: errorMessages.noUppercase,
       error: true
     });
     return false;
   }
   if (!/[$&+,:;=?@#|'<>.^*()%!-]/.test(password)) {
-    setSignupMessage({
+    setMessage({
       message: errorMessages.noSpecial,
       error: true
     });
@@ -81,20 +84,20 @@ const isValidPassword = (password, confirmPassword, setSignupMessage) => {
   }
 
   if (confirmPassword.length === 0) {
-    setSignupMessage({
+    setMessage({
       message: errorMessages.confirmPassword,
       error: true
     });
     return false;
   }
   if (password !== confirmPassword) {
-    setSignupMessage({
+    setMessage({
       message: errorMessages.noMatch,
       error: true
     });
     return false;
   }
-  setSignupMessage({
+  setMessage({
     message: "",
     error: false
   });

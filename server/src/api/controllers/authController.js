@@ -15,7 +15,7 @@ const handleAuth = async (req, res) => {
     return res.status(400).json({ message: "Missing email or password" });
 
   if (rememberMe) {
-    accessTokenDuration = "30m";
+    accessTokenDuration = "5h";
   } else {
     accessTokenDuration = "20s";
   }

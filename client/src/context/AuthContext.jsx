@@ -109,11 +109,11 @@ export const AuthProvider = ({ children }) => {
   // Validate Signup Password while typing
   useEffect(() => {
     if (!userData.password) return;
-    isValidPassword(
-      userData.password,
-      userData.confirmPassword,
-      setSignupMessage
-    );
+    isValidPassword({
+      password: userData.password,
+      confirmPassword: userData.confirmPassword,
+      setMessage: setSignupMessage
+    });
   }, [userData.password, userData.confirmPassword]);
 
   // Handle User Login

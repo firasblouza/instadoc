@@ -35,7 +35,6 @@ const Profile = () => {
           formData.append("profileImage", uploadedFile);
         }
 
-        console.log("This is userData ", user);
         const response = await axios.put(
           `/users/${decoded.UserInfo.id}`,
           formData,

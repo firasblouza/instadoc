@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const getAllUsers = async (req, res) => {
   // Parameters for the pagination
@@ -63,8 +64,6 @@ const modifyUserById = async (req, res) => {
     userData.profileImage = uploadedImage;
   }
 
-  console.log(userData);
-
   try {
     const user = await User.findByIdAndUpdate(id, userData);
     if (user) {
@@ -77,6 +76,45 @@ const modifyUserById = async (req, res) => {
   }
 };
 
+const modifyUserPasswordById = async (req, res) => {
+  let id = req.params.id;
+  const { oldPassword, newPassword } = req.body;
+  try {
+    const user = await User.findOne({ _id: id }).exec();
+    if (user) {
+      const validatePassword = await bcrypt.compare(oldPassword, user.password);
+
+      if (!validatePassword) {
+        console.log("password don't match");
+        return res
+          .status(400)
+          .json({ message: "Current password is incorrect" });
+      } else {
+        if (oldPassword === newPassword) {
+          return res
+            .status(409)
+            .json({
+              message: "New password cannot be the same as old password"
+            });
+        }
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(newPassword, salt);
+
+        const update = await User.findByIdAndUpdate(id, {
+          password: hash
+        });
+
+        if (update) {
+          res.status(200).json({ message: "Password updated successfully" });
+        } else {
+          res.status(404).json({ message: "User not found" });
+        }
+      }
+    }
+  } catch (err) {
+    res.status(500).json({ message: "Error while updating the password" });
+  }
+};
 const deleteUserById = async (req, res) => {
   let id = req.params.id;
   try {
@@ -91,4 +129,10 @@ const deleteUserById = async (req, res) => {
   }
 };
 
-module.exports = { getAllUsers, getUserById, modifyUserById, deleteUserById };
+module.exports = {
+  getAllUsers,
+  getUserById,
+  modifyUserById,
+  deleteUserById,
+  modifyUserPasswordById
+};

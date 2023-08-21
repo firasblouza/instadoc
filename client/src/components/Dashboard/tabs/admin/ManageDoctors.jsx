@@ -14,16 +14,22 @@ import ImagePreview from "../../UI/ImagePreview";
 
 const ManageDoctors = () => {
   const effectRan = useRef(false);
+
   const [doctors, setDoctors] = useState([]);
+  const [initialDoctors, setInitialDoctors] = useState([]); // Used to reset the doctors state
   const [doctorsNumber, setDoctorsNumber] = useState(0);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+
   const [filter, setFilter] = useState("");
   const [filterOpen, setFilterOpen] = useState("");
+
+  const [showModal, setShowModal] = useState(false);
   const [imageModal, setImageModal] = useState({
     state: false,
     image: ""
   });
+
+  const [search, setSearch] = useState("");
 
   const IMG_URL = "http://localhost:3500/uploads/";
 
@@ -40,6 +46,7 @@ const ManageDoctors = () => {
           }
         });
         setDoctors(response.data);
+        setInitialDoctors(response.data);
         setDoctorsNumber(response.data.length);
       } else {
         console.log("No access token found");
@@ -63,6 +70,20 @@ const ManageDoctors = () => {
       effectRan.current = true;
     };
   }, []);
+
+  const capitalize = (text) => {
+    if (typeof text == "object") {
+      return text[0]
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    } else if (typeof text == "string") {
+      return text
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    }
+  };
 
   // Delete Doctors
 
@@ -168,6 +189,27 @@ const ManageDoctors = () => {
     }
   };
 
+  // Doctor Search
+
+  const handleSearch = (e) => {
+    const searchString = e.target.value.toLowerCase(); // Convert the search string to lowercase
+    setSearch(searchString); // Update the search state
+
+    if (searchString === "") {
+      setDoctors(initialDoctors);
+    } else {
+      setDoctors(
+        initialDoctors.filter(
+          (doctor) =>
+            doctor.firstName.toLowerCase().includes(searchString) ||
+            doctor.lastName.toLowerCase().includes(searchString) ||
+            doctor.email.toLowerCase().includes(searchString) ||
+            doctor.idNumber.includes(searchString)
+        )
+      );
+    }
+  };
+
   return (
     <section className="admin-manage-doctors w-full h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] overflow-scroll overflow-y-scroll">
       <div className="flex flex-col items-center justify-center w-full">
@@ -216,54 +258,67 @@ const ManageDoctors = () => {
       </div>
       <div className="flex flex-col items-center justify-center w-full">
         <div className="flex flex-row justify-center items-center w-full">
-          <div className="flex flex-col bg-white rounded-lg shadow-lg p-4 m-4 overflow-x-scroll lg:overflow-x-hidden overflow-y-auto">
-            <div className="flex w-full justify-end gap-10 mb-5">
-              <div className="relative inline-block text-left">
-                <FaFilter
-                  className="cursor-pointer"
-                  onClick={() => setFilterOpen(!filterOpen)}
-                />
-                {filterOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                    <div
-                      className="py-1"
-                      role="menu"
-                      aria-orientation="vertical"
-                      aria-labelledby="options-menu"
-                    >
+          <div className="flex flex-col bg-white rounded-lg shadow-lg p-4 m-4 overflow-x-scroll lg:overflow-x-hidden overflow-y-auto min-h-[250px]">
+            <div className="flex w-full justify-between gap-10 mb-5">
+              {/* Search Field */}
+
+              <input
+                type="text"
+                placeholder="Rechercher un médecin"
+                className="border border-gray-300 rounded-lg py-1 px-2 w-1/2"
+                onChange={(e) => handleSearch(e)}
+              />
+
+              {/* Filter By Speciality Select */}
+
+              <div className="icons flex flex-row gap-10">
+                <div className="relative inline-block text-left">
+                  <FaFilter
+                    className="cursor-pointer"
+                    onClick={() => setFilterOpen(!filterOpen)}
+                  />
+                  {filterOpen && (
+                    <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-white ring-opacity-5">
                       <div
-                        onClick={() => handleFilter("all")}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                        className="py-1"
+                        role="menu"
+                        aria-orientation="vertical"
+                        aria-labelledby="options-menu"
                       >
-                        All
-                      </div>
-                      <div
-                        onClick={() => handleFilter("pending")}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
-                      >
-                        Pending
-                      </div>
-                      <div
-                        onClick={() => handleFilter("approved")}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
-                      >
-                        Approved
-                      </div>
-                      <div
-                        onClick={() => handleFilter("rejected")}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
-                      >
-                        Rejected
+                        <div
+                          onClick={() => handleFilter("all")}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                        >
+                          All
+                        </div>
+                        <div
+                          onClick={() => handleFilter("pending")}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                        >
+                          Pending
+                        </div>
+                        <div
+                          onClick={() => handleFilter("approved")}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                        >
+                          Approved
+                        </div>
+                        <div
+                          onClick={() => handleFilter("rejected")}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                        >
+                          Rejected
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
+                <FaSync className="cursor-pointer" onClick={fetchDoctors} />
               </div>
-              <FaSync className="cursor-pointer" onClick={fetchDoctors} />
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full table-auto text-center">
-                <thead>
+                <thead className="text-md font-semibold tracking-wide text-left text-gray-900 bg-gray-100 uppercase border-b border-gray-600">
                   <tr>
                     <th className="px-4 py-2">Dr.</th>
                     <th className="px-4 py-2">Email</th>
@@ -274,6 +329,16 @@ const ManageDoctors = () => {
                   </tr>
                 </thead>
                 <tbody>
+                  {doctors.length === 0 && (
+                    <tr className="text-gray-700 border-b border-gray-200">
+                      <td
+                        colSpan="6"
+                        className="px-4 py-3 text-ms font-semibold border text-center"
+                      >
+                        Aucun médecin trouvé
+                      </td>
+                    </tr>
+                  )}
                   {doctors.map((doctor) => (
                     <tr key={doctor._id}>
                       <td className="border px-2 py-2">
@@ -319,11 +384,78 @@ const ManageDoctors = () => {
               <Modal
                 title={"Détails du médecin"}
                 firstAction={handleVerify}
-                secondAction={handleImagePreview}
-                data={{ ...selectedDoctor, IMG_URL }}
+                secondAction={handleVerify}
+                firstActionArgs={[selectedDoctor._id, "approve"]}
+                secondActionArgs={[selectedDoctor._id, "reject"]}
+                firstButton={"Approve"}
+                secondButton={"Reject"}
                 showModal={showModal}
                 setShowModal={setShowModal}
-              />
+              >
+                {/* Modal Content */}
+
+                <div className="flex flex-col md:flex-row gap-2">
+                  <div className="w-1/3 flex flex-col">
+                    <img
+                      src={`${IMG_URL}${selectedDoctor.profileImage}`}
+                      alt=""
+                    />
+                  </div>
+
+                  <div className="w-2/3">
+                    <div className="flex flex-row justify-around py-3">
+                      <div className="flex flex-col gap-2">
+                        <p className="font-bold">Nom:</p>
+                        <p>
+                          {selectedDoctor.firstName} {selectedDoctor.lastName}
+                        </p>
+
+                        <p className="font-bold">Date du Naissance:</p>
+                        <p>
+                          {new Date(
+                            selectedDoctor.dateOfBirth
+                          ).toLocaleDateString()}
+                        </p>
+
+                        <p className="font-bold">ID Type:</p>
+
+                        <div className="flex flex-row gap-2 items-center">
+                          <p>{selectedDoctor.idType}</p>
+                          <FaEye
+                            className="cursor-pointer"
+                            onClick={() => {
+                              handleImagePreview(selectedDoctor.idImage);
+                            }}
+                          />
+                        </div>
+
+                        <p className="font-bold">Numero ID:</p>
+                        <p>{selectedDoctor.idNumber}</p>
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <p className="font-bold"># License Médical:</p>
+
+                        <div className="flex flex-row gap-2 items-center">
+                          <p>{selectedDoctor.licenseNumber}</p>
+                          <FaEye
+                            className="cursor-pointer"
+                            onClick={() => {
+                              handleImagePreview(selectedDoctor.licenseImage);
+                            }}
+                          />
+                        </div>
+
+                        <p className="font-bold">Spécialité:</p>
+                        <p>{capitalize(selectedDoctor.speciality)}</p>
+
+                        <p className="font-bold">Statut:</p>
+                        <p>{capitalize(selectedDoctor.verifiedStatus)}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Modal>
             )}
             {imageModal.state && showModal && (
               <ImagePreview

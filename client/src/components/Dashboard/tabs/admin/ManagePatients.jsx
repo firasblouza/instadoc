@@ -5,6 +5,8 @@ import axios from "../../../../api/axios";
 const ManagePatients = () => {
   const effectRan = useRef(false);
   const [patients, setPatients] = useState([]);
+  const [initialPatients, setInitialPatients] = useState([]);
+  const [search, setSearch] = useState("");
 
   const fetchPatients = async () => {
     try {
@@ -16,6 +18,7 @@ const ManagePatients = () => {
             Authorization: `Bearer ${accessToken}` // Attach the token to the Authorization header
           }
         });
+        setInitialPatients(response.data);
         setPatients(response.data);
       } else {
         console.log("No access token found");
@@ -39,6 +42,8 @@ const ManagePatients = () => {
     };
   }, []);
 
+  // Handle Patient Delete
+
   const handleDelete = async (id) => {
     try {
       const accessToken = localStorage.getItem("accessToken");
@@ -58,6 +63,27 @@ const ManagePatients = () => {
       console.log("An error occurred while deleting the patient");
     }
   };
+
+  // Handle user search
+
+  const handleSearch = (e) => {
+    const searchString = e.target.value.toLowerCase(); // Convert the search string to lowercase
+    setSearch(searchString); // Update the search state
+
+    if (searchString === "") {
+      setPatients(initialPatients);
+    } else {
+      setPatients(
+        initialPatients.filter(
+          (patient) =>
+            patient.firstName.toLowerCase().includes(searchString) ||
+            patient.lastName.toLowerCase().includes(searchString) ||
+            patient.email.toLowerCase().includes(searchString)
+        )
+      );
+    }
+  };
+
   return (
     <section className="admin-patients w-full h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] overflow-scroll overflow-y-hidden">
       <div className="flex flex-col items-center justify-center w-full">
@@ -75,13 +101,21 @@ const ManagePatients = () => {
       <div className="flex flex-col items-center justify-center w-full">
         <div className="flex flex-row justify-center items-center w-full">
           <div className="flex flex-col bg-white rounded-lg shadow-lg p-4 m-4 overflow-x-scroll lg:overflow-x-hidden">
-            <div className="flex w-full justify-end mb-5">
+            <div className="flex w-full justify-between mb-5">
+              {/* Add a search field  */}
+              <input
+                type="text"
+                placeholder="Rechercher un patient"
+                className="border border-gray-300 rounded-lg py-1 px-2 w-1/2"
+                onChange={(e) => handleSearch(e)}
+              />
+
               <FaSync className="cursor-pointer" onClick={fetchPatients} />
             </div>
             {/* Create a table with the patients in it and action buttons */}
             <div className="overflow-x-auto">
               <table className="min-w-full table-auto text-center">
-                <thead>
+                <thead className="text-md font-semibold tracking-wide text-left text-gray-900 bg-gray-100 uppercase border-b border-gray-600">
                   <tr>
                     <th className="px-4 py-2">Nom</th>
                     <th className="px-4 py-2">Prénom</th>
@@ -90,6 +124,16 @@ const ManagePatients = () => {
                   </tr>
                 </thead>
                 <tbody>
+                  {patients.length === 0 && (
+                    <tr className="text-gray-700 border-b border-gray-200">
+                      <td
+                        colSpan="4"
+                        className="px-4 py-3 text-ms font-semibold border text-center"
+                      >
+                        Aucun patient trouvé
+                      </td>
+                    </tr>
+                  )}
                   {patients.map((patient, index) => (
                     <tr key={index}>
                       <td className="border px-4 py-2">{patient.lastName}</td>

@@ -31,7 +31,7 @@ const Login = () => {
       <div className="login-container w-full h-full sm:w-1/5 sm:min-w-[300px] sm:h-auto bg-white rounded-lg shadow-lg flex flex-col">
         <div className="logo-section w-full h-auto max-h-[120px] flex items-center justify-center">
           <img
-            className="max-w-[180px] sm:max-w-[140px]"
+            className="max-w-[180px] py-5 pt-8 sm:max-w-[140px]"
             src={logo}
             alt="InstaDoc"
           />

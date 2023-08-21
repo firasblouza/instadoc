@@ -6,7 +6,7 @@ const getAllLabs = async (req, res) => {
   const limit = 10 || req.query.limit;
   const skip = (page - 1) * limit;
   try {
-    const labs = await Lab.find({}).skip(skip).limit(limit).exec();
+    const labs = await Lab.find({}).exec();
     if (labs) {
       res.status(200).json(labs);
     } else {
@@ -18,7 +18,9 @@ const getAllLabs = async (req, res) => {
 };
 
 const addLab = async (req, res) => {
-  const { name, location, city, email, phoneNumber } = req.body;
+  const { name, address, contact } = req.body;
+  const { location, city } = address;
+  const { email, phoneNumber } = contact;
   if (!name || !location || !city || !email || !phoneNumber) {
     return res.status(400).json({ message: "Missing required fields" });
   }

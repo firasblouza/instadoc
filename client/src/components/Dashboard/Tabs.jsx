@@ -70,7 +70,12 @@ const getTabs = (role) => {
   } else if (role === "admin") {
     tabs = [
       {
-        name: "Accueil",
+        name: " < Page d'accueil",
+        id: "accueil",
+        path: "/"
+      },
+      {
+        name: "Tableau de bord",
         id: "home",
         path: ""
       },

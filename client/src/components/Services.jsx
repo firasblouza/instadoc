@@ -2,14 +2,14 @@ import {
   service_appt,
   service_consult,
   service_secure,
-  service_support,
+  service_support
 } from "../assets";
 
 const Services = () => {
   return (
     <section
       id="services"
-      className="w-full h-auto flex flex-col mt-10 gap-5 lg:flex-row justify-evenly md:gap-3 lg:-mt-[130px] bg-transparent"
+      className="w-full h-auto flex flex-col mt-10 gap-5 lg:flex-row justify-evenly md:gap-3 lg:-mt-[130px] bg-transparent px-5"
     >
       <div className="service__card rounded-lg min-w-[260px] w-full flex flex-col items-center gap-1 lg:gap-3 justify-start lg:justify-evenly lg:max-w-[300px] h-auto p-5 bg-white shadow-lg z-10">
         <div className="service__card__img flex items-center justify-center w-1/2 lg:w-2/3">
@@ -22,8 +22,7 @@ const Services = () => {
 
         <p className="text-[16px] text-center text-[#1E1E1E]">
           Access virtual consultations with highly qualified and experienced
-          doctors. Receive personalized medical advice and treatement plans
-          tailored to your needs.
+          doctors. Receive medical advice tailored to your needs.
         </p>
       </div>
 
@@ -53,7 +52,7 @@ const Services = () => {
 
         <p className="text-[16px] text-center text-[#1E1E1E]">
           Your health information is kept confidential and secure. We prioritize
-          data privacy and ensure your sensetive information remains protected.
+          data privacy and your sensetive information is protected.
         </p>
       </div>
 
@@ -67,9 +66,8 @@ const Services = () => {
         </h1>
 
         <p className="text-[16px] text-center text-[#1E1E1E]">
-          Get immediate assistance and medical support round the clock. Our
-          dedicated team of professionals is available 24/7 to address your
-          health concerns and answer your questions.
+          Get immediate assistance round the clock. Our dedicated team of
+          professionals is available to address your concerns and questions.
         </p>
       </div>
     </section>

@@ -9,6 +9,7 @@ const verifyJWT = (req, res, next) => {
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) return res.sendStatus(403); // Forbidden
     req.email = decoded.email;
+    req.id = decoded.id;
     req.role = decoded.role;
     next();
   });

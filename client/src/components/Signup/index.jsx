@@ -23,7 +23,7 @@ const Signup = () => {
       >
         <div className="logo-section w-full h-auto  flex flex-col items-center justify-center ">
           <img
-            className="max-w-[180px] sm:max-w-[140px] max-h-[120px]"
+            className="max-w-[180px] py-4 sm:max-w-[140px] max-h-[120px]"
             src={logo}
             alt="InstaDoc"
           />
