@@ -1,10 +1,12 @@
 import { facebook, github } from "../../assets";
 import { Link } from "react-router-dom";
-import { useRef, useState } from "react";
+import { useContext, useState, useRef } from "react";
 import { FaPowerOff } from "react-icons/fa6";
+import { useNavigate, useLocation } from "react-router-dom";
+
 import useAuth from "../../hooks/useAuth";
 import useLogout from "../../hooks/useLogout";
-import { useNavigate } from "react-router-dom";
+import AuthContext from "../../context/AuthContext";
 
 const linkClassName = `text-[16px] font-normal whitespace-nowrap text-[#1E1E1E] lg:text-[18px] hover:text-blue-500 transition-all duration-500`;
 
@@ -15,13 +17,22 @@ const Navbar = () => {
   const { auth } = useAuth();
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = useLogout();
 
   const [activeTab, setActiveTab] = useState("accueil");
 
+  const { aboutRef } = useContext(AuthContext);
+
   const scrollToAbout = () => {
-    const aboutSection = document.getElementById("about");
+    const aboutSection = aboutRef.current;
+    setActiveTab("apropos");
+
+    if (location.pathname !== "/") {
+      navigate("/");
+    }
+
     aboutSection.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -73,7 +84,7 @@ const Navbar = () => {
               </Link>
               <a
                 href="#about"
-                onClick={() => setActiveTab("apropos")}
+                onClick={scrollToAbout}
                 className={`${linkClassName} mr-2 ${
                   activeTab === "apropos" ? "text-blue-500" : ""
                 }`}

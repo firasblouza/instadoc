@@ -34,12 +34,10 @@ const doctorSchema = new Schema({
     type: String,
     required: true
   },
-  speciality: [
-    {
-      type: String,
-      required: true
-    }
-  ],
+  speciality: {
+    type: String,
+    required: true
+  },
   availability: [
     {
       dayOfWeek: {
@@ -57,22 +55,6 @@ const doctorSchema = new Schema({
       isAvailable: {
         type: Boolean,
         default: true
-      }
-    }
-  ],
-  ratings: [
-    {
-      userId: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-        required: true
-      },
-      rating: {
-        type: Number,
-        required: true
-      },
-      review: {
-        type: String
       }
     }
   ],

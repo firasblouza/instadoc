@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "../api/axios";
 import jwt_decode from "jwt-decode";
@@ -64,6 +64,10 @@ export const AuthProvider = ({ children }) => {
   const from = location.state?.from?.pathname || "/";
   const LOGIN_URL = "/login";
   const REGISTER_URL = "/register";
+
+  // Section Refs
+
+  const aboutRef = useRef(null);
 
   useEffect(() => {
     const accessToken = localStorage.getItem("accessToken");
@@ -365,7 +369,8 @@ export const AuthProvider = ({ children }) => {
         handleUserLogin,
         loginMessage,
         setLoginMessage,
-        userInfo
+        userInfo,
+        aboutRef
       }}
     >
       {children}

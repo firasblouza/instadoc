@@ -8,9 +8,13 @@ import {
   FaTimes,
   FaChevronCircleDown
 } from "react-icons/fa";
+import { Link } from "react-router-dom";
+
 import axios from "../../../../api/axios";
 import Modal from "../../UI/Modal";
 import ImagePreview from "../../UI/ImagePreview";
+
+import { capitalize } from "../../../../utils/Capitalize";
 
 const ManageDoctors = () => {
   const effectRan = useRef(false);
@@ -70,20 +74,6 @@ const ManageDoctors = () => {
       effectRan.current = true;
     };
   }, []);
-
-  const capitalize = (text) => {
-    if (typeof text == "object") {
-      return text[0]
-        .split("-")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ");
-    } else if (typeof text == "string") {
-      return text
-        .split("-")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ");
-    }
-  };
 
   // Delete Doctors
 
@@ -361,14 +351,16 @@ const ManageDoctors = () => {
                         {doctor.verifiedStatus}
                       </td>
                       <td className="border flex flex-row gap-3 px-2 py-2">
-                        <FaEye className="cursor-pointer" />
+                        <Link to={`/doctor/${doctor._id}`}>
+                          <FaEye className="cursor-pointer text-blue-500" />
+                        </Link>
                         <FaTrashAlt
-                          className="cursor-pointer"
+                          className="cursor-pointer text-red-500"
                           onClick={() => handleDelete(doctor._id)}
                         />
                         {doctor.verifiedStatus === "pending" ? (
                           <FaCheck
-                            className="cursor-pointer"
+                            className="cursor-pointer text-green-500"
                             onClick={() => handleViewDetails(doctor)}
                           />
                         ) : (

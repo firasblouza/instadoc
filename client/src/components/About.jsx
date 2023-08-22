@@ -2,10 +2,11 @@ import { DrLeft, DrRight, Doctor3, verified, team } from "../assets";
 
 import { FaHospital, FaCertificate } from "react-icons/fa6";
 import { FaHospitalAlt } from "react-icons/fa";
-const About = () => {
+const About = ({ aboutRef }) => {
   return (
     <section
       id="about"
+      ref={aboutRef}
       className="w-full min-h-screen flex flex-col px-5 bg-white mt-[100px]"
     >
       <div className="w-full h-full flex flex-col gap-5 md:flex-row">

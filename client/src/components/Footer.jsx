@@ -27,19 +27,31 @@ const Footer = () => {
             Liens Rapides
           </h1>
           <div className="w-full h-auto flex flex-col justify-center items-center md:items-start md:justify-start gap-2">
-            <Link to="/" className="text-base font-medium">
+            <Link to="/" className="text-base font-medium hover:text-gray-500">
               Accueil
             </Link>
-            <Link to="/about" className="text-base font-medium">
+            <Link
+              to="/about"
+              className="text-base font-medium hover:text-gray-500"
+            >
               A propos
             </Link>
-            <Link to="/contact" className="text-base font-medium">
+            <Link
+              to="/contact"
+              className="text-base font-medium hover:text-gray-500"
+            >
               Contact
             </Link>
-            <Link to="/doctors" className="text-base font-medium">
+            <Link
+              to="/doctors"
+              className="text-base font-medium hover:text-gray-500"
+            >
               Consulter un médecin
             </Link>
-            <Link to="/labs" className="text-base font-medium">
+            <Link
+              to="/labs"
+              className="text-base font-medium hover:text-gray-500"
+            >
               Laboratoires
             </Link>
           </div>
@@ -68,7 +80,9 @@ const Footer = () => {
               <span>
                 {" "}
                 <a href="mailto:firas.blouza1@gmail.com">
-                  <span className="underline text-blue-500">InstaDoc</span>
+                  <span className="underline text-blue-500 hover:text-blue-400">
+                    InstaDoc
+                  </span>
                 </a>
               </span>
             </p>
@@ -78,7 +92,9 @@ const Footer = () => {
               <span>
                 {" "}
                 <a href="https://github.com/firasblouza">
-                  <span className="underline text-blue-500">InstaDoc</span>
+                  <span className="underline text-blue-500 hover:text-blue-400">
+                    InstaDoc
+                  </span>
                 </a>
               </span>
             </p>
@@ -103,10 +119,10 @@ const Footer = () => {
         </div>
       </div>
       <div className="flex flex-col gap-1 md:flex-row md:justify-between justify-center items-center h-auto w-full px-10  border-t border-black py-2">
-        <p className="text-left text-base font-normal">
+        <p className="text-left text-base font-normal cursor-pointer">
           &copy; {new Date().getFullYear()} InstaDoc. All rights reserved.
         </p>
-        <p className="text-left text-base font-normal">
+        <p className="text-left text-base font-normal cursor-pointer">
           Made with ❤️ {/* by Firas Blouza */}
         </p>
       </div>
