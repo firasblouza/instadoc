@@ -81,7 +81,7 @@ const Footer = () => {
                 {" "}
                 <a href="mailto:firas.blouza1@gmail.com">
                   <span className="underline text-blue-500 hover:text-blue-400">
-                    Firas Blouza
+                    InstaDoc
                   </span>
                 </a>
               </span>
@@ -93,7 +93,7 @@ const Footer = () => {
                 {" "}
                 <a href="https://github.com/firasblouza">
                   <span className="underline text-blue-500 hover:text-blue-400">
-                    Firas Blouza
+                    InstaDoc
                   </span>
                 </a>
               </span>
@@ -123,7 +123,7 @@ const Footer = () => {
           &copy; {new Date().getFullYear()} InstaDoc. All rights reserved.
         </p>
         <p className="text-left text-base font-normal cursor-pointer">
-          Made with ❤️ by Firas Blouza
+          Made with ❤️ by {/* Firas Blouza */}
         </p>
       </div>
     </section>
