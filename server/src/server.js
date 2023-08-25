@@ -18,7 +18,6 @@ app.use("/uploads", express.static("uploads"));
 app.use(credentials);
 
 // Cors
-app.use(cors(corsOptions));
 
 // Built-in JSON middleware
 app.use(express.json());
