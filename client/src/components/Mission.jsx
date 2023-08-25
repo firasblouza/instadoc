@@ -1,9 +1,26 @@
-import { DrLeft, DrRight, Doctor3, verified, team } from "../assets";
+import { useEffect, useRef } from "react";
 
+import { DrLeft, DrRight, Doctor3, verified, team } from "../assets";
 import { FaHospital, FaCertificate } from "react-icons/fa6";
 import { FaHospitalAlt } from "react-icons/fa";
 
+import { Link, useNavigate } from "react-router-dom";
+
 const Mission = () => {
+  const effectRan = useRef(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (effectRan.current === false) {
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 0);
+    }
+    return () => {
+      effectRan.current = true;
+    };
+  }, []);
+
   return (
     <section
       id="mission"
@@ -28,12 +45,18 @@ const Mission = () => {
           </p>
           {/* Add two buttons, consult a doctor and consult laboratories */}
           <div className="flex flex-col gap-5 md:flex-row justify-center items-center md:justify-start mt-10">
-            <button className="bg-white w-5/6 text-blue-500 font-bold py-2 px-4 rounded-lg hover:bg-gray-200">
+            <Link
+              to="/doctors"
+              className="bg-white text-center w-5/6 text-blue-500 font-bold py-2 px-4 rounded-lg hover:bg-gray-200"
+            >
               Consulter un médecin
-            </button>
-            <button className="bg-white w-5/6 text-blue-500 font-bold py-2 px-4 rounded-lg hover:bg-gray-200">
+            </Link>
+            <Link
+              to="/labs"
+              className="bg-white text-center w-5/6 text-blue-500 font-bold py-2 px-4 rounded-lg hover:bg-gray-200"
+            >
               Consulter un laboratoire
-            </button>
+            </Link>
           </div>
         </div>
       </div>

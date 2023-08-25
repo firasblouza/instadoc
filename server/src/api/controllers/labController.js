@@ -18,24 +18,24 @@ const getAllLabs = async (req, res) => {
 };
 
 const addLab = async (req, res) => {
-  const { name, address, contact } = req.body;
+  let labData = {};
+  if (req.body && req.body.lab) {
+    labData = JSON.parse(req.body.lab);
+  }
+  // Append the uploaded image to the lab object
+  if (req.files && req.files["labImage"]) {
+    labData.labImage = req.files["labImage"][0].filename;
+  }
+
+  const { name, address, contact, labImage } = labData;
   const { location, city } = address;
   const { email, phoneNumber } = contact;
-  if (!name || !location || !city || !email || !phoneNumber) {
+
+  if (!name || !location || !city || !email || !phoneNumber || !labImage) {
     return res.status(400).json({ message: "Missing required fields" });
   }
   try {
-    const createLab = await Lab.create({
-      name,
-      address: {
-        location,
-        city
-      },
-      contact: {
-        email,
-        phoneNumber
-      }
-    });
+    const createLab = await Lab.create(labData);
     if (createLab) {
       res.status(200).json({ message: "Lab added successfully" });
     } else {
@@ -62,25 +62,29 @@ const getLabById = async (req, res) => {
 
 const modifyLabById = async (req, res) => {
   const labId = req.params.id;
-  const { name, address, contact } = req.body;
-  const { location, city } = address;
-  const { email, phoneNumber } = contact;
-  if (!name || !location || !city || !email || !phoneNumber) {
-    return res.status(400).json({ message: "Missing required fields" });
+  const contentType = req.headers["content-type"];
+
+  let labData = {};
+
+  if (contentType.includes["multipart/form-data"]) {
+    if (req.body && req.body.lab) {
+      labData = JSON.parse(req.body.lab);
+    }
   }
+
+  if (req.files && req.files["labImage"]) {
+    labData.labImage = req.files["labImage"][0].filename;
+    console.log(labData.labImage);
+  }
+
+  console.log(labData);
+
   try {
-    const newLabObj = {
-      name,
-      address: {
-        location,
-        city
-      },
-      contact: {
-        email,
-        phoneNumber
-      }
-    };
-    const updateLab = await Lab.findByIdAndUpdate(labId, newLabObj).exec();
+    const updateLab = await Lab.findByIdAndUpdate(
+      labId,
+      { $set: labData },
+      { new: true }
+    ).exec();
     if (updateLab) {
       res.status(200).json({ message: "Lab updated successfully" });
     } else {

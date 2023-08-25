@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { FaTrashAlt, FaEye, FaEdit, FaSync } from "react-icons/fa";
+
 import axios from "../../../../api/axios";
+import useAccessToken from "../../../../hooks/useAccessToken";
 
 const ManagePatients = () => {
   const effectRan = useRef(false);
@@ -10,7 +12,7 @@ const ManagePatients = () => {
 
   const fetchPatients = async () => {
     try {
-      const accessToken = localStorage.getItem("accessToken");
+      const { accessToken } = useAccessToken();
 
       if (accessToken) {
         const response = await axios.get("/admin/patients", {
@@ -46,7 +48,7 @@ const ManagePatients = () => {
 
   const handleDelete = async (id) => {
     try {
-      const accessToken = localStorage.getItem("accessToken");
+      const { accessToken } = useAccessToken();
       if (accessToken) {
         const response = await axios.delete(`/admin/patient/${id}`, {
           headers: {
@@ -140,10 +142,10 @@ const ManagePatients = () => {
                       <td className="border px-4 py-2">{patient.firstName}</td>
                       <td className="border px-4 py-2">{patient.email}</td>
                       <td className="border px-4 py-2 flex flex-row gap-3">
-                        <FaEye className="cursor-pointer hover:text-gray-300" />
-                        <FaEdit className="cursor-pointer hover:text-gray-300" />
+                        <FaEye className="cursor-pointer text-blue-500 hover:text-blue-400" />
+                        <FaEdit className="cursor-pointer text-orange-500 hover:text-orange-400" />
                         <FaTrashAlt
-                          className="cursor-pointer hover:text-gray-300"
+                          className="cursor-pointer text-red-500 hover:text-red-400"
                           onClick={() => handleDelete(patient._id)}
                         />
                       </td>

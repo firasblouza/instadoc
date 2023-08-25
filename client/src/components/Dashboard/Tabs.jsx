@@ -4,9 +4,14 @@ const getTabs = (role) => {
   if (role === "user") {
     tabs = [
       {
-        name: "Accueil",
-        id: "home",
+        name: " < Page d'accueil",
+        id: "accueil",
         path: "/"
+      },
+      {
+        name: "Tableau de bord",
+        id: "home",
+        path: ""
       },
       {
         name: "Mon Profil",
@@ -37,9 +42,14 @@ const getTabs = (role) => {
   } else if (role === "doctor") {
     tabs = [
       {
-        name: "Accueil",
-        id: "home",
+        name: " < Page d'accueil",
+        id: "accueil",
         path: "/"
+      },
+      {
+        name: "Tableau de bord",
+        id: "home",
+        path: ""
       },
       {
         name: "Mon Profil",

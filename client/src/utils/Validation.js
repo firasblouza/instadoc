@@ -122,7 +122,14 @@ const isValidData = (data, setSignupMessage, step) => {
         error: true
       });
     if (!isValidEmail(data.email, setSignupMessage)) return;
-    if (!isValidPassword(data.password, data.confirmPassword, setSignupMessage))
+    if (
+      !isValidPassword({
+        from: "signup",
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+        setMessage: setSignupMessage
+      })
+    )
       return;
     if (!data.role || data.role === "default") {
       return setSignupMessage({
@@ -181,6 +188,12 @@ const isValidData = (data, setSignupMessage, step) => {
   } else if (step === 3) {
     console.log("checking here");
     if (!data.profileImage) {
+      return setSignupMessage({
+        message: "Please upload your profile image",
+        error: true
+      });
+    }
+    if (!data.cvImage) {
       return setSignupMessage({
         message: "Please upload your profile image",
         error: true

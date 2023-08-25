@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef } from "react";
-import { FaFilter, FaSync } from "react-icons/fa";
+import { FaSync } from "react-icons/fa";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { doctorSpecialties } from "../data/data";
 import { capitalize } from "../utils/Capitalize";
+import { useNavigate } from "react-router-dom";
 
 import axios from "../api/axios";
 
@@ -16,24 +17,16 @@ const Doctors = () => {
   const IMG_URL = "http://localhost:3500/uploads/";
 
   const effectRan = useRef(false);
+  const navigate = useNavigate();
 
   // Function to fetch the doctors
 
   const fetchDoctors = async () => {
     setDoctors([]);
     try {
-      const accessToken = localStorage.getItem("accessToken");
-      if (accessToken) {
-        const response = await axios.get("/doctors", {
-          headers: {
-            Authorization: `Bearer ${accessToken}` // Attach the token to the Authorization header
-          }
-        });
-        setDoctors(response.data);
-        setInitialDoctors(response.data);
-      } else {
-        console.log("No access token found");
-      }
+      const response = await axios.get("/doctors");
+      setDoctors(response.data);
+      setInitialDoctors(response.data);
     } catch (error) {
       if (error.response && error.response.status === 401) {
         console.log("Unauthorized: You need to log in or refresh your token");
@@ -85,7 +78,6 @@ const Doctors = () => {
 
   const handleFilter = async (e) => {
     await fetchDoctors();
-    console.log();
 
     if (e.target.value === "all") {
       return; // No need to further filter for "all" option
@@ -166,8 +158,11 @@ const Doctors = () => {
                       <FaStarHalfAlt className="text-yellow-500" />
                       <FaRegStar className="text-yellow-500" />
                     </div>
-                    <button className="bg-blue-500 w-5/6 text-white rounded-lg px-2 py-1 mt-2">
-                      Consulter
+                    <button
+                      className="bg-blue-500 w-5/6 text-white rounded-lg px-2 py-1 mt-2"
+                      onClick={() => navigate(`/doctor/${doctor._id}`)}
+                    >
+                      Voir le profile
                     </button>
                   </div>
                 ))}

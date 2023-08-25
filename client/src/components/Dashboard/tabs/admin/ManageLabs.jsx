@@ -5,7 +5,8 @@ import {
   FaEdit,
   FaSync,
   FaFilter,
-  FaPlus
+  FaPlus,
+  FaUpload
 } from "react-icons/fa";
 
 import Modal from "../../UI/Modal";
@@ -13,6 +14,8 @@ import Input from "../../../Input";
 
 import axios from "../../../../api/axios";
 import jwt_decode from "jwt-decode";
+
+import useAccessToken from "../../../../hooks/useAccessToken";
 
 const ManageLabs = () => {
   const [labs, setLabs] = useState([]);
@@ -31,6 +34,9 @@ const ManageLabs = () => {
     }
   });
 
+  const [addFile, setAddFile] = useState(null);
+  const [editFile, setEditFile] = useState(null);
+
   const [search, setSearch] = useState("");
 
   const [showAddModal, setShowAddModal] = useState(false);
@@ -41,6 +47,9 @@ const ManageLabs = () => {
     error: false
   });
 
+  const IMG_URL = "http://localhost:3500/uploads/";
+  const IMG_Placeholder = "imagePlaceholder.png";
+
   const effectRan = useRef(false);
 
   // Function to fetch the labs.
@@ -48,7 +57,7 @@ const ManageLabs = () => {
   const fetchLabs = async () => {
     setLabs([]); // Empty the labs array
     try {
-      const accessToken = localStorage.getItem("accessToken");
+      const { accessToken } = useAccessToken();
       if (accessToken) {
         const response = await axios.get("/labs/", {
           headers: {
@@ -99,12 +108,18 @@ const ManageLabs = () => {
 
   const addLab = async () => {
     try {
-      const accessToken = localStorage.getItem("accessToken");
+      const { accessToken } = useAccessToken();
       if (accessToken) {
-        const response = await axios.post("/labs/add", newLab, {
+        const formData = new FormData();
+        formData.append("lab", JSON.stringify(newLab));
+        if (addFile) {
+          formData.append("labImage", addFile);
+        }
+        const response = await axios.post("/labs/add", formData, {
           headers: {
             Authorization: `Bearer ${accessToken}`
-          }
+          },
+          "Content-Type": "multipart/form-data"
         });
         if (response.status === 200) {
           fetchLabs();
@@ -132,7 +147,7 @@ const ManageLabs = () => {
 
   const deleteLab = async (id) => {
     try {
-      const accessToken = localStorage.getItem("accessToken");
+      const { accessToken } = useAccessToken();
       if (accessToken) {
         const response = await axios.delete(`/labs/delete/${id}`, {
           headers: {
@@ -155,6 +170,11 @@ const ManageLabs = () => {
 
   const handleShowLab = (lab) => {
     setSelectedLab(lab);
+    setEditFile(null);
+    setModifyStatus({
+      message: "",
+      error: false
+    });
     setShowEditModal(true);
   };
 
@@ -176,16 +196,21 @@ const ManageLabs = () => {
         return;
       }
 
-      const accessToken = localStorage.getItem("accessToken");
+      const { accessToken } = useAccessToken();
       if (accessToken) {
-        const decodedToken = jwt_decode(accessToken);
+        const formData = new FormData();
+        formData.append("lab", selectedLab);
+        if (editFile) {
+          formData.append("labImage", editFile);
+        }
         const response = await axios.put(
           `/labs/edit/${selectedLab._id}`,
-          selectedLab,
+          formData,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`
-            }
+            },
+            "Content-Type": "multipart/form-data"
           }
         );
         if (response.status === 200) {
@@ -258,114 +283,154 @@ const ManageLabs = () => {
                     secondButton={"Annuler"}
                   >
                     <div className="flex flex-col justify-center">
-                      <div className="flex flex-col gap-5 items-center md:items-start md:w-1/2">
-                        <label
-                          htmlFor="labName"
-                          className="text-base font-semi text-[#1E1E1E] -mb-5 px-3"
-                        >
-                          Nom du laboratoire
-                        </label>
-                        <Input
-                          type="text"
-                          name="labName"
-                          id="labName"
-                          placeholder="Nom du laboratoire"
-                          value={newLab.name}
-                          onChange={(e) =>
-                            setNewLab({ ...newLab, name: e.target.value })
-                          }
-                          required={true}
-                        />
-                        <label
-                          htmlFor="labEmail"
-                          className="text-base font-semi text-[#1E1E1E] -mb-5 px-3"
-                        >
-                          Email du laboratoire
-                        </label>
-                        <Input
-                          type="email"
-                          name="labEmail"
-                          id="labEmail"
-                          placeholder="Email du laboratoire"
-                          value={newLab.contact.email}
-                          onChange={(e) =>
-                            setNewLab({
-                              ...newLab,
-                              contact: {
-                                ...newLab.contact,
-                                email: e.target.value
-                              }
-                            })
-                          }
-                          required={true}
-                        />
-                        <label
-                          htmlFor="labPhoneNumber"
-                          className="text-base font-semi text-[#1E1E1E] -mb-5 px-3"
-                        >
-                          Numéro de téléphone du laboratoire
-                        </label>
-                        <Input
-                          type="text"
-                          name="labPhoneNumber"
-                          id="labPhoneNumber"
-                          placeholder="Téléphone"
-                          value={newLab.contact.phoneNumber}
-                          onChange={(e) =>
-                            setNewLab({
-                              ...newLab,
-                              contact: {
-                                ...newLab.contact,
-                                phoneNumber: e.target.value
-                              }
-                            })
-                          }
-                          required={true}
-                        />
-                        <label
-                          htmlFor="labLocation"
-                          className="text-base font-semi text-[#1E1E1E] -mb-5 px-3"
-                        >
-                          Adresse du laboratoire
-                        </label>
-                        {/* City & Location Inputs */}
-                        <div className="flex flex-col md:flex-row gap-3">
+                      <div className="flex flex-col md:flex-row md:items-start items-center">
+                        <div className="flex flex-col gap-5 items-center md:items-start md:w-1/2">
+                          <label
+                            htmlFor="labName"
+                            className="text-base font-semi text-[#1E1E1E] -mb-5 px-3"
+                          >
+                            Nom du laboratoire
+                          </label>
                           <Input
                             type="text"
-                            name="labCity"
-                            id="labCity"
-                            placeholder="Ville"
-                            value={newLab.address.city}
+                            name="labName"
+                            id="labName"
+                            placeholder="Nom du laboratoire"
+                            value={newLab.name}
+                            onChange={(e) =>
+                              setNewLab({ ...newLab, name: e.target.value })
+                            }
+                            required={true}
+                          />
+                          <label
+                            htmlFor="labEmail"
+                            className="text-base font-semi text-[#1E1E1E] -mb-5 px-3"
+                          >
+                            Email du laboratoire
+                          </label>
+                          <Input
+                            type="email"
+                            name="labEmail"
+                            id="labEmail"
+                            placeholder="Email du laboratoire"
+                            value={newLab.contact.email}
                             onChange={(e) =>
                               setNewLab({
                                 ...newLab,
-                                address: {
-                                  ...newLab.adress,
-                                  city: e.target.value
+                                contact: {
+                                  ...newLab.contact,
+                                  email: e.target.value
                                 }
                               })
                             }
                             required={true}
-                            size={"w-full md:w-2/6"}
                           />
+                          <label
+                            htmlFor="labPhoneNumber"
+                            className="text-base font-semi text-[#1E1E1E] -mb-5 px-3"
+                          >
+                            Numéro de téléphone du laboratoire
+                          </label>
                           <Input
                             type="text"
-                            name="labLocation"
-                            id="labLocation"
-                            placeholder="Adresse du laboratoire"
-                            value={newLab.address.location}
+                            name="labPhoneNumber"
+                            id="labPhoneNumber"
+                            placeholder="Téléphone"
+                            value={newLab.contact.phoneNumber}
                             onChange={(e) =>
                               setNewLab({
                                 ...newLab,
-                                address: {
-                                  ...newLab.address,
-                                  location: e.target.value
+                                contact: {
+                                  ...newLab.contact,
+                                  phoneNumber: e.target.value
                                 }
                               })
                             }
                             required={true}
-                            size={"w-full md:w-4/6"}
                           />
+                          <label
+                            htmlFor="labLocation"
+                            className="text-base font-semi text-[#1E1E1E] -mb-5 px-3"
+                          >
+                            Adresse du laboratoire
+                          </label>
+                          {/* City & Location Inputs */}
+                          <div className="flex flex-col md:flex-row gap-3">
+                            <Input
+                              type="text"
+                              name="labCity"
+                              id="labCity"
+                              placeholder="Ville"
+                              value={newLab.address.city}
+                              onChange={(e) =>
+                                setNewLab({
+                                  ...newLab,
+                                  address: {
+                                    ...newLab.address,
+                                    city: e.target.value
+                                  }
+                                })
+                              }
+                              required={true}
+                              size={"w-full md:w-1/2"}
+                            />
+                            <Input
+                              type="text"
+                              name="labLocation"
+                              id="labLocation"
+                              placeholder="Adresse"
+                              value={newLab.address.location}
+                              onChange={(e) =>
+                                setNewLab({
+                                  ...newLab,
+                                  address: {
+                                    ...newLab.address,
+                                    location: e.target.value
+                                  }
+                                })
+                              }
+                              required={true}
+                              size={"w-full"}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Add Lab Image */}
+
+                        <div className="flex flex-col justify-start items-center w-full md:w-1/2 mt-3 md:mt-0">
+                          <img
+                            src={
+                              addFile
+                                ? URL.createObjectURL(addFile)
+                                : `${IMG_URL}${IMG_Placeholder}`
+                            }
+                            alt="Labo"
+                            className="w-60 h-60 object-cover"
+                          />
+
+                          {/* Upload Button */}
+
+                          <div className="labUpload bg-transparent  h-8 rounded-full my-3 flex justify-center items-center  gap-6 px-3 flex-row w-full">
+                            <button
+                              type="button"
+                              className="relative overflow-hidden bg-blue-400 hover:bg-blue-300 cursor-pointer max-w-[120px] w-full h-8 text-white font-bold text-[16px] px-1 rounded-md my-3 flex justify-center items-center"
+                            >
+                              <FaUpload className="mr-2 cursor-pointer" />
+                              Upload
+                              <input
+                                type="file"
+                                accept="image/*"
+                                name="labImage"
+                                className="absolute top-0 left-0 opacity-0 w-full h-full cursor-pointer transform scale-[3]"
+                                placeholder="Lab Image"
+                                onChange={(e) => setAddFile(e.target.files[0])}
+                              />
+                            </button>
+
+                            <p className="text-[12px] text-gray-400">
+                              {addFile ? addFile.name : "No file chosen"}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -435,6 +500,9 @@ const ManageLabs = () => {
                   ))}
                 </tbody>
               </table>
+
+              {/* Edit Lab Modal */}
+
               {showEditModal && (
                 <Modal
                   title={"Modifier le laboratoire"}
@@ -445,7 +513,7 @@ const ManageLabs = () => {
                   secondAction={() => setShowEditModal(false)}
                   secondButton={"Annuler"}
                 >
-                  <div className="flex flex-row w-full justify-center py-3">
+                  <div className="flex flex-row w-full justify-center py-3 ">
                     <p
                       className={`${
                         modifyStatus.error ? "text-red-500" : "text-green-500"
@@ -454,119 +522,165 @@ const ManageLabs = () => {
                       {modifyStatus.message}
                     </p>
                   </div>
-                  <div className="flex flex-col gap-3">
-                    <label
-                      htmlFor="labName"
-                      className="text-base font-semi text-[#1E1E1E] -mb-5 px-3"
-                    >
-                      Nom du laboratoire
-                    </label>
-                    <Input
-                      type="text"
-                      name="labName"
-                      id="labName"
-                      placeholder="Nom du laboratoire"
-                      value={selectedLab.name}
-                      onChange={(e) =>
-                        setSelectedLab({
-                          ...selectedLab,
-                          name: e.target.value
-                        })
-                      }
-                      required={true}
-                    />
-                    <label
-                      htmlFor="labEmail"
-                      className="text-base font-semi text-[#1E1E1E] -mb-5 px-3"
-                    >
-                      Email du laboratoire
-                    </label>
-                    <Input
-                      type="email"
-                      name="labEmail"
-                      id="labEmail"
-                      placeholder="Email"
-                      value={selectedLab.contact.email}
-                      onChange={(e) =>
-                        setSelectedLab({
-                          ...selectedLab,
-                          contact: {
-                            ...selectedLab.contact,
-                            email: e.target.value
-                          }
-                        })
-                      }
-                      required={true}
-                    />
-                    <label
-                      htmlFor="labPhoneNumber"
-                      className="text-base font-semi text-[#1E1E1E] -mb-5 px-3"
-                    >
-                      Téléphone du laboratoire
-                    </label>
-                    <Input
-                      type="text"
-                      name="labPhoneNumber"
-                      id="labPhoneNumber"
-                      placeholder="Téléphone"
-                      value={selectedLab.contact.phoneNumber}
-                      onChange={(e) =>
-                        setSelectedLab({
-                          ...selectedLab,
-                          contact: {
-                            ...selectedLab.contact,
-                            phoneNumber: e.target.value
-                          }
-                        })
-                      }
-                      required={true}
-                    />
-                    <label
-                      htmlFor="labCity"
-                      className="text-base font-semi text-[#1E1E1E] -mb-5 px-3"
-                    >
-                      Ville du laboratoire
-                    </label>
-                    <Input
-                      type="text"
-                      name="labCity"
-                      id="labCity"
-                      placeholder="Ville"
-                      value={selectedLab.address.city}
-                      onChange={(e) =>
-                        setSelectedLab({
-                          ...selectedLab,
-                          address: {
-                            ...selectedLab.address,
-                            city: e.target.value
-                          }
-                        })
-                      }
-                      required={true}
-                    />
-                    <label
-                      htmlFor="labLocation"
-                      className="text-base font-semi text-[#1E1E1E] -mb-5 px-3"
-                    >
-                      Adresse du laboratoire
-                    </label>
-                    <Input
-                      type="text"
-                      name="labLocation"
-                      id="labLocation"
-                      placeholder="Adresse"
-                      value={selectedLab.address.location}
-                      onChange={(e) =>
-                        setSelectedLab({
-                          ...selectedLab,
-                          address: {
-                            ...selectedLab.address,
-                            location: e.target.value
-                          }
-                        })
-                      }
-                      required={true}
-                    />
+
+                  <div className="flex flex-col md:flex-row md:items-start items-center  w-full">
+                    <div className="flex flex-col gap-3 w-full md:w-1/2 ">
+                      <label
+                        htmlFor="labName"
+                        className="text-base font-semi text-[#1E1E1E] -mb-5 px-3"
+                      >
+                        Nom du laboratoire
+                      </label>
+                      <Input
+                        type="text"
+                        name="labName"
+                        id="labName"
+                        placeholder="Nom du laboratoire"
+                        value={selectedLab.name}
+                        onChange={(e) =>
+                          setSelectedLab({
+                            ...selectedLab,
+                            name: e.target.value
+                          })
+                        }
+                        required={true}
+                      />
+                      <label
+                        htmlFor="labEmail"
+                        className="text-base font-semi text-[#1E1E1E] -mb-5 px-3"
+                      >
+                        Email du laboratoire
+                      </label>
+                      <Input
+                        type="email"
+                        name="labEmail"
+                        id="labEmail"
+                        placeholder="Email"
+                        value={selectedLab.contact.email}
+                        onChange={(e) =>
+                          setSelectedLab({
+                            ...selectedLab,
+                            contact: {
+                              ...selectedLab.contact,
+                              email: e.target.value
+                            }
+                          })
+                        }
+                        required={true}
+                      />
+                      <label
+                        htmlFor="labPhoneNumber"
+                        className="text-base font-semi text-[#1E1E1E] -mb-5 px-3"
+                      >
+                        Téléphone du laboratoire
+                      </label>
+                      <Input
+                        type="text"
+                        name="labPhoneNumber"
+                        id="labPhoneNumber"
+                        placeholder="Téléphone"
+                        value={selectedLab.contact.phoneNumber}
+                        onChange={(e) =>
+                          setSelectedLab({
+                            ...selectedLab,
+                            contact: {
+                              ...selectedLab.contact,
+                              phoneNumber: e.target.value
+                            }
+                          })
+                        }
+                        required={true}
+                      />
+                      <label
+                        htmlFor="labCity"
+                        className="text-base font-semi text-[#1E1E1E] -mb-5 px-3"
+                      >
+                        Ville du laboratoire
+                      </label>
+                      <Input
+                        type="text"
+                        name="labCity"
+                        id="labCity"
+                        placeholder="Ville"
+                        value={selectedLab.address.city}
+                        onChange={(e) =>
+                          setSelectedLab({
+                            ...selectedLab,
+                            address: {
+                              ...selectedLab.address,
+                              city: e.target.value
+                            }
+                          })
+                        }
+                        required={true}
+                      />
+                      <label
+                        htmlFor="labLocation"
+                        className="text-base font-semi text-[#1E1E1E] -mb-5 px-3"
+                      >
+                        Adresse du laboratoire
+                      </label>
+                      <Input
+                        type="text"
+                        name="labLocation"
+                        id="labLocation"
+                        placeholder="Adresse"
+                        value={selectedLab.address.location}
+                        onChange={(e) =>
+                          setSelectedLab({
+                            ...selectedLab,
+                            address: {
+                              ...selectedLab.address,
+                              location: e.target.value
+                            }
+                          })
+                        }
+                        required={true}
+                      />
+                    </div>
+
+                    {/* Edit Lab Image */}
+
+                    <div className="flex flex-col justify-start items-center w-full md:w-1/2 mt-3 md:mt-0">
+                      <img
+                        src={
+                          editFile
+                            ? URL.createObjectURL(editFile)
+                            : selectedLab.labImage
+                            ? `${IMG_URL}${selectedLab.labImage}`
+                            : `${IMG_URL}${IMG_Placeholder}`
+                        }
+                        alt="Labo"
+                        className="w-60 h-60 object-cover"
+                      />
+
+                      {/* Upload Button */}
+
+                      <div className="labUpload bg-transparent  h-8 rounded-full my-3 flex justify-center items-center  gap-6 px-3 flex-row w-full">
+                        <button
+                          type="button"
+                          className="relative overflow-hidden bg-blue-400 hover:bg-blue-300 cursor-pointer max-w-[120px] w-full h-8 text-white font-bold text-[16px] px-1 rounded-md my-3 flex justify-center items-center"
+                        >
+                          <FaUpload className="mr-2 cursor-pointer" />
+                          Upload
+                          <input
+                            type="file"
+                            accept="image/*"
+                            name="labImage"
+                            className="absolute top-0 left-0 opacity-0 w-full h-full cursor-pointer transform scale-[3]"
+                            placeholder="Lab Image"
+                            onChange={(e) => {
+                              setEditFile(e.target.files[0]);
+                              console.log(editFile);
+                            }}
+                          />
+                        </button>
+
+                        <p className="text-[12px] text-gray-400">
+                          {editFile ? editFile.name : "No file chosen"}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </Modal>
               )}

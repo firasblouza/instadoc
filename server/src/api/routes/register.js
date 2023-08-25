@@ -8,7 +8,8 @@ router.post(
   upload.fields([
     { name: "idImage" },
     { name: "licenseImage" },
-    { name: "profileImage" }
+    { name: "profileImage" },
+    { name: "cvImage" }
   ]),
   registerController.handleSignup
 );

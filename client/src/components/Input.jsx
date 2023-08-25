@@ -29,9 +29,7 @@ const Input = ({
     >
       {icon ? icon : null}
       <input
-        className={`${
-          size ? size : "w-full"
-        } h-8 bg-transparent outline-none pr-2 text-sm`}
+        className={`w-full h-8 bg-transparent outline-none pr-2 text-sm`}
         id={id}
         type={type}
         required={required ? required : null}

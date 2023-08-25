@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }) => {
     idImage: null,
     licenseNumber: "",
     licenseImage: null,
+    cvImage: null,
     speciality: ""
   });
 
@@ -217,6 +218,7 @@ export const AuthProvider = ({ children }) => {
         formData.append("idImage", userData.idImage);
         formData.append("licenseImage", userData.licenseImage);
         formData.append("profileImage", userData.profileImage);
+        formData.append("cvImage", userData.cvImage);
       }
 
       const response = await axios.post(REGISTER_URL, formData, {
@@ -247,6 +249,7 @@ export const AuthProvider = ({ children }) => {
         idImage: null,
         licenseNumber: "",
         licenseImage: null,
+        cvImage: null,
         speciality: ""
       });
     } catch (err) {

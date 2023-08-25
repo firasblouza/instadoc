@@ -10,10 +10,6 @@ const fetchStatistics = async (req, res) => {
     const doctors = await Doctor.countDocuments({});
     const labs = await Lab.countDocuments({});
 
-    if (!patients || !consultations || !doctors) {
-      return res.status(500).json({ message: "Internal server error" });
-    }
-
     res.status(200).json({ patients, consultations, doctors, labs });
   } catch (err) {
     console.error(err);

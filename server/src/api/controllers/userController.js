@@ -47,16 +47,6 @@ const modifyUserById = async (req, res) => {
   const uploadedImage = req.files["profileImage"]
     ? req.files["profileImage"][0].filename
     : null;
-  const {
-    email,
-    firstName,
-    lastName,
-    phoneNumber,
-    allergies,
-    age,
-    sex,
-    medicalHistory
-  } = req.body.user;
 
   const userData = JSON.parse(req.body.user);
 
@@ -91,11 +81,9 @@ const modifyUserPasswordById = async (req, res) => {
           .json({ message: "Current password is incorrect" });
       } else {
         if (oldPassword === newPassword) {
-          return res
-            .status(409)
-            .json({
-              message: "New password cannot be the same as old password"
-            });
+          return res.status(409).json({
+            message: "New password cannot be the same as old password"
+          });
         }
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(newPassword, salt);

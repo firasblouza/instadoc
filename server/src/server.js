@@ -44,10 +44,8 @@ app.use("/refresh", require("./api/routes/refresh"));
 app.use("/logout", require("./api/routes/logout"));
 
 app.use("/admin", require("./api/routes/adminRoutes"));
-
-// Protected routes
-app.use(verifyJWT);
 app.use("/doctors", require("./api/routes/doctorRoutes"));
+
 app.use("/users", require("./api/routes/userRoutes"));
 app.use("/appointments", require("./api/routes/appointmentRoutes"));
 app.use("/labs", require("./api/routes/labRoutes"));

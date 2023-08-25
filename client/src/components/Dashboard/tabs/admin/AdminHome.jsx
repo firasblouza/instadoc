@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "../../../../api/axios";
 
-const Home = () => {
+import axios from "../../../../api/axios";
+import useAccessToken from "../../../../hooks/useAccessToken";
+
+const AdminHome = () => {
   const effectRan = useRef(false);
   const [statistics, setStatistics] = useState({
     patients: 0,
@@ -14,8 +16,7 @@ const Home = () => {
     if (effectRan.current === false) {
       const fetchStatistics = async () => {
         try {
-          const accessToken = localStorage.getItem("accessToken");
-
+          const { accessToken } = useAccessToken();
           if (accessToken) {
             const response = await axios.get("/admin/statistics", {
               headers: {
@@ -49,15 +50,17 @@ const Home = () => {
   }, []);
 
   return (
-    <section className="admin-home w-full h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] overflow-scroll overflow-y-scroll">
+    <section className="AdminHome w-full h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] overflow-scroll overflow-y-scroll">
       <h1 className="text-1xl font-bold text-[#1E1E1E] text-center my-3">
         Bienvenue sur votre espace administrateur
       </h1>
+
       <section className="statistics flex flex-row flex-wrap justify-around">
         <div className="statistic-card flex flex-col justify-center items-center bg-white rounded-lg shadow-lg p-4 m-4">
           <h2 className="text-1xl font-bold">Nombre de patients</h2>
           <p className="text-1xl font-bold">{statistics.patients}</p>
         </div>
+
         <div className="statistic-card flex flex-col justify-center items-center bg-white rounded-lg shadow-lg p-4 m-4">
           <h2 className="text-1xl font-bold">Nombre de consultations</h2>
           <p className="text-1xl font-bold">{statistics.consultations}</p>
@@ -66,6 +69,7 @@ const Home = () => {
           <h2 className="text-1xl font-bold">Nombre de médecins</h2>
           <p className="text-1xl font-bold">{statistics.doctors}</p>
         </div>
+
         <div className="statistic-card flex flex-col justify-center items-center bg-white rounded-lg shadow-lg p-4 m-4">
           <h2 className="text-1xl font-bold">Nombre de laboratoires</h2>
           <p className="text-1xl font-bold">{statistics.labs}</p>
@@ -75,4 +79,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default AdminHome;

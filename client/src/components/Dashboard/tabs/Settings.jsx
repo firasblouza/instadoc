@@ -1,11 +1,13 @@
 import { useEffect, useState, useRef } from "react";
-import { FaSave, FaEdit } from "react-icons/fa";
+import { FaSave, FaEdit, FaTrashAlt } from "react-icons/fa";
 
 import Input from "../../../components/Input";
 
 import { isValidPassword } from "../../../utils/Validation";
 import jwt_decode from "jwt-decode";
 import axios from "../../../api/axios";
+import useLogout from "../../../hooks/useLogout";
+import useAccessToken from "../../../hooks/useAccessToken";
 
 const Settings = () => {
   const [pwData, setPwData] = useState({
@@ -63,11 +65,12 @@ const Settings = () => {
 
   const saveChanges = async () => {
     try {
-      const accessToken = localStorage.getItem("accessToken");
-      if (accessToken) {
-        const decodedToken = jwt_decode(accessToken);
+      const { accessToken, decodedToken } = useAccessToken();
+      if (accessToken && decodedToken) {
+        const path =
+          decodedToken.UserInfo.role === "user" ? "users" : "doctors";
         const response = await axios.put(
-          `/users/password/${decodedToken.UserInfo.id}`,
+          `/${path}/password/${decodedToken.UserInfo.id}`,
           pwData,
           {
             headers: {
@@ -109,6 +112,51 @@ const Settings = () => {
     }
   };
 
+  const deleteAccount = async () => {
+    try {
+      if (window.confirm("Vous etes sur de supprimer votre compte?")) {
+        const { accessToken, decodedToken } = useAccessToken();
+        if (accessToken && decodedToken) {
+          const path =
+            decodedToken.UserInfo.role === "user" ? "users" : "doctors";
+          const response = await axios.delete(
+            `/${path}/${decodedToken.UserInfo.id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`
+              },
+              withCredentials: true
+            }
+          );
+          if (response.status === 200) {
+            // Show alert of success and use window location to go homepage
+            window.alert("Votre compte a été supprimé avec succès");
+            window.location.href = "/";
+            useLogout();
+            localStorage.removeItem("accessToken");
+            setAuth({});
+          }
+        } else {
+          setStatusMessage({
+            message: "You are not authorized to perform this action",
+            error: true
+          });
+        }
+      }
+    } catch (err) {
+      if (err?.response && err.response.status === 400) {
+        setStatusMessage({
+          message: err.response.data.message,
+          error: true
+        });
+      } else {
+        setStatusMessage({
+          message: err.response.data.message,
+          error: true
+        });
+      }
+    }
+  };
   return (
     <section className="dashboard-settings w-full h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] overflow-scroll overflow-y-scroll">
       <div className="flex flex-col items-center w-full h-full my-3">
@@ -153,6 +201,7 @@ const Settings = () => {
               <label htmlFor="oldPassword" className="text-gray-800 font-bold">
                 New Password :
               </label>
+
               <Input
                 type="password"
                 name="newPassword"
@@ -164,12 +213,14 @@ const Settings = () => {
                 onChange={(e) => handleFieldChange(e)}
               />
             </div>
+
             {/* Confirm Password */}
 
             <div className="formGroup  justify-between flex flex-col items-center md:w-4/6 w-full  md:flex-row gap-2 my-3">
               <label htmlFor="oldPassword" className="text-gray-800 font-bold">
                 Confirm Password :
               </label>
+
               <Input
                 type="password"
                 name="confirmPassword"
@@ -181,7 +232,9 @@ const Settings = () => {
                 onChange={(e) => handleFieldChange(e)}
               />
             </div>
+
             {/* Submit Button */}
+
             <div className="flex flex-col w-full md:flex-row gap-3 justify-center">
               <button
                 type="button"
@@ -195,6 +248,7 @@ const Settings = () => {
                 <FaEdit className="mr-2" />
                 {isModifying ? "Cancel" : "Edit"}
               </button>
+
               <button
                 type="submit"
                 className={`relative overflow-hidden ${
@@ -207,6 +261,15 @@ const Settings = () => {
               >
                 <FaSave className="mr-2" />
                 Save
+              </button>
+              <button
+                type="submit"
+                className={`relative overflow-hidden bg-red-500
+                    h-8 text-white font-bold text-[16px] px-2 rounded-md my-3 flex justify-center items-center `}
+                onClick={deleteAccount}
+              >
+                <FaTrashAlt className="mr-2" />
+                Supprimer Compte
               </button>
             </div>
           </div>

@@ -32,8 +32,6 @@ const Navbar = () => {
     if (location.pathname !== "/") {
       navigate("/");
     }
-
-    aboutSection.scrollIntoView({ behavior: "smooth" });
   };
 
   const signOut = async () => {

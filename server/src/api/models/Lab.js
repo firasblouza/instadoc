@@ -25,6 +25,10 @@ const labSchema = new Schema({
       type: String,
       requierd: true
     }
+  },
+  labImage: {
+    type: String, // This is going to be a file path for the doctor's profile.
+    required: true
   }
 });
 

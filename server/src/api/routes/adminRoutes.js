@@ -16,7 +16,7 @@ router.delete(
   doctorController.deleteDoctorById
 );
 
-router.get("/statistics", verifyRole("admin"), adminController.fetchStatistics);
+router.get("/statistics", adminController.fetchStatistics);
 router.get("/patients", verifyRole("admin"), userController.getAllUsers);
 router.get("/doctors", verifyRole("admin"), doctorController.getAllDoctors);
 router.put("/patient/:id", verifyRole("admin"), userController.modifyUserById);

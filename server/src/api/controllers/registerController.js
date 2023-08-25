@@ -7,7 +7,6 @@ const upload = require("../middleware/multer");
 const handleSignup = async (req, res) => {
   const { email, password, firstName, lastName, role, dateOfBirth } =
     JSON.parse(req.body.userData);
-  console.log(JSON.parse(req.body.userData));
 
   if (!email || !password || !firstName || !lastName || !role || !dateOfBirth) {
     return res.status(400).json({ message: "Please fill in all fields1" });
@@ -20,6 +19,7 @@ const handleSignup = async (req, res) => {
     const licenseImage = req.files["licenseImage"][0].filename;
     const profileImage = req.files["profileImage"][0].filename;
     const idImage = req.files["idImage"][0].filename;
+    const cvImage = req.files["cvImage"][0].filename;
 
     if (
       !speciality ||
@@ -28,7 +28,8 @@ const handleSignup = async (req, res) => {
       !idImage ||
       !licenseNumber ||
       !licenseImage ||
-      !profileImage
+      !profileImage ||
+      !cvImage
     ) {
       return res.status(400).json({ message: "Please fill in all fields" });
     }
@@ -56,9 +57,9 @@ const handleSignup = async (req, res) => {
         profileImage: req.files["profileImage"][0].filename,
         licenseNumber,
         licenseImage: req.files["licenseImage"][0].filename,
+        cvImage: req.files["cvImage"][0].filename,
         speciality
       });
-      console.log(newDoctor);
       res.status(201).json({
         message: `Account created successfully`
       });
@@ -82,7 +83,6 @@ const handleSignup = async (req, res) => {
       firstName,
       lastName
     });
-    console.log(newUser);
     res.status(201).json({
       message: "Account created successfuly"
     });

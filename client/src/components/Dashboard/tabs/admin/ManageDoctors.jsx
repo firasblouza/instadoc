@@ -16,6 +16,8 @@ import ImagePreview from "../../UI/ImagePreview";
 
 import { capitalize } from "../../../../utils/Capitalize";
 
+import useAccessToken from "../../../../hooks/useAccessToken";
+
 const ManageDoctors = () => {
   const effectRan = useRef(false);
 
@@ -42,7 +44,7 @@ const ManageDoctors = () => {
   const fetchDoctors = async () => {
     setDoctors([]);
     try {
-      const accessToken = localStorage.getItem("accessToken");
+      const { accessToken } = useAccessToken();
       if (accessToken) {
         const response = await axios.get("/admin/doctors", {
           headers: {
@@ -75,32 +77,98 @@ const ManageDoctors = () => {
     };
   }, []);
 
-  // Delete Doctors
+  // Verify doctor
 
-  const handleDelete = async (id) => {
+  const handleVerify = async (id, action) => {
+    const endpoint = action === "approve" ? "approve" : "reject";
+    const status = action === "approve" ? "approved" : "rejected";
+    const pendingApproval = action === "approved" ? true : false;
     try {
-      const accessToken = localStorage.getItem("accessToken");
+      const { accessToken } = useAccessToken();
       if (accessToken) {
-        const response = await axios.delete(`/admin/doctor/${id}`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`
+        const response = await axios.put(
+          `/admin/doctor/${action}/${id}`,
+          { verifiedStatus: status, pendingApproval },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`
+            }
           }
-        });
+        );
         if (response.status === 200) {
-          setDoctors(doctors.filter((doctor) => doctor._id !== id));
+          fetchDoctors();
+          window.alert(`Doctor ${status} successfully`);
+          setShowModal(false);
+        } else {
+          window.alert(
+            `An error occurred while ${
+              action == "approve" ? "verifying" : "rejecting"
+            } the doctor`
+          );
         }
       } else {
         console.log("No access token found");
       }
-    } catch (error) {
-      if (error.response && error.response.status === 401) {
-        console.log("Unauthorized: You need to log in or refresh your token");
-      } else {
-        console.log(
-          "An error occurred while deleting the doctor",
-          error.message
-        );
+    } catch (err) {
+      console.log(
+        `An error occurred while ${
+          action == "approve" ? "verifying" : "rejecting"
+        } the doctor`,
+        err.message
+      );
+    }
+  };
+
+  // Delete Doctors
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Vous êtes sûr de vouloir supprimer ce médecin ?")) {
+      try {
+        const { accessToken } = useAccessToken();
+        if (accessToken) {
+          const response = await axios.delete(`/admin/doctor/${id}`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`
+            }
+          });
+          if (response.status === 200) {
+            setDoctors(doctors.filter((doctor) => doctor._id !== id));
+            window.alert("Médecin supprimer avec succés");
+          }
+        } else {
+          console.log("No access token found");
+        }
+      } catch (error) {
+        if (error.response && error.response.status === 401) {
+          console.log("Unauthorized: You need to log in or refresh your token");
+        } else {
+          console.log(
+            "An error occurred while deleting the doctor",
+            error.message
+          );
+        }
       }
+    }
+  };
+
+  // Doctor Search
+
+  const handleSearch = (e) => {
+    const searchString = e.target.value.toLowerCase(); // Convert the search string to lowercase
+    setSearch(searchString); // Update the search state
+
+    if (searchString === "") {
+      setDoctors(initialDoctors);
+    } else {
+      setDoctors(
+        initialDoctors.filter(
+          (doctor) =>
+            doctor.firstName.toLowerCase().includes(searchString) ||
+            doctor.lastName.toLowerCase().includes(searchString) ||
+            doctor.email.toLowerCase().includes(searchString) ||
+            doctor.idNumber.includes(searchString)
+        )
+      );
     }
   };
 
@@ -136,68 +204,6 @@ const ManageDoctors = () => {
     setDoctors((filteredDoctors) =>
       filteredDoctors.filter((doctor) => doctor.verifiedStatus === filter)
     );
-  };
-
-  // Verify doctor
-
-  const handleVerify = async (id, action) => {
-    const endpoint = action === "approve" ? "approve" : "reject";
-    const status = action === "approve" ? "approved" : "rejected";
-    try {
-      const accessToken = localStorage.getItem("accessToken");
-      if (accessToken) {
-        const response = await axios.put(
-          `/admin/doctor/${action}/${id}`,
-          { verifiedStatus: status },
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`
-            }
-          }
-        );
-        if (response.status === 200) {
-          fetchDoctors();
-          window.alert(`Doctor ${status} successfully`);
-          setShowModal(false);
-        } else {
-          window.alert(
-            `An error occurred while ${
-              action == "approve" ? "verifying" : "rejecting"
-            } the doctor`
-          );
-        }
-      } else {
-        console.log("No access token found");
-      }
-    } catch (err) {
-      console.log(
-        `An error occurred while ${
-          action == "approve" ? "verifying" : "rejecting"
-        } the doctor`,
-        err.message
-      );
-    }
-  };
-
-  // Doctor Search
-
-  const handleSearch = (e) => {
-    const searchString = e.target.value.toLowerCase(); // Convert the search string to lowercase
-    setSearch(searchString); // Update the search state
-
-    if (searchString === "") {
-      setDoctors(initialDoctors);
-    } else {
-      setDoctors(
-        initialDoctors.filter(
-          (doctor) =>
-            doctor.firstName.toLowerCase().includes(searchString) ||
-            doctor.lastName.toLowerCase().includes(searchString) ||
-            doctor.email.toLowerCase().includes(searchString) ||
-            doctor.idNumber.includes(searchString)
-        )
-      );
-    }
   };
 
   return (

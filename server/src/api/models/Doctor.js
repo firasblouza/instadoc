@@ -38,6 +38,7 @@ const doctorSchema = new Schema({
     type: String,
     required: true
   },
+
   availability: [
     {
       dayOfWeek: {
@@ -46,18 +47,22 @@ const doctorSchema = new Schema({
       },
       startTime: {
         type: String,
-        required: true
+        required: true,
+        default: "00:00"
       },
       endTime: {
         type: String,
-        required: true
+        required: true,
+        default: "00:00"
       },
       isAvailable: {
         type: Boolean,
-        default: true
+        default: true,
+        required: true
       }
     }
   ],
+
   idType: {
     type: String,
     required: true
@@ -78,17 +83,50 @@ const doctorSchema = new Schema({
     type: String, // This is going to be a file path for the doctor's medical license.
     required: true
   },
+  cvImage: {
+    type: String, // This is going to be a file path for the doctor's profile.
+    required: true
+  },
   verifiedStatus: {
     type: String,
     enum: ["pending", "approved", "rejected"],
     default: "pending",
     required: true
   },
+  pendingApproval: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
   refreshToken: {
     type: String
   }
 });
 
+doctorSchema.pre("save", function (next) {
+  if (!this.isNew) {
+    return next();
+  }
+
+  const daysOfWeek = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday"
+  ];
+
+  this.availability = daysOfWeek.map((day, index) => ({
+    dayOfWeek: index,
+    startTime: "00:00",
+    endTime: "00:00",
+    isAvailable: true
+  }));
+
+  next();
+});
 const Doctor = mongoose.model("Doctor", doctorSchema);
 
 module.exports = Doctor;

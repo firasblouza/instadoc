@@ -1,6 +1,7 @@
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { useEffect } from "react";
+import jwt_decode from "jwt-decode";
 
 import useLogout from "./hooks/useLogout";
 
@@ -11,20 +12,28 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import RequireAuth from "./components/RequireAuth";
 import Authenticated from "./components/Authenticated";
+import Doctor from "./components/Profiles/Doctor";
 
 // Dashboard
 import Dashboard from "./components/Dashboard";
 import AdminHome from "./components/Dashboard/tabs/admin/AdminHome";
+import DoctorHome from "./components/Dashboard/tabs/doctor/DoctorHome";
 import Profile from "./components/Dashboard/tabs/Profile";
 import ManagePatients from "./components/Dashboard/tabs/admin/ManagePatients";
 import ManageDoctors from "./components/Dashboard/tabs/admin/ManageDoctors";
 import Settings from "./components/Dashboard/tabs/Settings";
 import ManageLabs from "./components/Dashboard/tabs/admin/ManageLabs";
+import Labs from "./components/Labs";
+
+// Hooks
+
+import useAccessToken from "./hooks/useAccessToken";
 
 const App = () => {
   const location = useLocation();
-  const accessToken = localStorage.getItem("accessToken");
   const navigate = useNavigate();
+
+  const { accessToken, decodedToken } = useAccessToken();
 
   const Logout = () => {
     const handleLogout = useLogout();
@@ -51,8 +60,24 @@ const App = () => {
         <Route path="doctors" element={<Layout />}>
           <Route index element={<Doctors />} />
         </Route>
+
+        <Route path="labs" element={<Layout />}>
+          <Route index element={<Labs />} />
+        </Route>
+
+        {/* Individual Profiles */}
+        <Route path="doctor/:doctorId" element={<Layout />}>
+          <Route index element={<Doctor />} />
+        </Route>
+
         <Route path="dashboard/*" element={<Dashboard />}>
-          <Route index element={<AdminHome />} />
+          {decodedToken.UserInfo.role === "admin" ? (
+            <Route index element={<AdminHome />} />
+          ) : decodedToken.UserInfo.role === "doctor" ? (
+            <Route index element={<DoctorHome />} />
+          ) : (
+            <Route index element={<AdminHome />} />
+          )}
           <Route path="profile" element={<Profile />} />
 
           {/* Admin Routes */}
