@@ -37,7 +37,7 @@ const ManageDoctors = () => {
 
   const [search, setSearch] = useState("");
 
-  const IMG_URL = "https://instadoc-server.vercel.app/uploads/";
+  const IMG_URL = "https://instadoc-api.onrender.com/uploads/";
 
   // Function to fetch the doctors
 

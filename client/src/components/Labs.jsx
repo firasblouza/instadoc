@@ -22,7 +22,7 @@ const Labs = () => {
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
 
-  const IMG_URL = "https://instadoc-server.vercel.app/uploads/";
+  const IMG_URL = "https://instadoc-api.onrender.com/uploads/";
 
   const effectRan = useRef(false);
 

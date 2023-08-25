@@ -23,7 +23,7 @@ const Profile = () => {
     profileImage: null
   });
 
-  const IMG_URL = "https://instadoc-server.vercel.app/uploads/";
+  const IMG_URL = "https://instadoc-api.onrender.com/uploads/";
   const imgPlaceholder = `${IMG_URL}imagePlaceholder.png`;
 
   // Save Changes
