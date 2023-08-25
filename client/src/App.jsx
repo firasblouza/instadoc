@@ -31,9 +31,9 @@ import useAccessToken from "./hooks/useAccessToken";
 
 const App = () => {
   const location = useLocation();
+  const accessToken = localStorage.getItem("accessToken");
   const navigate = useNavigate();
-
-  const { accessToken, decodedToken } = useAccessToken();
+  const decodedToken = accessToken ? jwt_decode(accessToken) : null;
 
   const Logout = () => {
     const handleLogout = useLogout();
@@ -46,30 +46,29 @@ const App = () => {
       };
 
       performLogout();
-    }, [handleLogout, navigate]);
+    }, []); // Use an empty dependency array to run the effect only once
 
     return null; // Render nothing while the logout process is being executed
   };
-
   return (
-    <AuthProvider>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-        </Route>
-        <Route path="doctors" element={<Layout />}>
-          <Route index element={<Doctors />} />
-        </Route>
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Home />} />
+      </Route>
+      <Route path="doctors" element={<Layout />}>
+        <Route index element={<Doctors />} />
+      </Route>
 
-        <Route path="labs" element={<Layout />}>
-          <Route index element={<Labs />} />
-        </Route>
+      <Route path="labs" element={<Layout />}>
+        <Route index element={<Labs />} />
+      </Route>
 
-        {/* Individual Profiles */}
-        <Route path="doctor/:doctorId" element={<Layout />}>
-          <Route index element={<Doctor />} />
-        </Route>
+      {/* Individual Profiles */}
+      <Route path="doctor/:doctorId" element={<Layout />}>
+        <Route index element={<Doctor />} />
+      </Route>
 
+      {accessToken && (
         <Route path="dashboard/*" element={<Dashboard />}>
           {decodedToken.UserInfo.role === "admin" ? (
             <Route index element={<AdminHome />} />
@@ -79,9 +78,6 @@ const App = () => {
             <Route index element={<AdminHome />} />
           )}
           <Route path="profile" element={<Profile />} />
-
-          {/* Admin Routes */}
-
           <Route path="admin/patients" element={<ManagePatients />} />
           <Route path="admin/doctors" element={<ManageDoctors />} />
           <Route path="admin/labs" element={<ManageLabs />} />
@@ -90,16 +86,18 @@ const App = () => {
 
           <Route path="settings" element={<Settings />} />
         </Route>
+      )}
 
-        <Route path="login" element={<Login />} />
-        <Route path="signup" element={<Signup />} />
+      {/* Admin Routes */}
 
-        <Route element={<RequireAuth />}>
-          <Route path="dashboard" element={<Dashboard />} />
-        </Route>
-        <Route path="logout" element={<Logout />} />
-      </Routes>
-    </AuthProvider>
+      <Route path="login" element={<Login />} />
+      <Route path="signup" element={<Signup />} />
+
+      <Route element={<RequireAuth />}>
+        <Route path="dashboard" element={<Dashboard />} />
+      </Route>
+      <Route path="logout" element={<Logout />} />
+    </Routes>
   );
 };
 
