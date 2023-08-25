@@ -9,7 +9,7 @@ const Authenticated = () => {
   const location = useLocation();
   const { accessToken, decodedToken } = useAccessToken();
 
-  if (accessToken) {
+  if (accessToken && accessToken !== "") {
     // Already logged in, redirect to home
     return <Navigate to="/" state={{ from: location }} replace />;
   }

@@ -9,10 +9,10 @@ const useAccessToken = () => {
       return { accessToken, decodedToken };
     } catch (error) {
       console.error("Error decoding access token:", error);
-      return null;
+      return { accessToken: "", decodedToken: {} };
     }
   } else {
-    return null;
+    return { accessToken: "", decodedToken: {} };
   }
 };
 

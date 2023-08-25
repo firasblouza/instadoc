@@ -13,6 +13,7 @@ import {
 import SignupMain from "../components/Signup/SignupMain";
 import SignupData from "../components/Signup/SignupData";
 import SignupFinish from "../components/Signup/SignupFinish";
+import useAccessToken from "../hooks/useAccessToken";
 
 const AuthContext = createContext({});
 
@@ -69,33 +70,41 @@ export const AuthProvider = ({ children }) => {
   // Section Refs
 
   const aboutRef = useRef(null);
+  const effectRan = useRef(false);
 
   useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");
-    if (accessToken) {
-      const decodedToken = jwt_decode(accessToken);
-      setAuth({
-        email: decodedToken.UserInfo.email,
-        fullName: decodedToken.UserInfo.fullName,
-        role: decodedToken.UserInfo.role,
-        accessToken: accessToken
-      });
+    if (effectRan.current === false) {
+      const { accessToken, decodedToken } = useAccessToken();
+      if (accessToken && accessToken !== "") {
+        setAuth({
+          id: decodedToken.UserInfo.id,
+          email: decodedToken.UserInfo.email,
+          fullName: decodedToken.UserInfo.fullName,
+          role: decodedToken.UserInfo.role,
+          accessToken: accessToken
+        });
+      } else {
+        setAuth({
+          id: "",
+          email: "",
+          fullName: "",
+          role: "",
+          accessToken: ""
+        });
+      }
     }
+    return () => {
+      effectRan.current = true;
+    };
   }, []);
 
   useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");
-    if (accessToken) {
-      const decodedToken = jwt_decode(accessToken);
+    const { accessToken, decodedToken } = useAccessToken();
+    if (accessToken && accessToken !== "" && decodedToken) {
       const expiresInMs = decodedToken.exp * 1000 - Date.now();
 
       if (expiresInMs > 0) {
         const timeoutId = setTimeout(() => {
-          localStorage.clear();
-          setAuth({});
-          console.log("cleared token");
-
-          // Call the useLogout function here
           navigate("/logout");
         }, expiresInMs);
 
@@ -171,7 +180,6 @@ export const AuthProvider = ({ children }) => {
         id: decodedToken.UserInfo.id,
         email: loginData.email,
         fullName: decodedToken.UserInfo.fullName,
-        password: loginData.password,
         role: decodedToken.UserInfo.role,
         accessToken
       });

@@ -1,18 +1,34 @@
 import axios from "../api/axios";
 import useAuth from "./useAuth";
 
+import { useNavigate } from "react-router-dom";
+
 const useLogout = () => {
-  const { setAuth } = useAuth();
+  let loggedOut = false;
+  const { auth, setAuth } = useAuth();
+  const navigate = useNavigate();
   const handleLogout = async () => {
-    try {
-      const response = await axios.get("/logout", {
-        withCredentials: true
-      });
-      console.log(` This is the logout `, response);
-      setAuth({});
-      localStorage.removeItem("accessToken");
-    } catch (error) {
-      console.log(error);
+    if (loggedOut === false) {
+      try {
+        const response = await axios.get("/logout", {
+          withCredentials: true
+        });
+        console.log(` This is the logout `, auth);
+        setAuth({
+          id: "",
+          email: "",
+          fullName: "",
+          role: "",
+          accessToken: ""
+        });
+        localStorage.removeItem("accessToken");
+        navigate("/");
+
+        console.log(auth);
+        loggedOut = true;
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
   return handleLogout;

@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { FaSave, FaEdit, FaTrashAlt } from "react-icons/fa";
 
 import Input from "../../../components/Input";
+import { useNavigate } from "react-router-dom";
 
 import { isValidPassword } from "../../../utils/Validation";
 import jwt_decode from "jwt-decode";
@@ -17,6 +18,7 @@ const Settings = () => {
   });
 
   const effectRan = useRef(null);
+  const navigate = useNavigate();
 
   const [statusMessage, setStatusMessage] = useState({
     message: "",
@@ -66,7 +68,7 @@ const Settings = () => {
   const saveChanges = async () => {
     try {
       const { accessToken, decodedToken } = useAccessToken();
-      if (accessToken && decodedToken) {
+      if (accessToken && accessToken !== "" && decodedToken) {
         const path =
           decodedToken.UserInfo.role === "user" ? "users" : "doctors";
         const response = await axios.put(
@@ -116,7 +118,7 @@ const Settings = () => {
     try {
       if (window.confirm("Vous etes sur de supprimer votre compte?")) {
         const { accessToken, decodedToken } = useAccessToken();
-        if (accessToken && decodedToken) {
+        if (accessToken && accessToken !== "" && decodedToken) {
           const path =
             decodedToken.UserInfo.role === "user" ? "users" : "doctors";
           const response = await axios.delete(
@@ -131,10 +133,7 @@ const Settings = () => {
           if (response.status === 200) {
             // Show alert of success and use window location to go homepage
             window.alert("Votre compte a été supprimé avec succès");
-            window.location.href = "/";
-            useLogout();
-            localStorage.removeItem("accessToken");
-            setAuth({});
+            navigate("/logout");
           }
         } else {
           setStatusMessage({

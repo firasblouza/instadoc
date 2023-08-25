@@ -37,7 +37,7 @@ const DoctorHome = () => {
   const fetchDoctor = async () => {
     try {
       const { accessToken, decodedToken } = useAccessToken();
-      if (accessToken && decodedToken) {
+      if (accessToken && accessToken !== "" && decodedToken) {
         const response = await axios.get(
           `/doctors/${decodedToken.UserInfo.id}`,
           {
@@ -75,7 +75,7 @@ const DoctorHome = () => {
   const saveAvailability = async () => {
     try {
       const { accessToken, decodedToken } = useAccessToken();
-      if (accessToken && decodedToken) {
+      if (accessToken && accessToken !== "" && decodedToken) {
         const response = await axios.put(
           `/doctors/${decodedToken.UserInfo.id}`,
           { availability: newAvailability }

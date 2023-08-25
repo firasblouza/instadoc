@@ -30,7 +30,7 @@ const Profile = () => {
   const saveChanges = async () => {
     try {
       const { accessToken, decodedToken } = useAccessToken();
-      if (accessToken && decodedToken) {
+      if (accessToken && accessToken !== "" && decodedToken) {
         const formData = new FormData();
         formData.append("user", JSON.stringify(user));
         if (uploadedProfile) {
@@ -81,7 +81,7 @@ const Profile = () => {
       const fetchUser = async () => {
         try {
           const { accessToken, decodedToken } = useAccessToken();
-          if (accessToken && decodedToken) {
+          if (accessToken && accessToken !== "" && decodedToken) {
             const path =
               decodedToken.UserInfo.role === "user" ||
               decodedToken.UserInfo.role === "admin"

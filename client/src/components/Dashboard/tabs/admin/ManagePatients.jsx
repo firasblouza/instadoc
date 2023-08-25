@@ -13,8 +13,7 @@ const ManagePatients = () => {
   const fetchPatients = async () => {
     try {
       const { accessToken } = useAccessToken();
-
-      if (accessToken) {
+      if (accessToken && accessToken !== "") {
         const response = await axios.get("/admin/patients", {
           headers: {
             Authorization: `Bearer ${accessToken}` // Attach the token to the Authorization header

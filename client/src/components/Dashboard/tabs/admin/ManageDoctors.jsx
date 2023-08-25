@@ -45,7 +45,7 @@ const ManageDoctors = () => {
     setDoctors([]);
     try {
       const { accessToken } = useAccessToken();
-      if (accessToken) {
+      if (accessToken && accessToken !== "") {
         const response = await axios.get("/admin/doctors", {
           headers: {
             Authorization: `Bearer ${accessToken}` // Attach the token to the Authorization header
@@ -85,7 +85,7 @@ const ManageDoctors = () => {
     const pendingApproval = action === "approved" ? true : false;
     try {
       const { accessToken } = useAccessToken();
-      if (accessToken) {
+      if (accessToken && accessToken !== "") {
         const response = await axios.put(
           `/admin/doctor/${action}/${id}`,
           { verifiedStatus: status, pendingApproval },
@@ -125,7 +125,7 @@ const ManageDoctors = () => {
     if (window.confirm("Vous êtes sûr de vouloir supprimer ce médecin ?")) {
       try {
         const { accessToken } = useAccessToken();
-        if (accessToken) {
+        if (accessToken && accessToken !== "") {
           const response = await axios.delete(`/admin/doctor/${id}`, {
             headers: {
               Authorization: `Bearer ${accessToken}`

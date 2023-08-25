@@ -58,7 +58,7 @@ const ManageLabs = () => {
     setLabs([]); // Empty the labs array
     try {
       const { accessToken } = useAccessToken();
-      if (accessToken) {
+      if (accessToken && accessToken !== "") {
         const response = await axios.get("/labs/", {
           headers: {
             Authorization: `Bearer ${accessToken}`
@@ -109,7 +109,7 @@ const ManageLabs = () => {
   const addLab = async () => {
     try {
       const { accessToken } = useAccessToken();
-      if (accessToken) {
+      if (accessToken && accessToken !== "") {
         const formData = new FormData();
         formData.append("lab", JSON.stringify(newLab));
         if (addFile) {
@@ -148,7 +148,7 @@ const ManageLabs = () => {
   const deleteLab = async (id) => {
     try {
       const { accessToken } = useAccessToken();
-      if (accessToken) {
+      if (accessToken && accessToken !== "") {
         const response = await axios.delete(`/labs/delete/${id}`, {
           headers: {
             Authorization: `Bearer ${accessToken}`
@@ -197,7 +197,7 @@ const ManageLabs = () => {
       }
 
       const { accessToken } = useAccessToken();
-      if (accessToken) {
+      if (accessToken && accessToken !== "") {
         const formData = new FormData();
         formData.append("lab", selectedLab);
         if (editFile) {

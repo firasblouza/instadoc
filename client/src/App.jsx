@@ -42,7 +42,6 @@ const App = () => {
     useEffect(() => {
       const performLogout = async () => {
         await handleLogout();
-        navigate("/login");
       };
 
       performLogout();

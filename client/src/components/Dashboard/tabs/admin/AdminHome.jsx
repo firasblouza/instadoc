@@ -17,7 +17,7 @@ const AdminHome = () => {
       const fetchStatistics = async () => {
         try {
           const { accessToken } = useAccessToken();
-          if (accessToken) {
+          if (accessToken && accessToken !== "") {
             const response = await axios.get("/admin/statistics", {
               headers: {
                 Authorization: `Bearer ${accessToken}` // Attach the token to the Authorization header
