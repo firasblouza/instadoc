@@ -21,8 +21,8 @@ const Doctor = () => {
 
   const effectRan = useRef(false);
 
-  const IMG_URL = "http://localhost:3500/uploads/";
-  const IMG_Placeholder = "http://localhost:3500/uploads/imagePlaceholder.png";
+  const IMG_URL = "https://instadoc-server.vercel.app/uploads/";
+  const IMG_Placeholder = `${IMG_URL}imagePlaceholder.png`;
 
   const fetchDoctor = async () => {
     setDoctor([]);
