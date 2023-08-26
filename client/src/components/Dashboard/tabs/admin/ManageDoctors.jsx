@@ -37,8 +37,10 @@ const ManageDoctors = () => {
 
   const [search, setSearch] = useState("");
 
-  const IMG_URL = "http://localhost:3500/uploads/";
+
+ const IMG_URL = "https://instadoc-api.onrender.com/uploads/";
   const imgPlaceholder = `${IMG_URL}imagePlaceholder.png`;
+
 
   // Function to fetch the doctors
 

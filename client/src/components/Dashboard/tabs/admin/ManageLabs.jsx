@@ -47,7 +47,7 @@ const ManageLabs = () => {
     error: false
   });
 
-  const IMG_URL = "http://localhost:3500/uploads/";
+  const IMG_URL = "https://instadoc-api.onrender.com/uploads/";
   const IMG_Placeholder = "imagePlaceholder.png";
 
   const effectRan = useRef(false);
