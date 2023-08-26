@@ -163,7 +163,7 @@ const Settings = () => {
 
         {/* Settings Box */}
         <div className="SettingsContainer flex flex-col w-full h-full md:w-2/3 md:h-2/3 border  rounded-lg shadow-lg my-3 items-center">
-          <h1 className="text-2xl font-bold text-gray-800 m-4">
+          <h1 className="text-2xl font-bold text-gray-800 m-4 text-center">
             Change Password
           </h1>
           <div className="contentContainer flex flex-col items-center border w-full h-full">
@@ -241,7 +241,7 @@ const Settings = () => {
                   !isModifying
                     ? "bg-blue-400 hover:bg-blue-300"
                     : "bg-red-400 hover:bg-red-300"
-                } max-w-[120px] w-full h-8 text-white font-bold text-[16px] px-1 rounded-md my-3 flex justify-center items-center cursor-pointer`}
+                } md:max-w-[120px] w-full h-8 text-white font-bold text-[16px] px-1 rounded-md md:my-3 flex justify-center items-center cursor-pointer`}
                 onClick={() => setIsModifying(!isModifying)}
               >
                 <FaEdit className="mr-2" />
@@ -254,7 +254,7 @@ const Settings = () => {
                   !isModifying
                     ? "bg-gray-400"
                     : "bg-green-400 hover:bg-green-300 cursor-pointer"
-                } max-w-[120px] w-full h-8 text-white font-bold text-[16px] px-1 rounded-md my-3 flex justify-center items-center `}
+                } md:max-w-[120px] w-full h-8 text-white font-bold text-[16px] px-1 rounded-md md:my-3 flex justify-center items-center `}
                 disabled={!isModifying}
                 onClick={saveChanges}
               >
@@ -264,7 +264,7 @@ const Settings = () => {
               <button
                 type="submit"
                 className={`relative overflow-hidden bg-red-500
-                    h-8 text-white font-bold text-[16px] px-2 rounded-md my-3 flex justify-center items-center `}
+                    h-8 text-white font-bold text-[16px] px-2 rounded-md md:my-3 flex justify-center items-center `}
                 onClick={deleteAccount}
               >
                 <FaTrashAlt className="mr-2" />

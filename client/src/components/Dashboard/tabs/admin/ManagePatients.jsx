@@ -102,12 +102,12 @@ const ManagePatients = () => {
       <div className="flex flex-col items-center justify-center w-full">
         <div className="flex flex-row justify-center items-center w-full">
           <div className="flex flex-col bg-white rounded-lg shadow-lg p-4 m-4 overflow-x-scroll lg:overflow-x-hidden">
-            <div className="flex w-full justify-between mb-5">
+            <div className="flex w-full justify-between mb-5 gap-5 items-center">
               {/* Add a search field  */}
               <input
                 type="text"
                 placeholder="Rechercher un patient"
-                className="border border-gray-300 rounded-lg py-1 px-2 w-1/2"
+                className="border border-gray-300 rounded-lg py-1 px-2 w-full md:w-1/2"
                 onChange={(e) => handleSearch(e)}
               />
 

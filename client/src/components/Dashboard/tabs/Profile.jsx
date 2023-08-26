@@ -129,13 +129,13 @@ const Profile = () => {
       </div>
 
       <div className="flex flex-col justify-center">
-        <div className="flex flex-col w-full justify-center items-center ">
+        <div className="flex flex-col w-full justify-center items-center pb-5 ">
           <div className="flex flex-col">
             <h1 className="text-1xl font-bold text-[#1E1E1E]  my-3">
               Personal Information
             </h1>
           </div>
-          <div className="mainContainer flex flex-col md:flex-row justify-center items-start  rounded-lg shadow-lg px-3 ">
+          <div className="mainContainer flex flex-col md:flex-row justify-center items-start  rounded-lg shadow-lg px-3 mb-9 md:mb-0 ">
             <div className="infoContainer flex flex-col   rounded-lg shadow-lg px-3 ">
               <div className="flowControlContainer   flex flex-col md:flex-row w-auto  gap-4">
                 <div className="imageContainer  flex flex-col justify-start rounded-lg w-full">
@@ -152,14 +152,14 @@ const Profile = () => {
                   />
                   {/* Avatar Upload Button */}
 
-                  <div className="avatarUpload bg-transparent  h-8 rounded-full my-3 flex justify-around items-center  px-1 flex-row max-w-[280px]">
+                  <div className="avatarUpload bg-transparent   rounded-full my-3 flex justify-around items-center px-5 md:px-1 flex-col md:flex-row md:md:max-w-[280px] h-auto">
                     <button
                       type="button"
                       className={`relative overflow-hidden ${
                         !isModifying
                           ? "bg-gray-400"
                           : "bg-blue-400 hover:bg-blue-300 cursor-pointer"
-                      } max-w-[120px] w-full h-8 text-white font-bold text-[16px] px-1 rounded-md my-3 flex justify-center items-center `}
+                      } w-full md:max-w-[120px] h-8 text-white font-bold text-[16px]  md:px-1 rounded-md my-3 flex justify-center items-center `}
                     >
                       <FaUpload className="mr-2" />
                       Upload
@@ -182,7 +182,7 @@ const Profile = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-col w-full">
+                <div className="flex flex-col w-full items-center text-center">
                   <div className="formGroup">
                     <label
                       htmlFor="firstName"
@@ -200,7 +200,7 @@ const Profile = () => {
                       onChange={(e) =>
                         setUser({ ...user, firstName: e.target.value })
                       }
-                      className="border border-grey-300 max-w-[280px] w-5/6 h-8 rounded-full shadow-md my-2 flex justify-around items-center overflow-hidden py-2 px-5"
+                      className="border border-grey-300 md:max-w-[280px] w-full md:w-5/6 h-8 rounded-full shadow-md my-2 flex justify-around items-center overflow-hidden py-2 px-5"
                     />
                   </div>
 
@@ -221,7 +221,7 @@ const Profile = () => {
                       onChange={(e) =>
                         setUser({ ...user, lastName: e.target.value })
                       }
-                      className="border border-grey-300 max-w-[280px] w-5/6 h-8 rounded-full shadow-md my-2 flex justify-around items-center overflow-hidden py-2 px-5"
+                      className="border border-grey-300 md:max-w-[280px] w-full md:w-5/6 h-8 rounded-full shadow-md my-2 flex justify-around items-center overflow-hidden py-2 px-5"
                     />
                   </div>
                   <div className="formGroup">
@@ -241,7 +241,7 @@ const Profile = () => {
                       onChange={(e) =>
                         setUser({ ...user, email: e.target.value })
                       }
-                      className="border border-grey-300 max-w-[280px] w-5/6 h-8 rounded-full shadow-md my-2 flex justify-around items-center overflow-hidden py-2 px-5"
+                      className="border border-grey-300 md:max-w-[280px] w-full md:w-5/6 h-8 rounded-full shadow-md my-2 flex justify-around items-center overflow-hidden py-2 px-5"
                     />
                   </div>
 
@@ -262,7 +262,7 @@ const Profile = () => {
                       onChange={(e) =>
                         setUser({ ...user, phoneNumber: e.target.value })
                       }
-                      className="border border-grey-300 max-w-[280px] w-5/6 h-8 rounded-full shadow-md my-2 flex justify-around items-center overflow-hidden py-2 px-5"
+                      className="border border-grey-300 md:max-w-[280px] w-full md:w-5/6 h-8 rounded-full shadow-md my-2 flex justify-around items-center overflow-hidden py-2 px-5"
                     />
                   </div>
 
@@ -281,12 +281,12 @@ const Profile = () => {
                       defaultValue={user.dateOfBirth.substring(0, 10)}
                       onChange={(e) => (user.dateOfBirth = e.target.value)}
                       disabled={!isModifying}
-                      className="border border-grey-300 max-w-[280px] w-5/6 h-8 rounded-full shadow-md my-2 flex justify-around items-center overflow-hidden py-2 px-5"
+                      className="border border-grey-300 md:max-w-[280px] w-full md:w-5/6 h-8 rounded-full shadow-md my-2 flex justify-around items-center py-2 px-5"
                     />
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col w-full md:w-auto md:flex-row gap-3 justify-center">
+              <div className="flex flex-col w-full md:w-auto md:flex-row gap-3 justify-center px-5 py-5 md:px-0">
                 <button
                   type="button"
                   className={`relative overflow-hidden ${
@@ -331,14 +331,14 @@ const Profile = () => {
                   className="w-1/2 md:w-4/5"
                   alt="Doctor Resumé"
                 />
-                <div className="cvUpload bg-transparent w-full h-8 rounded-full my-3 flex justify-around items-center  px-2 flex-row max-w-[280px]">
+                <div className="cvUpload bg-transparent  h-auto rounded-full my-3 flex justify-around items-center px-5 md:px-1 flex-col w-full md:max-w-[280px] ">
                   <button
                     type="button"
                     className={`relative overflow-hidden ${
                       !isModifying
                         ? "bg-gray-400"
                         : "bg-blue-400 hover:bg-blue-300 cursor-pointer"
-                    } max-w-[120px] w-full h-8 text-white font-bold text-[16px] px-1 rounded-md my-3 flex justify-center items-center `}
+                    } w-full md:max-w-[120px] h-8 text-white font-bold text-[16px]  md:px-1 rounded-md my-3 flex justify-center items-center `}
                   >
                     <FaUpload className="mr-2" />
                     Upload

@@ -38,6 +38,7 @@ const ManageDoctors = () => {
   const [search, setSearch] = useState("");
 
   const IMG_URL = "http://localhost:3500/uploads/";
+  const imgPlaceholder = `${IMG_URL}imagePlaceholder.png`;
 
   // Function to fetch the doctors
 
@@ -217,7 +218,7 @@ const ManageDoctors = () => {
           <p className="text-1xl font-bold">{doctorsNumber}</p>
         </div>
 
-        <div className="flex flex-row justify-center items-center w-full">
+        <div className="flex flex-col md:flex-row justify-center items-center w-full">
           <div className="flex flex-col justify-center items-center bg-white rounded-lg shadow-lg p-4 m-4 ">
             <h2 className="text-1xl font-bold">Médecins Approuvé</h2>
             <p className="text-1xl font-bold text-green-500">
@@ -255,19 +256,19 @@ const ManageDoctors = () => {
       <div className="flex flex-col items-center justify-center w-full">
         <div className="flex flex-row justify-center items-center w-full">
           <div className="flex flex-col bg-white rounded-lg shadow-lg p-4 m-4 overflow-x-scroll lg:overflow-x-hidden overflow-y-auto min-h-[250px]">
-            <div className="flex w-full justify-between gap-10 mb-5">
+            <div className="flex w-full justify-between gap-5 md:gap-10 mb-5 items-center">
               {/* Search Field */}
 
               <input
                 type="text"
                 placeholder="Rechercher un médecin"
-                className="border border-gray-300 rounded-lg py-1 px-2 w-1/2"
+                className="border border-gray-300 rounded-lg py-1 px-2 w-full md:w-1/2"
                 onChange={(e) => handleSearch(e)}
               />
 
               {/* Filter By Speciality Select */}
 
-              <div className="icons flex flex-row gap-10">
+              <div className="icons flex flex-row gap-5">
                 <div className="relative inline-block text-left">
                   <FaFilter
                     className="cursor-pointer"
@@ -393,15 +394,19 @@ const ManageDoctors = () => {
                 {/* Modal Content */}
 
                 <div className="flex flex-col md:flex-row gap-2">
-                  <div className="w-1/3 flex flex-col">
+                  <div className="w-full flex flex-col">
                     <img
-                      src={`${IMG_URL}${selectedDoctor.profileImage}`}
+                      src={
+                        selectedDoctor.profileImage
+                          ? `${IMG_URL}${selectedDoctor.profileImage}`
+                          : imgPlaceholder
+                      }
                       alt=""
                     />
                   </div>
 
-                  <div className="w-2/3">
-                    <div className="flex flex-row justify-around py-3">
+                  <div className="w-full">
+                    <div className="flex flex-col md:flex-row justify-center items-center md:justify-around py-3">
                       <div className="flex flex-col gap-2">
                         <p className="font-bold">Nom:</p>
                         <p>
@@ -417,7 +422,7 @@ const ManageDoctors = () => {
 
                         <p className="font-bold">ID Type:</p>
 
-                        <div className="flex flex-row gap-2 items-center">
+                        <div className="flex flex-row gap-2 items-center justify-center md:justify-start">
                           <p>{selectedDoctor.idType}</p>
                           <FaEye
                             className="cursor-pointer"
@@ -431,10 +436,10 @@ const ManageDoctors = () => {
                         <p>{selectedDoctor.idNumber}</p>
                       </div>
 
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2 ">
                         <p className="font-bold"># License Médical:</p>
 
-                        <div className="flex flex-row gap-2 items-center">
+                        <div className="flex flex-row gap-2 items-center justify-center md:justify-start">
                           <p>{selectedDoctor.licenseNumber}</p>
                           <FaEye
                             className="cursor-pointer"
