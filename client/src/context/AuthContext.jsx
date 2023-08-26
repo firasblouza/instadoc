@@ -341,7 +341,7 @@ export const AuthProvider = ({ children }) => {
     if (e.target.name === "back") {
       step > 1
         ? step === 3
-          ? setStep(1)
+          ? setStep(2)
           : setStep((prev) => prev - 1)
         : setStep(1);
       setUserData({ ...userData, password: "", confirmPassword: "" });
