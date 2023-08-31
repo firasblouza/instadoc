@@ -17,22 +17,22 @@ const appointmentSchema = new Schema({
     required: true
   },
   date: {
-    type: Date,
+    type: String,
+    required: true
+  },
+  dateTime: {
+    type: String,
     required: true
   },
   duration: {
     type: Number,
-    required: true
-  },
-  type: {
-    type: String,
-    enum: ["Chat", "Video"],
-    required: true
+    required: true,
+    default: 1
   },
   status: {
     type: String,
-    enum: ["Scheduled", "Completed", "Cancelled"],
-    default: "Scheduled"
+    enum: ["pending", "approved", "completed", "cancelled"],
+    default: "pending"
   }
 });
 

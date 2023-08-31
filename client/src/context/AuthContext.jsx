@@ -188,7 +188,6 @@ export const AuthProvider = ({ children }) => {
         password: "",
         rememberMe: false
       });
-      console.log(response.data);
       navigate(from, { replace: true });
     } catch (err) {
       switch (err.response?.status) {
@@ -236,7 +235,6 @@ export const AuthProvider = ({ children }) => {
         withCredentials: true
       });
 
-      console.log(response.data);
       setSignupMessage({ message: response.data.message, error: false });
       setTimeout(() => {
         navigate("/login");

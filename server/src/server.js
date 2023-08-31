@@ -1,17 +1,23 @@
 require("dotenv").config();
+const PORT = process.env.PORT;
+const IO_PORT = process.env.IO_PORT;
+const io = require("socket.io")(IO_PORT);
 const express = require("express");
 const cors = require("cors");
 const app = express();
 const dbConnect = require("./config/db");
 const mongoose = require("mongoose");
-const PORT = process.env.PORT;
 const corsOptions = require("./config/corsOptions");
 const verifyJWT = require("./api/middleware/verifyJWT");
 const cookieParser = require("cookie-parser");
 const credentials = require("./api/middleware/credentials");
 
-// Server static files
+// IO Connection
+io.on("connection", (socket) => {
+  console.log(socket.id);
+});
 
+// Server static files
 app.use("/uploads", express.static("uploads"));
 
 // Handle 'Access-Control-Allow-Credentials' option for Cors

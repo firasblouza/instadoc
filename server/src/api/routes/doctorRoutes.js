@@ -9,7 +9,11 @@ router.get("/statistics/:id", doctorController.fetchStatistics);
 router.get("/:id", doctorController.getDoctorById);
 router.put(
   "/:id",
-  upload.fields([{ name: "profileImage", name: "cvImage" }]),
+  upload.fields([
+    { name: "profileImage" },
+    { name: "cvImage" },
+    { name: "licenseImage" }
+  ]),
   doctorController.modifyDoctorById
 );
 router.delete("/:id", doctorController.deleteDoctorById);

@@ -63,8 +63,8 @@ const getUserAppointments = async (req, res) => {
 };
 
 const scheduleAppointment = async (req, res) => {
-  const { userId, doctorId, reason, date, duration, type } = req.body;
-  if (!userId || !doctorId || !reason || !date || !duration || !type) {
+  const { userId, doctorId, reason, date, dateTime } = req.body;
+  if (!userId || !doctorId || !reason || !date || !dateTime) {
     return res.status(400).json({ message: "Missing required fields" });
   }
   try {
@@ -73,8 +73,7 @@ const scheduleAppointment = async (req, res) => {
       doctorId,
       reason,
       date,
-      duration,
-      type
+      dateTime
     });
     console.log(newAppointment);
     res.status(201).json({ message: "Appointment created successfully" });
@@ -102,29 +101,12 @@ const cancelAppointment = async (req, res) => {
 
 const modifyAppointmentById = async (req, res) => {
   const appointmentId = req.params.id;
-  const { userId, doctorId, reason, date, duration, type, status } = req.body;
-  if (
-    !userId ||
-    !doctorId ||
-    !reason ||
-    !date ||
-    !duration ||
-    !type ||
-    !status
-  ) {
-    return res.status(400).json({ message: "Missing required fields" });
-  }
+
   try {
     const updatedAppointment = await Appointment.findByIdAndUpdate(
       appointmentId,
-      {
-        userId,
-        doctorId,
-        reason,
-        date,
-        duration,
-        type
-      }
+      { $set: req.body },
+      { new: true }
     ).exec();
     if (updatedAppointment) {
       res.status(200).json({ message: "Appointment updated successfully" });

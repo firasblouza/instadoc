@@ -145,21 +145,21 @@ const DoctorHome = () => {
   const getDayOfWeek = (day) => {
     switch (day) {
       case 0:
-        return "Lundi";
-      case 1:
-        return "Mardi";
-      case 2:
-        return "Mercredi";
-      case 3:
-        return "Jeudi";
-      case 4:
-        return "Vendredi";
-      case 5:
-        return "Samedi";
-      case 6:
         return "Dimanche";
-      default:
+      case 1:
         return "Lundi";
+      case 2:
+        return "Mardi";
+      case 3:
+        return "Mercredi";
+      case 4:
+        return "Jeudi";
+      case 5:
+        return "Vendredi";
+      case 6:
+        return "Samedi";
+      default:
+        return "";
     }
   };
 

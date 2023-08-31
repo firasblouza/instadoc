@@ -25,7 +25,10 @@ const Doctors = () => {
     setDoctors([]);
     try {
       const response = await axios.get("/doctors");
-      setDoctors(response.data);
+      const approvedDoctors = response.data.filter(
+        (doctor) => doctor.verifiedStatus === "approved"
+      );
+      setDoctors(approvedDoctors);
       setInitialDoctors(response.data);
     } catch (error) {
       if (error.response && error.response.status === 401) {
