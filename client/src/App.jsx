@@ -1,6 +1,7 @@
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { useEffect } from "react";
+
 import jwt_decode from "jwt-decode";
 
 import useLogout from "./hooks/useLogout";
@@ -13,6 +14,10 @@ import Signup from "./components/Signup";
 import RequireAuth from "./components/RequireAuth";
 import Authenticated from "./components/Authenticated";
 import Doctor from "./components/Profiles/Doctor";
+
+// Appointments
+
+import Appointment from "./components/Appointment";
 
 // Dashboard
 import Dashboard from "./components/Dashboard";
@@ -29,6 +34,7 @@ import Labs from "./components/Labs";
 
 import useAccessToken from "./hooks/useAccessToken";
 import Demandes from "./components/Dashboard/tabs/doctor/Demandes";
+import Contact from "./components/Contact";
 
 const App = () => {
   const location = useLocation();
@@ -52,13 +58,18 @@ const App = () => {
   };
   return (
     <Routes>
+      {/* Home Route */}
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
+        <Route path="contact" element={<Contact />} />
       </Route>
+
+      {/* Doctors Routes */}
       <Route path="doctors" element={<Layout />}>
         <Route index element={<Doctors />} />
       </Route>
 
+      {/* Lab Routes */}
       <Route path="labs" element={<Layout />}>
         <Route index element={<Labs />} />
       </Route>
@@ -67,6 +78,8 @@ const App = () => {
       <Route path="doctor/:doctorId" element={<Layout />}>
         <Route index element={<Doctor />} />
       </Route>
+
+      {/* Dashboard Routes */}
 
       {accessToken && (
         <Route path="dashboard/*" element={<Dashboard />}>
@@ -78,6 +91,9 @@ const App = () => {
             <Route index element={<AdminHome />} />
           )}
           <Route path="profile" element={<Profile />} />
+
+          {/* Admin Routes */}
+
           <Route path="admin/patients" element={<ManagePatients />} />
           <Route path="admin/doctors" element={<ManageDoctors />} />
           <Route path="admin/labs" element={<ManageLabs />} />
@@ -85,18 +101,21 @@ const App = () => {
           {/* End Admin Routes */}
 
           <Route path="consultations">
-            {decodedToken.UserInfo.role === "doctor" ? (
-              <Route index element={<Demandes />} />
-            ) : (
-              <Route index element={<Profile />} />
-            )}
+            <Route index element={<Demandes />} />
           </Route>
+
+          {/* Appointment Routes */}
+
+          {/*  Settings Route */}
 
           <Route path="settings" element={<Settings />} />
         </Route>
       )}
 
-      {/* Admin Routes */}
+      {/* End Dashboard Routes */}
+
+      {/* Appointment Route */}
+      <Route path="appointment/:apptId" element={<Appointment />} />
 
       <Route path="login" element={<Login />} />
       <Route path="signup" element={<Signup />} />

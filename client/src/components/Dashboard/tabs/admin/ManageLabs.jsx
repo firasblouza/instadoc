@@ -208,9 +208,9 @@ const ManageLabs = () => {
           formData,
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`
-            },
-            "Content-Type": "multipart/form-data"
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "multipart/form-data"
+            }
           }
         );
         if (response.status === 200) {

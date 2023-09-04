@@ -66,18 +66,17 @@ const modifyLabById = async (req, res) => {
 
   let labData = {};
 
-  if (contentType.includes["multipart/form-data"]) {
+  if (contentType && contentType.includes("multipart/form-data")) {
     if (req.body && req.body.lab) {
       labData = JSON.parse(req.body.lab);
+      console.log("This is lab data : " + labData);
     }
   }
-
+  console.log(labData);
   if (req.files && req.files["labImage"]) {
     labData.labImage = req.files["labImage"][0].filename;
     console.log(labData.labImage);
   }
-
-  console.log(labData);
 
   try {
     const updateLab = await Lab.findByIdAndUpdate(

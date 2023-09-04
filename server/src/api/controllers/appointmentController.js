@@ -1,4 +1,5 @@
 const Appointment = require("../models/Appointment");
+const jwt = require("jsonwebtoken");
 
 const getAllAppointments = async (req, res) => {
   // Parameters for the pagination
@@ -22,6 +23,13 @@ const getAllAppointments = async (req, res) => {
 
 const getAppointmentById = async (req, res) => {
   const appointmentId = req.params.id;
+  let id;
+  const token = req.headers["authorization"].split(" ")[1];
+  if (!token) return res.status(401).json({ message: "Unauthorized" });
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+  if (decoded) {
+    id = decoded.UserInfo.id;
+  }
   try {
     const appointment = await Appointment.findById(appointmentId).exec();
     if (appointment) {
@@ -64,7 +72,7 @@ const getUserAppointments = async (req, res) => {
 
 const scheduleAppointment = async (req, res) => {
   const { userId, doctorId, reason, date, dateTime } = req.body;
-  if (!userId || !doctorId || !reason || !date || !dateTime) {
+  if (!userId || !doctorId || !reason || !date) {
     return res.status(400).json({ message: "Missing required fields" });
   }
   try {
@@ -72,8 +80,7 @@ const scheduleAppointment = async (req, res) => {
       userId,
       doctorId,
       reason,
-      date,
-      dateTime
+      date
     });
     console.log(newAppointment);
     res.status(201).json({ message: "Appointment created successfully" });

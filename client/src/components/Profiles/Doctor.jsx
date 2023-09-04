@@ -10,6 +10,8 @@ import Modal from "../Dashboard/UI/Modal";
 
 import axios from "../../api/axios";
 import useAccessToken from "../../hooks/useAccessToken";
+import StarRating from "./StarRating";
+import AvgRating from "./AvgRating";
 
 const Doctor = () => {
   const { doctorId } = useParams();
@@ -32,10 +34,28 @@ const Doctor = () => {
     error: false
   });
 
+  const [star, setStar] = useState(0);
+  const [review, setReview] = useState("");
+  const [avgRating, setAvgRating] = useState(0);
+
   const effectRan = useRef(false);
+
+  const { accessToken, decodedToken } = useAccessToken();
 
   const IMG_URL = "http://localhost:3500/uploads/";
   const IMG_Placeholder = "http://localhost:3500/uploads/imagePlaceholder.png";
+
+  const calculateAverageRating = (ratings) => {
+    if (ratings.length === 0) {
+      return 0; // Handle the case where there are no ratings.
+    }
+
+    const sumOfRatings = ratings.reduce(
+      (total, rating) => total + rating.rating,
+      0
+    );
+    return sumOfRatings / ratings.length;
+  };
 
   const fetchDoctor = async () => {
     setDoctor([]);
@@ -51,14 +71,18 @@ const Doctor = () => {
             appoint.doctorId === response.data._id &&
             appoint.status === "completed"
         );
-
-        setDoctor(response.data);
-        setDoctor({
-          ...response.data,
-          dateOfBirth: response.data.dateOfBirth.substring(0, 10),
-          speciality: capitalize(response.data.speciality),
-          successfulAppointments: doctorAppointments.length
-        });
+        const docRatings = await axios.get(`/ratings/doctor/${doctorId}`);
+        if (doctorAppointments && docRatings) {
+          setDoctor({
+            ...response.data,
+            dateOfBirth: response.data.dateOfBirth.substring(0, 10),
+            speciality: capitalize(response.data.speciality),
+            successfulAppointments: doctorAppointments.length,
+            ratings: docRatings.data.length > 0 ? docRatings.data : []
+          });
+          const average = calculateAverageRating(docRatings.data);
+          setAvgRating(average);
+        }
       }
     } catch (err) {
       if (err?.response?.data?.message) {
@@ -76,6 +100,138 @@ const Doctor = () => {
       effectRan.current = true;
     };
   }, []);
+
+  const handleImagePreview = (image) => {
+    setImageModal({ state: true, image: `${IMG_URL}${image}` });
+  };
+
+  const handleShowModal = () => {
+    setShowModal(true);
+    setDemandeStatus({ message: "", error: false });
+  };
+
+  const validateDemande = () => {
+    if (appointment.date === "") {
+      setDemandeStatus({
+        message: "Vous devez choisir une date",
+        error: true
+      });
+      return false;
+    }
+    if (appointment.reason === "") {
+      setDemandeStatus({
+        message: "Vous devez entrer un motif",
+        error: true
+      });
+      return false;
+    }
+    return true;
+  };
+
+  // A function to check if the user already has a "pending" appointment with this doctor.
+
+  const getPendingAppointments = async () => {
+    if (accessToken && accessToken !== "") {
+      if (
+        decodedToken.UserInfo.role === "user" ||
+        decodedToken.UserInfo.role === "admin"
+      ) {
+        try {
+          const userAppointments = await axios.get(
+            `/appointments/user/${decodedToken.UserInfo.id}`
+          );
+          console.log(userAppointments);
+          if (userAppointments.status === 200) {
+            const pendingAppointments = userAppointments.data.filter(
+              (appointment) =>
+                appointment.status === "pending" &&
+                appointment.doctorId === doctor._id
+            );
+            console.log(pendingAppointments);
+            if (pendingAppointments.length > 0) {
+              setDemandeStatus({
+                message:
+                  "Vous avez déjà une demande en attente avec ce médecin",
+                error: true
+              });
+              return true;
+            } else {
+              return false;
+            }
+          } else {
+            return false;
+          }
+        } catch (err) {
+          if (err?.response?.data?.message) {
+            console.log(err.response.data.message);
+          }
+        }
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  };
+
+  const sendAppointment = async () => {
+    if (accessToken && accessToken !== "") {
+      if (
+        decodedToken.UserInfo.role === "user" ||
+        decodedToken.UserInfo.role === "admin"
+      ) {
+        if (validateDemande()) {
+          const pendingAppointment = await getPendingAppointments();
+          if (!pendingAppointment) {
+            try {
+              const response = await axios.post(
+                "/appointments",
+                {
+                  userId: decodedToken.UserInfo.id,
+                  doctorId: doctor._id,
+                  reason: appointment.reason,
+                  date: appointment.date
+                },
+                {
+                  headers: {
+                    Authorization: `Bearer ${accessToken}`
+                  }
+                }
+              );
+              if (response.status === 201) {
+                console.log(response.data);
+                window.alert("Votre demande à été envoyée avec succès");
+                setDemandeStatus({
+                  message: "Votre demande à été envoyée avec succès",
+                  error: false
+                });
+              }
+            } catch (err) {
+              if (err?.response?.data?.message) {
+                console.log(err.response.data.message);
+                setDemandeStatus({
+                  message: err.response.data.message,
+                  error: true
+                });
+              }
+            }
+          }
+        }
+      } else {
+        window.alert(
+          "Vous devez être connecté en tant que patient pour effectuer cette action"
+        );
+        setShowModal(false);
+        window.location.href = "/login";
+      }
+    } else {
+      window.alert(
+        "Vous devez être connecté en tant que patient pour effectuer cette action"
+      );
+      setShowModal(false);
+      window.location.href = "/login";
+    }
+  };
 
   // Doctor Availability
 
@@ -128,142 +284,39 @@ const Doctor = () => {
 
   const nextAvailableDate = getNextAvailableDate();
 
-  const handleImagePreview = (image) => {
-    setImageModal({ state: true, image: `${IMG_URL}${image}` });
-  };
-
-  const handleShowModal = () => {
-    setShowModal(true);
-    setDemandeStatus({ message: "", error: false });
-  };
-
-  const validateDemande = () => {
-    if (appointment.date === "") {
-      setDemandeStatus({
-        message: "Vous devez choisir une date",
-        error: true
-      });
-      return false;
+  const sendRating = async () => {
+    if (!review || review === "") {
+      window.alert("Vous devez entrer un commentaire");
+      return;
     }
-    if (appointment.reason === "") {
-      setDemandeStatus({
-        message: "Vous devez entrer un motif",
-        error: true
-      });
-      return false;
+    if (star === 0) {
+      window.alert("Vous devez entrer une note");
+      return;
     }
-    return true;
-  };
 
-  // A function to check if the user already has a "pending" appointment with this doctor.
+    try {
+      const ratingData = {
+        userId: decodedToken.UserInfo.id,
+        doctorId,
+        rating: star,
+        review,
+        patientName: decodedToken.UserInfo.fullName,
+        doctorName: `${doctor.firstName} ${doctor.lastName}`
+      };
 
-  const getPendingAppointments = async () => {
-    const { accessToken, decodedToken } = useAccessToken();
-    if (accessToken && accessToken !== "") {
-      if (
-        decodedToken.UserInfo.role === "user" ||
-        decodedToken.UserInfo.role === "admin"
-      ) {
-        try {
-          const userAppointments = await axios.get(
-            `/appointments/user/${decodedToken.UserInfo.id}`
-          );
-          console.log(userAppointments);
-          if (userAppointments.status === 200) {
-            const pendingAppointments = userAppointments.data.filter(
-              (appointment) =>
-                appointment.status === "pending" &&
-                appointment.doctorId === doctor._id
-            );
-            console.log(pendingAppointments);
-            if (pendingAppointments.length > 0) {
-              setDemandeStatus({
-                message:
-                  "Vous avez déjà une demande en attente avec ce médecin",
-                error: true
-              });
-              return true;
-            } else {
-              return false;
-            }
-          } else {
-            return false;
-          }
-        } catch (err) {
-          if (err?.response?.data?.message) {
-            console.log(err.response.data.message);
-          }
-        }
+      const response = await axios.post("/ratings", ratingData);
+      if (response.status === 200) {
+        window.alert("Votre avis à été envoyé avec succès");
+        setReview("");
+        setStar(0);
+        fetchDoctor();
       } else {
-        return false;
+        window.alert("Une erreur s'est produite");
       }
-    } else {
-      return false;
-    }
-  };
-
-  const sendAppointment = async () => {
-    const { accessToken, decodedToken } = useAccessToken();
-    if (accessToken && accessToken !== "") {
-      if (
-        decodedToken.UserInfo.role === "user" ||
-        decodedToken.UserInfo.role === "admin"
-      ) {
-        if (validateDemande()) {
-          const pendingAppointment = await getPendingAppointments();
-          if (!pendingAppointment) {
-            const selectedSlot = doctor.availability.find(
-              (slot) => slot.dayOfWeek === parseInt(appointment.date, 10)
-            );
-
-            try {
-              const response = await axios.post(
-                "/appointments",
-                {
-                  userId: decodedToken.UserInfo.id,
-                  doctorId: doctor._id,
-                  reason: appointment.reason,
-                  date: appointment.date,
-                  dateTime: formattedDate
-                },
-                {
-                  headers: {
-                    Authorization: `Bearer ${accessToken}`
-                  }
-                }
-              );
-              if (response.status === 201) {
-                console.log(response.data);
-                window.alert("Votre demande à été envoyée avec succès");
-                setDemandeStatus({
-                  message: "Votre demande à été envoyée avec succès",
-                  error: false
-                });
-              }
-            } catch (err) {
-              if (err?.response?.data?.message) {
-                console.log(err.response.data.message);
-                setDemandeStatus({
-                  message: err.response.data.message,
-                  error: true
-                });
-              }
-            }
-          }
-        }
-      } else {
-        window.alert(
-          "Vous devez être connecté en tant que patient pour effectuer cette action"
-        );
-        setShowModal(false);
-        window.location.href = "/login";
+    } catch (err) {
+      if (err?.response?.data?.message) {
+        console.log(err.response.data.message);
       }
-    } else {
-      window.alert(
-        "Vous devez être connecté en tant que patient pour effectuer cette action"
-      );
-      setShowModal(false);
-      window.location.href = "/login";
     }
   };
 
@@ -289,6 +342,34 @@ const Doctor = () => {
           >
             Demander une consultation
           </button>
+          {/* A section to leave a review */}
+
+          {(decodedToken.UserInfo.role === "user" ||
+            decodedToken.UserInfo.role === "admin") && (
+            <div className="reviewSection w-full flex flex-col mt-10 gap-3 p-3">
+              <div className="flex flex-row justify-start items-center gap-5">
+                <h1 className="text-xl font-bold text-[#1E1E1E]">
+                  Laisser un avis :
+                </h1>
+                {/* Make empty stars that get full on hover */}
+                <StarRating star={star} setStar={setStar} />
+              </div>
+
+              <textarea
+                className="border border-gray-500 rounded-lg p-2"
+                rows="5"
+                placeholder="Laisser un commentaire"
+                value={review}
+                onChange={(e) => setReview(e.target.value)}
+              ></textarea>
+              <button
+                className="bg-blue-500 w-full text-white rounded-lg px-2 py-1 mt-2"
+                onClick={sendRating}
+              >
+                Envoyer
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Appointment Creating Modal */}
@@ -325,16 +406,17 @@ const Doctor = () => {
                     <option value="">Selectionner une date</option>
                     {doctor.availability.map((slot) => {
                       if (slot.isAvailable) {
-                        const nextDayIndex =
-                          (nextAvailableDate.getDay() + slot.dayOfWeek) % 6;
                         const nextDay = new Date(nextAvailableDate);
                         nextDay.setDate(
                           nextAvailableDate.getDate() + slot.dayOfWeek
                         );
+                        const optValue = `${getDayOfWeek(
+                          slot.dayOfWeek
+                        )} - Le ${capitalize(getFormattedDate(nextDay))}`;
+
                         return (
-                          <option key={slot.dayOfWeek} value={slot.dayOfWeek}>
-                            {getDayOfWeek(slot.dayOfWeek)} - Le{" "}
-                            {capitalize(getFormattedDate(nextDay))}
+                          <option key={slot.dayOfWeek} value={optValue}>
+                            {optValue}
                           </option>
                         );
                       }
@@ -433,45 +515,59 @@ const Doctor = () => {
 
             <div className="detailGroup w-full flex flex-row gap-3 items-center">
               <p className="text-base font-bold text-[#1E1E1E]">Avis :</p>
-              <div className="relative flex flex-row justify-center items-center my-2 gap-1 after:content-['(3.5)'] after:text-sm after:text-gray-500 after:absolute after:-top-4 after:-right-7 ">
-                <FaStar className="text-yellow-500" />
-                <FaStar className="text-yellow-500" />
-                <FaStar className="text-yellow-500" />
-                <FaStarHalfAlt className="text-yellow-500" />
-                <FaRegStar className="text-yellow-500" />
+              <div className="relative flex flex-row justify-center items-center my-2 gap-1">
+                <AvgRating rating={avgRating} />
+                <p className="text-sm text-gray-500 ">
+                  ({avgRating.toFixed(2)})
+                </p>
               </div>
             </div>
 
             {/* Ratings Display */}
 
             <div className="ratingsBox w-full flex flex-col shadow-lg rounded-lg  p-2 max-h-[300px]  overflow-y-auto">
-              {ratings.map((rating, index) => (
-                <div
-                  key={index}
-                  className="ratingContainer w-full flex flex-col p-2 border-b border-gray-500"
-                >
-                  {/* Rating Details */}
-                  <div className="userSection flex flex-row w-full items-center gap-2">
-                    <p className="ratingUser font-bold text-[#1E1E1E] text-xs">
-                      {rating.user}
-                    </p>
-                    {/* Rating Stars */}
-                    <div className="relative flex flex-row justify-center items-center gap-1 after:content-['(3.5)'] after:text-sm after:text-gray-500">
-                      <FaStar className="text-yellow-500 text-xs" />
-                      <FaStar className="text-yellow-500 text-xs" />
-                      <FaStar className="text-yellow-500 text-xs" />
-                      <FaStarHalfAlt className="text-yellow-500 text-xs" />
-                      <FaRegStar className="text-yellow-500 text-xs" />
+              {doctor.ratings && doctor.ratings.length > 0 ? (
+                [...doctor.ratings].reverse().map((rating, index) => (
+                  <div
+                    key={index}
+                    className="ratingContainer w-full flex flex-col p-2 border-b border-gray-500"
+                  >
+                    {/* Rating Details */}
+                    <div className="userSection flex flex-row w-full items-center gap-2">
+                      <p className="ratingUser font-bold text-[#1E1E1E] text-xs">
+                        {rating.patientName}
+                      </p>
+                      {/* Rating Stars */}
+                      <div className="relative flex flex-row justify-center items-center gap-2">
+                        <AvgRating rating={rating.rating} />
+                        <p className="text-sm text-gray-500">
+                          ({rating.rating})
+                        </p>
+                      </div>
                     </div>
+                    {/* Rating date */}
+                    <p className="text-xs text-gray-500">
+                      Le{" "}
+                      {new Date(rating.createdAt)
+                        .toLocaleDateString("fr-FR", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit"
+                        })
+                        .replace(/\//g, "-")}{" "}
+                      à{" "}
+                      {new Date(rating.createdAt).toLocaleTimeString("fr-FR", {
+                        hour: "2-digit",
+                        minute: "2-digit"
+                      })}
+                    </p>
+                    {/* Rating Comment */}
+                    <p className="text-xs font-normal">{rating.review}</p>
                   </div>
-                  {/* Rating date */}
-                  <p className="text-xs text-gray-500">
-                    Le {doctor.dateOfBirth} à 20:15
-                  </p>
-                  {/* Rating Comment */}
-                  <p className="text-xs font-normal">{rating.comment}</p>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-xs font-bold text-[#1E1E1E]">Aucun avis</p>
+              )}
             </div>
             {/* Button on mobile */}
             <button className="bg-blue-500 w-full  md:hidden text-white rounded-lg px-2 py-1 mt-2">

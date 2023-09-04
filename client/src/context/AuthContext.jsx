@@ -10,6 +10,8 @@ import {
   isValidEmail
 } from "../utils/Validation";
 
+import { io } from "socket.io-client";
+
 import SignupMain from "../components/Signup/SignupMain";
 import SignupData from "../components/Signup/SignupData";
 import SignupFinish from "../components/Signup/SignupFinish";
@@ -60,6 +62,8 @@ export const AuthProvider = ({ children }) => {
   const [step, setStep] = useState(1);
 
   const [auth, setAuth] = useState({});
+
+  const [selectedAppt, setSelectedAppt] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -379,7 +383,9 @@ export const AuthProvider = ({ children }) => {
         loginMessage,
         setLoginMessage,
         userInfo,
-        aboutRef
+        aboutRef,
+        selectedAppt,
+        setSelectedAppt
       }}
     >
       {children}

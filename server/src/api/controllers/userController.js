@@ -44,18 +44,29 @@ const getUserById = async (req, res) => {
 
 const modifyUserById = async (req, res) => {
   let id = req.params.id;
-  const uploadedImage = req.files["profileImage"]
-    ? req.files["profileImage"][0].filename
-    : null;
+  const contentType = req.headers["content-type"];
+  let userData = {};
 
-  const userData = JSON.parse(req.body.user);
+  if (contentType.includes("multipart/form-data")) {
+    if (req.body && req.body.user) {
+      userData = JSON.parse(req.body.user);
+    }
+  }
 
-  if (uploadedImage) {
-    userData.profileImage = uploadedImage;
+  if (contentType.includes("json")) {
+    userData = req.body;
+  }
+
+  if (req.files && req.files["profileImage"]) {
+    userData.profileImage = req.files["profileImage"][0].filename;
   }
 
   try {
-    const user = await User.findByIdAndUpdate(id, userData);
+    const user = await User.findByIdAndUpdate(
+      id,
+      { $set: userData },
+      { new: true }
+    );
     if (user) {
       res.status(200).json({ message: "User updated successfully" });
     } else {

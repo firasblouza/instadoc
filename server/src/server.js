@@ -1,7 +1,6 @@
 require("dotenv").config();
 const PORT = process.env.PORT;
 const IO_PORT = process.env.IO_PORT;
-const io = require("socket.io")(IO_PORT);
 const express = require("express");
 const cors = require("cors");
 const app = express();
@@ -11,10 +10,18 @@ const corsOptions = require("./config/corsOptions");
 const verifyJWT = require("./api/middleware/verifyJWT");
 const cookieParser = require("cookie-parser");
 const credentials = require("./api/middleware/credentials");
+const io = require("socket.io")(IO_PORT, {
+  cors: {
+    origin: ["http://localhost:5173", "http://127.0.0.1:5173"]
+  }
+});
 
 // IO Connection
-io.on("connection", (socket) => {
+io.on("connect", (socket) => {
   console.log(socket.id);
+  socket.on("noteAdded", (notes) => {
+    console.log("Received new Notes : " + notes);
+  });
 });
 
 // Server static files
@@ -55,6 +62,8 @@ app.use("/doctors", require("./api/routes/doctorRoutes"));
 app.use("/users", require("./api/routes/userRoutes"));
 app.use("/appointments", require("./api/routes/appointmentRoutes"));
 app.use("/labs", require("./api/routes/labRoutes"));
+
+app.use("/ratings", require("./api/routes/ratingRoutes"));
 
 mongoose.connection.once("open", () => {
   console.log("Connected to MongoDB");

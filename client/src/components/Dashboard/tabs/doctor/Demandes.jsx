@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import {
   FaTrashAlt,
   FaSync,
@@ -8,11 +8,14 @@ import {
   FaTimes,
   FaChevronCircleDown
 } from "react-icons/fa";
+
 import { Link } from "react-router-dom";
 
 import axios from "../../../../api/axios";
 import Modal from "../../UI/Modal";
 import ImagePreview from "../../UI/ImagePreview";
+
+import AuthContext from "../../../../context/AuthContext";
 
 import { capitalize } from "../../../../utils/Capitalize";
 
@@ -24,7 +27,8 @@ const Demandes = () => {
   const [appointments, setAppointments] = useState([]);
   const [initialAppts, setInitialAppts] = useState([]); // Used to reset the appointments state
   const [apptsNumber, setApptsNumber] = useState(0);
-  const [selectedAppt, setSelectedAppt] = useState(null);
+
+  const { selectedAppt, setSelectedAppt } = useContext(AuthContext);
 
   const [filter, setFilter] = useState("");
   const [filterOpen, setFilterOpen] = useState("");
@@ -40,11 +44,13 @@ const Demandes = () => {
   const IMG_URL = "http://localhost:3500/uploads/";
   const imgPlaceholder = `${IMG_URL}imagePlaceholder.png`;
 
-  const fetchPatient = async (patientId) => {
+  const { accessToken, decodedToken } = useAccessToken();
+
+  const fetchData = async (id, role) => {
+    const endpoint = role === "doctor" ? "users" : "doctors";
     try {
-      const { accessToken } = useAccessToken();
       if (accessToken && accessToken !== "") {
-        const response = await axios.get(`/users/${patientId}`, {
+        const response = await axios.get(`/${endpoint}/${id}`, {
           headers: {
             Authorization: `Bearer ${accessToken}` // Attach the token to the Authorization header
           }
@@ -67,18 +73,21 @@ const Demandes = () => {
   const fetchAppointments = async () => {
     setAppointments([]);
     try {
-      const { accessToken, decodedToken } = useAccessToken();
       if (accessToken && accessToken !== "") {
-        const doctorId = decodedToken.UserInfo.id;
-        const response = await axios.get(`/appointments/doctor/${doctorId}`, {
+        const id = decodedToken.UserInfo.id;
+        const role = decodedToken.UserInfo.role;
+        const endpoint = role === "doctor" ? "doctor" : "user";
+        const response = await axios.get(`/appointments/${endpoint}/${id}`, {
           headers: {
             Authorization: `Bearer ${accessToken}` // Attach the token to the Authorization header
           }
         });
         const appointmentsData = await Promise.all(
           response.data.map(async (appointment) => {
-            const patient = await fetchPatient(appointment.userId);
-            return { ...appointment, patient };
+            const fetchId =
+              role === "doctor" ? appointment.userId : appointment.doctorId;
+            const userData = await fetchData(fetchId, role);
+            return { ...appointment, userData };
           })
         );
         setAppointments(appointmentsData);
@@ -185,7 +194,7 @@ const Demandes = () => {
     }
   };
 
-  // Patient Search
+  // userData Search
 
   const handleSearch = (e) => {
     const searchString = e.target.value.toLowerCase(); // Convert the search string to lowercase
@@ -197,11 +206,13 @@ const Demandes = () => {
       setAppointments(
         initialAppts.filter(
           (appointment) =>
-            appointment.patient.firstName
+            appointment.userData.firstName
               .toLowerCase()
               .includes(searchString) ||
-            appointment.patient.lastName.toLowerCase().includes(searchString) ||
-            appointment.patient.email.toLowerCase().includes(searchString)
+            appointment.userData.lastName
+              .toLowerCase()
+              .includes(searchString) ||
+            appointment.userData.email.toLowerCase().includes(searchString)
         )
       );
     }
@@ -236,7 +247,7 @@ const Demandes = () => {
   };
 
   return (
-    <section className="admin-manage-appointments w-full h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] overflow-scroll overflow-y-scroll">
+    <section className="appointments w-full h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] overflow-scroll overflow-y-scroll">
       <div className="flex flex-col items-center justify-center w-full">
         <h1 className="text-1xl font-bold text-[#1E1E1E] text-center my-3">
           Gestion des demandes
@@ -357,7 +368,11 @@ const Demandes = () => {
               <table className="min-w-full table-auto text-center">
                 <thead className="text-md font-semibold tracking-wide text-left text-gray-900 bg-gray-100 uppercase border-b border-gray-600">
                   <tr>
-                    <th className="px-4 py-2">Patient</th>
+                    <th className="px-4 py-2">
+                      {decodedToken.UserInfo.role === "doctor"
+                        ? "Patient"
+                        : "Doctor"}
+                    </th>
                     <th className="px-4 py-2">Email</th>
                     <th className="px-4 py-2">Date</th>
                     <th className="px-4 py-2">Etat</th>
@@ -379,11 +394,11 @@ const Demandes = () => {
                   {appointments.map((appointment) => (
                     <tr key={appointment._id}>
                       <td className="border px-2 py-2">
-                        {appointment.patient.firstName}{" "}
-                        {appointment.patient.lastName}
+                        {appointment.userData.firstName}{" "}
+                        {appointment.userData.lastName}
                       </td>
                       <td className="border px-2 py-2">
-                        {appointment.patient.email}
+                        {appointment.userData.email}
                       </td>
                       <td className="border px-2 py-2">{appointment.date}</td>
                       <td
@@ -399,10 +414,16 @@ const Demandes = () => {
                       >
                         {capitalize(appointment.status)}
                       </td>
-                      <td className="border flex flex-row gap-3 px-2 py-2">
-                        <Link to={`/appointment/${appointment._id}`}>
-                          <FaEye className="cursor-pointer text-blue-500" />
-                        </Link>
+                      <td className="border flex flex-row gap-3 px-2 py-2 justify-center">
+                        {appointment.status === "approved" ||
+                        appointment.status === "completed" ? (
+                          <Link to={`/appointment/${appointment._id}`}>
+                            <FaEye
+                              className="cursor-pointer text-blue-500"
+                              onClick={() => setSelectedAppt(appointment)}
+                            />
+                          </Link>
+                        ) : null}
                         <FaTrashAlt
                           className="cursor-pointer text-red-500"
                           onClick={() => handleDelete(appointment._id)}
@@ -424,12 +445,28 @@ const Demandes = () => {
             {showModal && (
               <Modal
                 title={"Détails du demande"}
-                firstAction={handleVerify}
+                firstAction={
+                  decodedToken.UserInfo.role === "doctor" && handleVerify
+                }
                 secondAction={handleVerify}
-                firstActionArgs={[selectedAppt._id, "approve"]}
-                secondActionArgs={[selectedAppt._id, "reject"]}
-                firstButton={"Approve"}
-                secondButton={"Reject"}
+                firstActionArgs={
+                  decodedToken.UserInfo.role === "doctor" && [
+                    selectedAppt._id,
+                    "approve"
+                  ]
+                }
+                secondActionArgs={
+                  decodedToken.UserInfo.role === "doctor" && [
+                    selectedAppt._id,
+                    "cancel"
+                  ]
+                }
+                firstButton={
+                  decodedToken.UserInfo.role === "doctor" && "Approve"
+                }
+                secondButton={
+                  decodedToken.UserInfo.role === "doctor" ? "Reject" : "Annuler"
+                }
                 showModal={showModal}
                 setShowModal={setShowModal}
               >
@@ -442,8 +479,8 @@ const Demandes = () => {
                         <div className="flex flex-row gap-2">
                           <p className="font-bold">Nom:</p>
                           <p>
-                            {selectedAppt.patient.firstName}{" "}
-                            {selectedAppt.patient.lastName}
+                            {selectedAppt.userData.firstName}{" "}
+                            {selectedAppt.userData.lastName}
                           </p>
                         </div>
 
@@ -451,14 +488,14 @@ const Demandes = () => {
                           <p className="font-bold">Date du Naissance:</p>
                           <p>
                             {new Date(
-                              selectedAppt.patient.dateOfBirth
+                              selectedAppt.userData.dateOfBirth
                             ).toLocaleDateString()}
                           </p>
                         </div>
 
                         <div className="flex flex-row gap-2">
                           <p className="font-bold">Email:</p>
-                          <p>{selectedAppt.patient.email} </p>
+                          <p>{selectedAppt.userData.email} </p>
                         </div>
 
                         <div className="flex flex-row gap-2">

@@ -145,7 +145,7 @@ const Doctors = () => {
                     <img
                       src={`${IMG_URL}${doctor.profileImage}`}
                       alt={`${doctor.firstName} ${doctor.lastName}`}
-                      className="w-5/6 h-auto rounded-lg "
+                      className="max-w-5/6 h-[270px] rounded-lg "
                     />
                     <h1 className="text-xl font-bold my-1 text-[#1E1E1E]">
                       {doctor.firstName} {doctor.lastName}

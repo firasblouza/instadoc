@@ -20,9 +20,8 @@ const appointmentSchema = new Schema({
     type: String,
     required: true
   },
-  dateTime: {
-    type: String,
-    required: true
+  notes: {
+    type: Array
   },
   duration: {
     type: Number,

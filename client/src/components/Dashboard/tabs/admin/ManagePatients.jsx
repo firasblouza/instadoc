@@ -4,23 +4,33 @@ import { FaTrashAlt, FaEye, FaEdit, FaSync } from "react-icons/fa";
 import axios from "../../../../api/axios";
 import useAccessToken from "../../../../hooks/useAccessToken";
 
+import Modal from "../../UI/Modal";
+
 const ManagePatients = () => {
   const effectRan = useRef(false);
   const [patients, setPatients] = useState([]);
   const [initialPatients, setInitialPatients] = useState([]);
   const [search, setSearch] = useState("");
+  const [selectedPatient, setSelectedPatient] = useState([]);
+
+  const [showModal, setShowModal] = useState(false);
+  const [editModal, setEditModal] = useState(false);
+
+  const { accessToken } = useAccessToken();
 
   const fetchPatients = async () => {
     try {
-      const { accessToken } = useAccessToken();
       if (accessToken && accessToken !== "") {
         const response = await axios.get("/admin/patients", {
           headers: {
             Authorization: `Bearer ${accessToken}` // Attach the token to the Authorization header
           }
         });
-        setInitialPatients(response.data);
-        setPatients(response.data);
+        const fetchedPatients = response.data.filter(
+          (patient) => patient.role === "user"
+        );
+        setInitialPatients(fetchedPatients);
+        setPatients(fetchedPatients);
       } else {
         console.log("No access token found");
       }
@@ -85,6 +95,38 @@ const ManagePatients = () => {
     }
   };
 
+  const handleViewDetails = (patient) => {
+    setSelectedPatient(patient);
+    setShowModal(true);
+  };
+
+  const handleViewEdit = (patient) => {
+    setSelectedPatient(patient);
+    setEditModal(true);
+  };
+
+  const editPatient = async (patient) => {
+    const id = patient._id;
+    if (accessToken && accessToken !== "") {
+      try {
+        const response = await axios.put(`/admin/patient/${id}`, patient, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json"
+          }
+        });
+        if (response.status === 200) {
+          setEditModal(false);
+          window.alert("Patient modifié avec succès");
+          fetchPatients();
+        }
+      } catch {
+        window.alert("Une erreur s'est produite lors de la modification");
+        console.log("An error occurred while updating the patient");
+      }
+    }
+  };
+
   return (
     <section className="admin-patients w-full h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] overflow-scroll overflow-y-hidden">
       <div className="flex flex-col items-center justify-center w-full">
@@ -141,8 +183,14 @@ const ManagePatients = () => {
                       <td className="border px-4 py-2">{patient.firstName}</td>
                       <td className="border px-4 py-2">{patient.email}</td>
                       <td className="border px-4 py-2 flex flex-row gap-3">
-                        <FaEye className="cursor-pointer text-blue-500 hover:text-blue-400" />
-                        <FaEdit className="cursor-pointer text-orange-500 hover:text-orange-400" />
+                        <FaEye
+                          className="cursor-pointer text-blue-500 hover:text-blue-400"
+                          onClick={() => handleViewDetails(patient)}
+                        />
+                        <FaEdit
+                          className="cursor-pointer text-orange-500 hover:text-orange-400"
+                          onClick={() => handleViewEdit(patient)}
+                        />
                         <FaTrashAlt
                           className="cursor-pointer text-red-500 hover:text-red-400"
                           onClick={() => handleDelete(patient._id)}
@@ -152,6 +200,155 @@ const ManagePatients = () => {
                   ))}
                 </tbody>
               </table>
+              {showModal && (
+                <Modal
+                  title="Détails du patient"
+                  showModal={showModal}
+                  setShowModal={setShowModal}
+                  secondAction={() => setShowModal(false)}
+                  secondButton={"Fermer"}
+                >
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-row gap-3">
+                      <p className="font-bold">Nom:</p>
+                      <p>
+                        {selectedPatient.lastName} {selectedPatient.firstName}
+                      </p>
+                    </div>
+                    <div className="flex flex-row gap-3">
+                      <p className="font-bold">Date du Naissance:</p>
+                      <p>{selectedPatient.dateOfBirth}</p>
+                    </div>
+                    <div className="flex flex-row gap-3">
+                      <p className="font-bold">Email:</p>
+                      <p>{selectedPatient.email}</p>
+                    </div>
+                    <div className="flex flex-row gap-3">
+                      <p className="font-bold">Téléphone:</p>
+                      <p>
+                        {selectedPatient.phoneNumber.length > 0
+                          ? selectedPatient.phoneNumber
+                          : "-"}
+                      </p>
+                    </div>
+                    <div className="flex flex-row gap-3">
+                      <p className="font-bold">Allergies:</p>
+                      <p>
+                        {selectedPatient.allergies.length > 0
+                          ? selectedPatient.allergies
+                          : "-"}
+                      </p>
+                    </div>
+                    <div className="flex flex-row gap-3">
+                      <p className="font-bold">Medical History:</p>
+                      <p>
+                        {selectedPatient.medicalHistory.length > 0
+                          ? selectedPatient.medicalHistory
+                          : "-"}
+                      </p>
+                    </div>
+                  </div>
+                </Modal>
+              )}
+              {editModal && (
+                <Modal
+                  title="Modifier le patient"
+                  showModal={editModal}
+                  setShowModal={setEditModal}
+                  firstAction={editPatient}
+                  firstActionArgs={[selectedPatient]}
+                  firstButton={"Modifier"}
+                  secondAction={() => setEditModal(false)}
+                  secondButton={"Fermer"}
+                >
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-row gap-3">
+                      <p className="font-bold">Nom:</p>
+                      <input
+                        type="text"
+                        className="border border-gray-300 rounded-lg py-1 px-2 w-full md:w-1/2"
+                        value={selectedPatient.lastName}
+                        onChange={(e) =>
+                          setSelectedPatient({
+                            ...selectedPatient,
+                            lastName: e.target.value
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="flex flex-row gap-3">
+                      <p className="font-bold">Prénom:</p>
+                      <input
+                        type="text"
+                        className="border border-gray-300 rounded-lg py-1 px-2 w-full md:w-1/2"
+                        value={selectedPatient.firstName}
+                        onChange={(e) =>
+                          setSelectedPatient({
+                            ...selectedPatient,
+                            firstName: e.target.value
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="flex flex-row gap-3">
+                      <p className="font-bold">Date du Naissance:</p>
+                      <input
+                        type="date"
+                        className="border border-gray-300 rounded-lg py-1 px-2 w-full md:w-1/2"
+                        value={selectedPatient.dateOfBirth.substring(0, 10)}
+                        onChange={(e) =>
+                          setSelectedPatient({
+                            ...selectedPatient,
+                            dateOfBirth: e.target.value.substring(0, 10)
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="flex flex-row gap-3">
+                      <p className="font-bold">Email:</p>
+                      <input
+                        type="email"
+                        className="border border-gray-300 rounded-lg py-1 px-2 w-full md:w-1/2"
+                        value={selectedPatient.email}
+                        onChange={(e) =>
+                          setSelectedPatient({
+                            ...selectedPatient,
+                            email: e.target.value
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="flex flex-row gap-3">
+                      <p className="font-bold">Téléphone:</p>
+                      <input
+                        type="text"
+                        className="border border-gray-300 rounded-lg py-1 px-2 w-full md:w-1/2"
+                        value={selectedPatient.phoneNumber}
+                        onChange={(e) =>
+                          setSelectedPatient({
+                            ...selectedPatient,
+                            phoneNumber: e.target.value
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="flex flex-row gap-3">
+                      <p className="font-bold">Mot de passe:</p>
+                      <input
+                        type="password"
+                        className="border border-gray-300 rounded-lg py-1 px-2 w-full md:w-1/2"
+                        value={selectedPatient.password}
+                        onChange={(e) =>
+                          setSelectedPatient({
+                            ...selectedPatient,
+                            password: e.target.value
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                </Modal>
+              )}
             </div>
           </div>
         </div>
