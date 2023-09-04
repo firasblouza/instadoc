@@ -11,6 +11,8 @@ import axios from "../../api/axios";
 
 import { io } from "socket.io-client";
 
+// TODO: Implement the DAMN SOCKET krztni
+
 const Appointment = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [appointment, setAppointment] = useState({});
