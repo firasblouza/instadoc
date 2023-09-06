@@ -119,9 +119,24 @@ const Demandes = () => {
   // Verify or reject appointment
 
   const handleVerify = async (id, action) => {
-    const endpoint = action === "approve" ? "modify" : "cancel";
-    const status = action === "approve" ? "approved" : "cancelled";
-    const alert = action === "approve" ? "verifié" : "rejeté";
+    const endpoint =
+      action === "approve"
+        ? "modify"
+        : action === "cancel"
+        ? "cancel"
+        : "reject";
+    const status =
+      action === "approve"
+        ? "approved"
+        : action === "reject"
+        ? "rejected"
+        : "cancelled";
+    const alert =
+      action === "approve"
+        ? "verifié"
+        : action === "cancel"
+        ? "annuler"
+        : "rejeté";
     if (window.confirm(`Vous êtes sûr de vouloir ${alert} cette demande ?`)) {
       try {
         const { accessToken } = useAccessToken();
@@ -142,7 +157,11 @@ const Demandes = () => {
           } else {
             window.alert(
               `An error occurred while ${
-                action == "approve" ? "approving" : "rejecting"
+                action == "approve"
+                  ? "approving"
+                  : action == "cancel"
+                  ? "cancelling"
+                  : "rejecting"
               } the appointment`
             );
           }
@@ -152,7 +171,11 @@ const Demandes = () => {
       } catch (err) {
         console.log(
           `An error occurred while ${
-            action == "approve" ? "approving" : "rejecting"
+            action == "approve"
+              ? "approving"
+              : action == "cancel"
+              ? "cancelling"
+              : "rejecting"
           } the appointment`,
           err.message
         );
@@ -405,9 +428,10 @@ const Demandes = () => {
                         className={`border px-2 py-2 ${
                           appointment.status === "pending"
                             ? "text-orange-500"
-                            : appointment.status === "Approved"
+                            : appointment.status === "completed"
                             ? "text-blue-500"
-                            : appointment.status === "Cancelled"
+                            : appointment.status === "cancelled" ||
+                              appointment.status === "rejected"
                             ? "text-red-500"
                             : "text-green-500"
                         }`}
@@ -445,27 +469,30 @@ const Demandes = () => {
             {showModal && (
               <Modal
                 title={"Détails du demande"}
-                firstAction={
-                  decodedToken.UserInfo.role === "doctor" && handleVerify
+                firstAction={handleVerify}
+                secondAction={
+                  decodedToken.UserInfo.role === "doctor"
+                    ? handleVerify
+                    : setShowModal
                 }
-                secondAction={handleVerify}
                 firstActionArgs={
-                  decodedToken.UserInfo.role === "doctor" && [
-                    selectedAppt._id,
-                    "approve"
-                  ]
+                  decodedToken.UserInfo.role === "doctor"
+                    ? [selectedAppt._id, "approve"]
+                    : [selectedAppt._id, "cancel"]
+                }
+                firstButton={
+                  decodedToken.UserInfo.role === "doctor"
+                    ? "Approve"
+                    : "Annuler"
+                }
+                secondButton={
+                  decodedToken.UserInfo.role === "doctor" ? "Reject" : "Fermer"
                 }
                 secondActionArgs={
                   decodedToken.UserInfo.role === "doctor" && [
                     selectedAppt._id,
-                    "cancel"
+                    "reject"
                   ]
-                }
-                firstButton={
-                  decodedToken.UserInfo.role === "doctor" && "Approve"
-                }
-                secondButton={
-                  decodedToken.UserInfo.role === "doctor" ? "Reject" : "Annuler"
                 }
                 showModal={showModal}
                 setShowModal={setShowModal}
@@ -504,9 +531,10 @@ const Demandes = () => {
                             className={`${
                               selectedAppt.status === "pending"
                                 ? "text-orange-500"
-                                : selectedAppt.status === "approved"
+                                : selectedAppt.status === "completed"
                                 ? "text-blue-500"
-                                : selectedAppt.status === "rejected"
+                                : selectedAppt.status === "rejected" ||
+                                  selectedAppt.status === "cancelled"
                                 ? "text-red-500"
                                 : "text-green-500"
                             }`}

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 
 import axios from "../../api/axios";
@@ -10,6 +10,9 @@ const Sidebar = ({ appointment, isOpen, role, notes, setNotes, socket }) => {
   const [selectedNoteIndex, setSelectedNoteIndex] = useState(null);
 
   const [apptClients, setApptClients] = useState([]);
+
+  const { accessToken, decodedToken } = useAccessToken();
+  const navigate = useNavigate();
 
   // Handle add notes
 
@@ -60,6 +63,28 @@ const Sidebar = ({ appointment, isOpen, role, notes, setNotes, socket }) => {
     setSelectedNoteIndex(index);
   };
 
+  const endConsultation = async (id) => {
+    try {
+      const response = await axios.put(
+        `/appointments/modify/${id}`,
+        { status: "completed" },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        }
+      );
+      if (response.status === 200) {
+        window.alert("Consultation Terminée avec succés");
+        navigate("/dashboard/consultations");
+      } else {
+        window.alert("Désole, une erreur s'est produit");
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <nav
       className={`absolute md:static w-full origin-top md:w-1/4 bg-gray-800 text-white h-[calc(100vh-60px)] z-20  ${
@@ -99,20 +124,23 @@ const Sidebar = ({ appointment, isOpen, role, notes, setNotes, socket }) => {
 
           <div className="infoGroup flex flex-col gap-3 w-full px-4 py-1">
             <p className="font-bold text-lg">Notes: </p>
-
-            <input
-              type="text"
-              value={newNote}
-              placeholder="Ajouter une note"
-              className="w-full px-2 py-1 rounded-md bg-gray-700 hover:bg-gray-600 text-white"
-              onChange={(e) => setNewNote(e.target.value)}
-            />
-            <button
-              className="w-full px-2 py-1 rounded-md bg-gray-700 hover:bg-gray-600 text-white"
-              onClick={(e) => handleAddNote(e, appointment._id)}
-            >
-              Ajouter
-            </button>
+            {appointment.status !== "completed" && (
+              <>
+                <input
+                  type="text"
+                  value={newNote}
+                  placeholder="Ajouter une note"
+                  className="w-full px-2 py-1 rounded-md bg-gray-700 hover:bg-gray-600 text-white"
+                  onChange={(e) => setNewNote(e.target.value)}
+                />
+                <button
+                  className="w-full px-2 py-1 rounded-md bg-gray-700 hover:bg-gray-600 text-white"
+                  onClick={(e) => handleAddNote(e, appointment._id)}
+                >
+                  Ajouter
+                </button>
+              </>
+            )}
             <ul className="w-full h-32 p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent bg-white text-black list-none overflow-auto">
               {notes.map((note, index) => (
                 <li
@@ -138,14 +166,14 @@ const Sidebar = ({ appointment, isOpen, role, notes, setNotes, socket }) => {
                 </button>
               </div>
             )}
-            {appointment.status !== "completed" ? (
+            {appointment.status !== "completed" && (
               <button
                 className="w-full px-2 py-1 rounded-md bg-gray-700 text-white"
                 onClick={() => endConsultation(appointment._id)}
               >
                 Terminer Consultation
               </button>
-            ) : null}
+            )}
           </div>
         </div>
       ) : (

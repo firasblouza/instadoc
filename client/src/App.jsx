@@ -36,6 +36,7 @@ import useAccessToken from "./hooks/useAccessToken";
 import Demandes from "./components/Dashboard/tabs/doctor/Demandes";
 import Contact from "./components/Contact";
 import ManageRatings from "./components/Dashboard/tabs/admin/ManageRatings";
+import PatientHome from "./components/Dashboard/tabs/patient/PatientHome";
 
 const App = () => {
   const location = useLocation();
@@ -89,7 +90,7 @@ const App = () => {
           ) : decodedToken.UserInfo.role === "doctor" ? (
             <Route index element={<DoctorHome />} />
           ) : (
-            <Route index element={<AdminHome />} />
+            <Route index element={<PatientHome />} />
           )}
           <Route path="profile" element={<Profile />} />
 

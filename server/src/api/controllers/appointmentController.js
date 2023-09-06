@@ -94,7 +94,7 @@ const cancelAppointment = async (req, res) => {
   try {
     const cancelledAppointment = await Appointment.findByIdAndUpdate(
       appointmentId,
-      { status: "Cancelled" }
+      { status: "cancelled" }
     ).exec();
     if (cancelledAppointment) {
       res.status(200).json({ message: "Appointment cancelled successfully" });
@@ -103,6 +103,22 @@ const cancelAppointment = async (req, res) => {
     }
   } catch (err) {
     res.status(500).json({ message: "Error while cancelling appointment" });
+  }
+};
+const rejectAppointment = async (req, res) => {
+  const appointmentId = req.params.id;
+  try {
+    const rejectedAppointment = await Appointment.findByIdAndUpdate(
+      appointmentId,
+      { status: "rejected" }
+    ).exec();
+    if (rejectedAppointment) {
+      res.status(200).json({ message: "Appointment rejected successfully" });
+    } else {
+      res.status(404).json({ message: "Appointment not found" });
+    }
+  } catch (err) {
+    res.status(500).json({ message: "Error while rejecting appointment" });
   }
 };
 
@@ -188,6 +204,7 @@ module.exports = {
   scheduleAppointment,
   modifyAppointmentById,
   cancelAppointment,
+  rejectAppointment,
   deleteAppointmentById,
   createMessage
 };

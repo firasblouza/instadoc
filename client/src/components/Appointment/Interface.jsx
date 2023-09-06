@@ -54,6 +54,15 @@ const Interface = ({ appointment, client, socket }) => {
 
   useEffect(() => {
     // Check if appointment.messages is defined
+    if (appointment.messages && appointment.messages.length < 0) {
+      const firstMessage = {
+        senderId: appointment.patient.userId,
+        senderName: `${appointment.patient.firstName} ${appointment.patient.lastName}`,
+        role: appointment.patient.role,
+        content: appointment.reason
+      };
+      setMessages((prevMessages) => [...prevMessages, firstMessage]);
+    }
     if (appointment.messages && appointment.messages.length > 0) {
       setMessages(appointment.messages);
     }
@@ -112,7 +121,7 @@ const Interface = ({ appointment, client, socket }) => {
                   className={`message flex flex-col items-start ${
                     client.role === message.role
                       ? "justify-end items-end"
-                      : "justify-start"
+                      : "justify-start items-start"
                   } w-full h-full gap-2`}
                 >
                   <p className="font-bold text-lg">
