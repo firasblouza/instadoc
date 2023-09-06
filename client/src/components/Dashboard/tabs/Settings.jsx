@@ -179,7 +179,7 @@ const Settings = () => {
 
             {/* Current Password */}
 
-            <div className="formGroup  justify-between flex flex-col items-center w-full md:w-4/6  md:flex-row gap-2 my-3">
+            <div className="formGroup  justify-center flex flex-col items-center w-full md:w-4/6  md:flex-row gap-2 my-3">
               <label htmlFor="oldPassword" className="text-gray-800 font-bold">
                 Current Password :
               </label>
@@ -196,7 +196,7 @@ const Settings = () => {
             </div>
             {/* New Password */}
 
-            <div className="formGroup  justify-between flex flex-col items-center md:w-4/6 w-full  md:flex-row gap-2 my-3">
+            <div className="formGroup  justify-center flex flex-col items-center md:w-4/6 w-full  md:flex-row gap-2 my-3">
               <label htmlFor="oldPassword" className="text-gray-800 font-bold">
                 New Password :
               </label>
@@ -215,7 +215,7 @@ const Settings = () => {
 
             {/* Confirm Password */}
 
-            <div className="formGroup  justify-between flex flex-col items-center md:w-4/6 w-full  md:flex-row gap-2 my-3">
+            <div className="formGroup  justify-center flex flex-col items-center md:w-4/6 w-full  md:flex-row gap-2 my-3">
               <label htmlFor="oldPassword" className="text-gray-800 font-bold">
                 Confirm Password :
               </label>

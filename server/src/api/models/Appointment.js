@@ -28,6 +28,27 @@ const appointmentSchema = new Schema({
     required: true,
     default: 1
   },
+
+  messages: [
+    {
+      senderId: {
+        type: String
+      },
+      senderName: {
+        type: String
+      },
+      role: {
+        type: String
+      },
+      content: {
+        type: String
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ],
   status: {
     type: String,
     enum: ["pending", "approved", "completed", "cancelled"],

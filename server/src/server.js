@@ -16,11 +16,33 @@ const io = require("socket.io")(IO_PORT, {
   }
 });
 
+io.use((socket, next) => {
+  const apptId = socket.handshake.auth.apptId;
+  if (!apptId) {
+    return next(new Error("Invalid appointment"));
+  }
+  socket.apptId = apptId;
+  next();
+});
+
 // IO Connection
-io.on("connect", (socket) => {
-  console.log(socket.id);
-  socket.on("noteAdded", (notes) => {
-    console.log("Received new Notes : " + notes);
+io.on("connection", (socket) => {
+  console.log(`Client ${socket.id} connected to room ${socket.apptId}`);
+  socket.join(socket.apptId);
+  socket.on("add-note", (updatedNotes, id) => {
+    if (id) {
+      socket.to(id).emit("add-note", updatedNotes);
+    }
+  });
+  socket.on("delete-note", (updatedNotes, id) => {
+    if (id) {
+      socket.to(id).emit("delete-note", updatedNotes);
+    }
+  });
+  socket.on("send-message", (messageObj, id) => {
+    if (id) {
+      socket.to(id).emit("send-message", messageObj);
+    }
   });
 });
 

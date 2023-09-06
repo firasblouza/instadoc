@@ -141,6 +141,45 @@ const deleteAppointmentById = async (req, res) => {
   }
 };
 
+const createMessage = async (req, res) => {
+  const apptId = req.params.id;
+  const { senderId, role, content, senderName } = req.body;
+
+  if (!apptId) {
+    return res.status(400).json({ message: "Bad Request" });
+  }
+
+  if (!senderId || !role || !content || !senderName) {
+    return res.status(400).json({ message: "Bad Request, Missing payload" });
+  }
+
+  const messageObj = {
+    senderId,
+    senderName,
+    role,
+    content
+  };
+
+  try {
+    const updatedAppointment = await Appointment.findByIdAndUpdate(
+      apptId,
+      { $push: { messages: messageObj } }, // Use $push to add the message to the array
+      { new: true } // To get the updated document after the update
+    );
+
+    if (!updatedAppointment) {
+      return res.status(404).json({ message: "Appointment not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Message sent successfully", updatedAppointment });
+  } catch (error) {
+    console.error("Error adding message:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   getAllAppointments,
   getAppointmentById,
@@ -149,5 +188,6 @@ module.exports = {
   scheduleAppointment,
   modifyAppointmentById,
   cancelAppointment,
-  deleteAppointmentById
+  deleteAppointmentById,
+  createMessage
 };

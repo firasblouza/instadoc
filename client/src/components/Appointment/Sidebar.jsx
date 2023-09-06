@@ -9,20 +9,20 @@ const Sidebar = ({ appointment, isOpen, role, notes, setNotes, socket }) => {
   const [newNote, setNewNote] = useState("");
   const [selectedNoteIndex, setSelectedNoteIndex] = useState(null);
 
+  const [apptClients, setApptClients] = useState([]);
+
   // Handle add notes
 
   const handleAddNote = async (e, id) => {
     if (newNote) {
       setNotes((prevNotes) => [...prevNotes, newNote]); // Add the newNote to the notes array
       setNewNote(""); // Clear the input field
-      const updateNotes = await axios.put(`/appointments/modify/${id}`, {
-        notes: [...notes, newNote]
+      const updatedNotes = [...notes, newNote];
+      const update = await axios.put(`/appointments/modify/${id}`, {
+        notes: updatedNotes
       });
-      socket.emit("noteAdded", newNote);
+      socket.emit("add-note", updatedNotes, id);
     }
-  };
-  const handleNoteClick = (index) => {
-    setSelectedNoteIndex(index);
   };
 
   const handleNoteDelete = async (index, id) => {
@@ -32,6 +32,32 @@ const Sidebar = ({ appointment, isOpen, role, notes, setNotes, socket }) => {
     const updateNotes = await axios.put(`/appointments/modify/${id}`, {
       notes: updatedNotes
     });
+    socket.emit("delete-note", updatedNotes, id);
+  };
+
+  useEffect(() => {
+    socket.on("add-note", (updatedNotes) => {
+      console.log("Received updated notes:", updatedNotes);
+      setNotes(updatedNotes);
+    });
+
+    socket.on("delete-note", (updatedNotes) => {
+      console.log("Deleted Notes");
+      setNotes(updatedNotes);
+    });
+
+    socket.on("error", (error) => {
+      console.error("Socket error:", error);
+    });
+
+    return () => {
+      socket.off("add-note");
+      socket.off("delete-note");
+    };
+  }, []);
+
+  const handleNoteClick = (index) => {
+    setSelectedNoteIndex(index);
   };
 
   return (

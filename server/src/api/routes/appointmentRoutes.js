@@ -10,6 +10,7 @@ router.put("/cancel/:id", appointmentController.cancelAppointment);
 router.put("/modify/:id", appointmentController.modifyAppointmentById);
 router.post("/", appointmentController.scheduleAppointment);
 
+router.put("/message/:id", appointmentController.createMessage);
 // Admin related routes
 router.get("/", verifyRole("admin"), appointmentController.getAllAppointments);
 router.delete(

@@ -35,6 +35,7 @@ import Labs from "./components/Labs";
 import useAccessToken from "./hooks/useAccessToken";
 import Demandes from "./components/Dashboard/tabs/doctor/Demandes";
 import Contact from "./components/Contact";
+import ManageRatings from "./components/Dashboard/tabs/admin/ManageRatings";
 
 const App = () => {
   const location = useLocation();
@@ -97,6 +98,7 @@ const App = () => {
           <Route path="admin/patients" element={<ManagePatients />} />
           <Route path="admin/doctors" element={<ManageDoctors />} />
           <Route path="admin/labs" element={<ManageLabs />} />
+          <Route path="admin/reviews" element={<ManageRatings />} />
 
           {/* End Admin Routes */}
 

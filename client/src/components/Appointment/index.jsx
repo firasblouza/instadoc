@@ -5,11 +5,10 @@ import useAuth from "../../hooks/useAuth";
 import Sidebar from "./Sidebar";
 import Interface from "./Interface";
 
-import AuthContext from "../../context/AuthContext";
 import useAccessToken from "../../hooks/useAccessToken";
 import axios from "../../api/axios";
 
-import { io } from "socket.io-client";
+import { socket } from "./socket";
 
 // TODO: Implement the DAMN SOCKET krztni
 
@@ -18,21 +17,7 @@ const Appointment = () => {
   const [appointment, setAppointment] = useState({});
   const [notes, setNotes] = useState([]);
 
-  const socket = new io("http://localhost:3000", { autoConnect: false });
-
   const effectRan = useRef(false);
-
-  useEffect(() => {
-    if (effectRan.current === false) {
-      socket.connect();
-    }
-    return () => {
-      socket.disconnect();
-      effectRan.current = true;
-    };
-  }, []);
-
-  const navigate = useNavigate();
 
   const { apptId } = useParams();
   const { accessToken, decodedToken } = useAccessToken();
@@ -81,7 +66,6 @@ const Appointment = () => {
           };
           setAppointment(appointmentData);
           setNotes(appointmentData.notes);
-          console.log(appointmentData);
         }
       } else {
         console.log("No access token found");
@@ -105,6 +89,43 @@ const Appointment = () => {
       effectRan.current = true;
     };
   }, []);
+
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    const initializeSocket = () => {
+      if (!isConnected) {
+        socket.auth = { apptId };
+        socket.connect();
+        setIsConnected(true);
+        console.log("Socket connecting");
+      }
+    };
+
+    const disconnectSocket = () => {
+      socket.disconnect();
+      setIsConnected(false);
+    };
+
+    initializeSocket();
+
+    return () => {
+      disconnectSocket();
+    };
+  }, []);
+
+  // Listen for the "connect" event inside a separate useEffect
+  useEffect(() => {
+    const handleSocketConnect = () => {
+      console.log(`Socket connected with id: ${socket.id} apptId : ${apptId}`);
+    };
+
+    socket.on("connect", handleSocketConnect);
+
+    return () => {
+      socket.off("connect", handleSocketConnect);
+    };
+  }, []); // This effect runs once when the component mounts
 
   return (
     <section id="apptDashboard" className="relative w-full flex flex-col">
@@ -152,7 +173,7 @@ const Appointment = () => {
           />
         )}
         <div className="w-full md:w-4/5 p-4 max-h-[calc(100vh-60px)] overflow-y-hidden">
-          <Interface />
+          <Interface socket={socket} appointment={appointment} client={auth} />
         </div>
       </div>
     </section>

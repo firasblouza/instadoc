@@ -9,6 +9,8 @@ import {
   FaChevronCircleDown
 } from "react-icons/fa";
 
+import { Link, useNavigate } from "react-router-dom";
+
 import axios from "../../../../api/axios";
 import Modal from "../../UI/Modal";
 
@@ -22,6 +24,8 @@ const ManageRatings = () => {
   const [ratingsNumber, setRatingsNumber] = useState(0);
   const [showModal, setShowModal] = useState(false);
 
+  const navigate = useNavigate();
+
   const effectRan = useRef(false);
 
   const { accessToken, decodedToken } = useAccessToken();
@@ -31,18 +35,37 @@ const ManageRatings = () => {
       try {
         const response = await axios.get("/ratings");
         if (response.status === 200 && response.data.length > 0) {
-          const patient = await axios.get(`/users/${response.data.userId}`);
-          const doctor = await axios.get(`/doctors/${response.data.doctorId}`);
-          if (patient && doctor) {
-            const ratingData = {
-              ...response.data,
-              patient: patient.data,
-              doctor: doctor.data
-            };
-            setRatings(ratingData);
-            setRatingsNumber(ratingData.length);
-            console.log(ratingData);
+          // Create an array to store ratings
+          const newRatings = [];
+
+          // Iterate through each rating object in the array
+          for (const ratingData of response.data) {
+            // Access userId and doctorId for each rating object
+            const userId = ratingData.userId;
+            const doctorId = ratingData.doctorId;
+
+            // Fetch patient and doctor data using userId and doctorId
+            const [patient, doctor] = await Promise.all([
+              axios.get(`/users/${userId}`),
+              axios.get(`/doctors/${doctorId}`)
+            ]);
+
+            if (patient && doctor) {
+              // Create ratingData object with patient and doctor data
+              const ratingInfo = {
+                ...ratingData,
+                patient: patient.data,
+                doctor: doctor.data
+              };
+
+              // Add the ratingInfo object to the newRatings array
+              newRatings.push(ratingInfo);
+            }
           }
+
+          // Set the state with the newRatings array
+          setRatings(newRatings.reverse());
+          setRatingsNumber(newRatings.length);
         } else {
           console.log("No ratings found");
         }
@@ -68,6 +91,32 @@ const ManageRatings = () => {
     };
   }, []);
 
+  const viewAvis = (id) => {
+    navigate(`/doctor/${id}`);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const response = await axios.delete(`/ratings/${id}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      });
+      if (response.status === 200) {
+        fetchRatings();
+        window.alert("Avis supprimer avec success");
+      } else {
+        window.alert("Désolé, une erreur s'est produite");
+      }
+    } catch (err) {
+      if (err.response && err.response.status === 401) {
+        console.log("Unauthorized: You need to log in or refresh your token");
+      } else {
+        console.log("An error occurred while fetching data:", err.message);
+      }
+    }
+  };
+
   return (
     <section className="admin-manage-ratings w-full h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] overflow-scroll overflow-y-scroll">
       <div className="flex flex-col items-center justify-center w-full">
@@ -86,7 +135,7 @@ const ManageRatings = () => {
 
                 <input
                   type="text"
-                  placeholder="Rechercher un médecin"
+                  placeholder="Rechercher un avis"
                   className="border border-gray-300 rounded-lg py-1 px-2 w-full md:w-1/2"
                   onChange={(e) => handleSearch(e)}
                 />
@@ -131,10 +180,13 @@ const ManageRatings = () => {
                         <td className="border px-2 py-2">{rating.rating}</td>
                         <td className="border px-2 py-2">{rating.review}</td>
 
-                        <td className="border flex flex-row gap-3 px-2 py-2">
-                          <Link to={`/doctor/${rating.doctorId}`}>
-                            <FaEye className="cursor-pointer text-blue-500" />
-                          </Link>
+                        <td className="border flex justify-center flex-row gap-3 px-2 py-2">
+                          <FaEye
+                            className="cursor-pointer text-blue-500"
+                            onClick={() =>
+                              setSelectedRating(rating) & setShowModal(true)
+                            }
+                          />
                           <FaTrashAlt
                             className="cursor-pointer text-red-500"
                             onClick={() => handleDelete(rating._id)}
@@ -147,79 +199,53 @@ const ManageRatings = () => {
               </div>
               {showModal && (
                 <Modal
-                  title={"Détails du médecin"}
-                  firstAction={handleVerify}
-                  secondAction={handleVerify}
-                  firstActionArgs={[selectedDoctor._id, "approve"]}
-                  secondActionArgs={[selectedDoctor._id, "reject"]}
-                  firstButton={"Approve"}
-                  secondButton={"Reject"}
+                  title={"Avis"}
+                  firstAction={viewAvis}
+                  secondAction={handleDelete}
+                  secondActionArgs={[selectedRating._id]}
+                  firstButton={"Voir"}
+                  secondButton={"Supprimer"}
                   showModal={showModal}
                   setShowModal={setShowModal}
                 >
                   {/* Modal Content */}
 
                   <div className="flex flex-col md:flex-row gap-2">
-                    <div className="w-full flex flex-col">
-                      <img
-                        src={
-                          selectedDoctor.profileImage
-                            ? `${IMG_URL}${selectedDoctor.profileImage}`
-                            : imgPlaceholder
-                        }
-                        alt=""
-                      />
-                    </div>
-
                     <div className="w-full">
-                      <div className="flex flex-col md:flex-row justify-center items-center md:justify-around py-3">
+                      <div className="flex flex-col md:flex-row justify-center items-start md:justify-around py-3">
                         <div className="flex flex-col gap-2">
-                          <p className="font-bold">Nom:</p>
-                          <p>
-                            {selectedDoctor.firstName} {selectedDoctor.lastName}
-                          </p>
-
-                          <p className="font-bold">Date du Naissance:</p>
-                          <p>
-                            {new Date(
-                              selectedDoctor.dateOfBirth
-                            ).toLocaleDateString()}
-                          </p>
-
-                          <p className="font-bold">ID Type:</p>
-
-                          <div className="flex flex-row gap-2 items-center justify-center md:justify-start">
-                            <p>{selectedDoctor.idType}</p>
-                            <FaEye
-                              className="cursor-pointer"
-                              onClick={() => {
-                                handleImagePreview(selectedDoctor.idImage);
-                              }}
-                            />
+                          <div className="flex flex-row gap-3">
+                            <p className="font-bold">Médecin:</p>
+                            <p>{selectedRating.doctorName}</p>
                           </div>
 
-                          <p className="font-bold">Numero ID:</p>
-                          <p>{selectedDoctor.idNumber}</p>
+                          <div className="flex flex-row gap-3">
+                            <p className="font-bold">Patient:</p>
+                            <p>{selectedRating.patientName}</p>
+                          </div>
+
+                          <div className="flex flex-row gap-3">
+                            <p className="font-bold">Date:</p>
+
+                            <div className="flex flex-row gap-2 items-center justify-center md:justify-start">
+                              <p>
+                                {new Date(
+                                  selectedRating.createdAt
+                                ).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-row gap-3">
+                            <p className="font-bold">Rating:</p>
+                            <p>{selectedRating.rating}</p>
+                          </div>
                         </div>
 
-                        <div className="flex flex-col gap-2 ">
-                          <p className="font-bold"># License Médical:</p>
+                        <div className="flex flex-row gap-3">
+                          <p className="font-bold">Commentaire:</p>
 
-                          <div className="flex flex-row gap-2 items-center justify-center md:justify-start">
-                            <p>{selectedDoctor.licenseNumber}</p>
-                            <FaEye
-                              className="cursor-pointer"
-                              onClick={() => {
-                                handleImagePreview(selectedDoctor.licenseImage);
-                              }}
-                            />
-                          </div>
-
-                          <p className="font-bold">Spécialité:</p>
-                          <p>{capitalize(selectedDoctor.speciality)}</p>
-
-                          <p className="font-bold">Statut:</p>
-                          <p>{capitalize(selectedDoctor.verifiedStatus)}</p>
+                          <p>{selectedRating.review}</p>
                         </div>
                       </div>
                     </div>
