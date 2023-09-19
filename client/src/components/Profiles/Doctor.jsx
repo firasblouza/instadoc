@@ -337,14 +337,14 @@ const Doctor = () => {
             alt={`${doctor.firstName} ${doctor.lastName}`}
           />
           <button
-            className="bg-blue-500 w-full hidden md:block text-white rounded-lg px-2 py-1 mt-2"
+            className="bg-blue-500 w-full max-w-[380px]  text-white rounded-lg px-2 py-1 mt-3"
             onClick={handleShowModal}
           >
             Demander une consultation
           </button>
           {/* A section to leave a review */}
 
-          <div className="reviewSection w-full flex flex-col mt-10 gap-3 p-3">
+          <div className="reviewSection w-full  flex-col md:mt-4 gap-3 p-3 hidden md:flex">
             <div className="flex flex-row justify-start items-center gap-5">
               <h1 className="text-xl font-bold text-[#1E1E1E]">
                 Laisser un avis :
@@ -567,10 +567,33 @@ const Doctor = () => {
                 <p className="text-xs font-bold text-[#1E1E1E]">Aucun avis</p>
               )}
             </div>
+            {/* Review section on Mobile */}
+            <div className="reviewSection w-full flex flex-col mt-4 gap-3 p-3 md:hidden">
+              <div className="flex flex-row justify-start items-center gap-5">
+                <h1 className="text-xl font-bold text-[#1E1E1E]">
+                  Laisser un avis :
+                </h1>
+                {/* Make empty stars that get full on hover */}
+                <StarRating star={star} setStar={setStar} />
+              </div>
+
+              <textarea
+                className="border border-gray-500 rounded-lg p-2"
+                rows="5"
+                placeholder="Laisser un commentaire"
+                value={review}
+                onChange={(e) => setReview(e.target.value)}
+              ></textarea>
+
+              <button
+                className="bg-blue-500 w-full text-white rounded-lg px-2 py-1 mt-2"
+                onClick={sendRating}
+              >
+                Envoyer
+              </button>
+            </div>
+
             {/* Button on mobile */}
-            <button className="bg-blue-500 w-full  md:hidden text-white rounded-lg px-2 py-1 mt-2">
-              Demander une consultation
-            </button>
           </div>
         </div>
       </div>

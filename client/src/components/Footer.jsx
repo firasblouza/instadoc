@@ -14,7 +14,7 @@ const Footer = () => {
           <img
             src={logo}
             alt="logo"
-            className="w-100 max-w-[180px]  p-2 h-auto"
+            className="w-100 max-w-[180px]  p-2 h-auto justify-self-start"
           />
           <p className="text-base  font-semi text-center">
             InstaDoc is a platform that connects patients with doctors and
