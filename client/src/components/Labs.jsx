@@ -22,10 +22,18 @@ const Labs = () => {
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
 
-  const IMG_URL = "http://localhost:3500/uploads/";
+  // const IMG_URL = "http://localhost:3500/uploads/";
+  const IMG_URL = "https://instadoc-server.vercel.app/uploads/";
 
   const effectRan = useRef(false);
 
+  useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+  }, [showModal]);
   // Function to fetch the labs.
 
   const fetchLabs = async () => {

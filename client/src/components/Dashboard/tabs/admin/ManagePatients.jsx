@@ -217,7 +217,7 @@ const ManagePatients = () => {
                     </div>
                     <div className="flex flex-row gap-3">
                       <p className="font-bold">Date du Naissance:</p>
-                      <p>{selectedPatient.dateOfBirth}</p>
+                      <p>{selectedPatient.dateOfBirth.substring(0, 10)}</p>
                     </div>
                     <div className="flex flex-row gap-3">
                       <p className="font-bold">Email:</p>

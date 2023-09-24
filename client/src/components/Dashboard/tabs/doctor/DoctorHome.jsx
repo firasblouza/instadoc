@@ -20,7 +20,8 @@ const DoctorHome = () => {
   const [initialAvailability, setInitialAvailability] = useState([]);
   const [uploadedFile, setUploadedFile] = useState(null);
 
-  const IMG_URL = "http://localhost:3500/uploads/";
+  // const IMG_URL = "http://localhost:3500/uploads/";
+  const IMG_URL = "https://instadoc-server.vercel.app/uploads/";
 
   const [doctor, setDoctor] = useState({
     firstName: "",

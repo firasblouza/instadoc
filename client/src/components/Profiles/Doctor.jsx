@@ -42,8 +42,11 @@ const Doctor = () => {
 
   const { accessToken, decodedToken } = useAccessToken();
 
-  const IMG_URL = "http://localhost:3500/uploads/";
-  const IMG_Placeholder = "http://localhost:3500/uploads/imagePlaceholder.png";
+  // const IMG_URL = "http://localhost:3500/uploads/";
+  // const IMG_Placeholder = "http://localhost:3500/uploads/imagePlaceholder.png";
+  const IMG_URL = "https://instadoc-server.vercel.app/uploads/";
+  const IMG_Placeholder =
+    "https://instadoc-server.vercel.app/uploads/imagePlaceholder.png";
 
   const calculateAverageRating = (ratings) => {
     if (ratings.length === 0) {
@@ -56,6 +59,14 @@ const Doctor = () => {
     );
     return sumOfRatings / ratings.length;
   };
+
+  useEffect(() => {
+    if (imageModal.image !== "") {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+  }, [imageModal]);
 
   const fetchDoctor = async () => {
     setDoctor([]);

@@ -12,7 +12,7 @@ const Contact = () => {
             Vous avez des questions? N'hesitez pas de nous contactez !
           </p>
           <div className="flex flex-col md:flex-row w-full justify-center items-center gap-10 mb-5">
-            <div className="flex flex-col w-full md:w-1/2 gap-5">
+            <div className="flex flex-col w-full  gap-5">
               <div className="flex flex-col w-full gap-2">
                 <label
                   htmlFor="nom"
