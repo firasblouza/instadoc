@@ -17,7 +17,7 @@ const handleAuth = async (req, res) => {
   if (rememberMe) {
     accessTokenDuration = "5h";
   } else {
-    accessTokenDuration = "20s";
+    accessTokenDuration = "1h";
   }
   // Check if the email belongs to a user or a doctor first
   const user = await User.findOne({ email }).exec();
