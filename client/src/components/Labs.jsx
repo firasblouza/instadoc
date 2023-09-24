@@ -219,7 +219,7 @@ const Labs = () => {
                           className="max-w-[200px] rounded-lg "
                         />
                       </div>
-                      <div className="flex flex-col justify-center items-start w-2/3">
+                      <div className="flex flex-col justify-start items-start w-2/3">
                         <h1 className="text-xl font-bold my-1 text-[#1E1E1E]">
                           Nom :{" "}
                           <span className="font-normal">
