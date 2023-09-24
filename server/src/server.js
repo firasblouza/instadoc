@@ -93,6 +93,10 @@ app.use("/labs", require("./api/routes/labRoutes"));
 
 app.use("/ratings", require("./api/routes/ratingRoutes"));
 
+app.use((req, res) => {
+  res.status(404).send("404 Not Found");
+});
+
 mongoose.connection.once("open", () => {
   console.log("Connected to MongoDB");
   app.listen(PORT, () => {
