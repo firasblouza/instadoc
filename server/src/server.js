@@ -12,12 +12,7 @@ const cookieParser = require("cookie-parser");
 const httpServer = require("http").createServer(app);
 const credentials = require("./api/middleware/credentials");
 
-const io = require("socket.io")(httpServer, {
-  cors: {
-    origins: "*",
-    methods: ["GET", "POST"]
-  }
-});
+const io = require("socket.io")(httpServer);
 
 io.use((socket, next) => {
   const apptId = socket.handshake.auth.apptId;
