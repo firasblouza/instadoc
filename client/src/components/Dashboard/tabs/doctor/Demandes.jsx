@@ -42,7 +42,8 @@ const Demandes = () => {
   const [search, setSearch] = useState("");
 
   // const IMG_URL = "http://localhost:3500/uploads/";
-  const IMG_URL = "https://instadoc-server.vercel.app/uploads/";
+  const { API_URL } = useContext(AuthContext);
+  const IMG_URL = `${API_URL}/uploads/`;
   const imgPlaceholder = `${IMG_URL}imagePlaceholder.png`;
 
   const { accessToken, decodedToken } = useAccessToken();

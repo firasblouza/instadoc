@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 
 import axios from "../../../../api/axios";
 import jwt_decode from "jwt-decode";
@@ -11,6 +11,7 @@ import { startTime, endTime } from "../../../../data/data";
 import Modal from "../../UI/Modal";
 
 import useAccessToken from "../../../../hooks/useAccessToken";
+import AuthContext from "../../../../context/AuthContext";
 
 const DoctorHome = () => {
   const effectRan = useRef(false);
@@ -20,8 +21,8 @@ const DoctorHome = () => {
   const [initialAvailability, setInitialAvailability] = useState([]);
   const [uploadedFile, setUploadedFile] = useState(null);
 
-  // const IMG_URL = "http://localhost:3500/uploads/";
-  const IMG_URL = "https://instadoc-server.vercel.app/uploads/";
+  const { API_URL } = useContext(AuthContext);
+  const IMG_URL = `${API_URL}/uploads/`;
 
   const [doctor, setDoctor] = useState({
     firstName: "",

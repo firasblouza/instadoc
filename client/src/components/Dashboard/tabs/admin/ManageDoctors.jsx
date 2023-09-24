@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import {
   FaTrashAlt,
   FaSync,
@@ -17,6 +17,7 @@ import ImagePreview from "../../UI/ImagePreview";
 import { capitalize } from "../../../../utils/Capitalize";
 
 import useAccessToken from "../../../../hooks/useAccessToken";
+import AuthContext from "../../../../context/AuthContext";
 
 const ManageDoctors = () => {
   const effectRan = useRef(false);
@@ -38,7 +39,9 @@ const ManageDoctors = () => {
   const [search, setSearch] = useState("");
 
   // const IMG_URL = "http://localhost:3500/uploads/";
-  const IMG_URL = "https://instadoc-server.vercel.app/uploads/";
+
+  const { API_URL } = useContext(AuthContext);
+  const IMG_URL = `${API_URL}/uploads/`;
   const imgPlaceholder = `${IMG_URL}imagePlaceholder.png`;
 
   // Function to fetch the doctors

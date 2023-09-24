@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import {
   FaTrashAlt,
   FaEye,
@@ -13,6 +13,7 @@ import Input from "./Input";
 
 import axios from "../api/axios";
 import jwt_decode from "jwt-decode";
+import AuthContext from "../context/AuthContext";
 
 const Labs = () => {
   const [labs, setLabs] = useState([]);
@@ -22,8 +23,8 @@ const Labs = () => {
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
 
-  // const IMG_URL = "http://localhost:3500/uploads/";
-  const IMG_URL = "https://instadoc-server.vercel.app/uploads/";
+  const { API_URL } = useContext(AuthContext);
+  const IMG_URL = `${API_URL}/uploads/`;
 
   const effectRan = useRef(false);
 

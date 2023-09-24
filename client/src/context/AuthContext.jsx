@@ -71,6 +71,8 @@ export const AuthProvider = ({ children }) => {
   const LOGIN_URL = "/login";
   const REGISTER_URL = "/register";
 
+  const API_URL = "https://instadoc-api.onrender.com";
+
   // Section Refs
 
   const aboutRef = useRef(null);
@@ -385,7 +387,8 @@ export const AuthProvider = ({ children }) => {
         userInfo,
         aboutRef,
         selectedAppt,
-        setSelectedAppt
+        setSelectedAppt,
+        API_URL
       }}
     >
       {children}

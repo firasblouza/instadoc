@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import { useParams } from "react-router-dom";
 
 import { FaStar, FaStarHalfAlt, FaRegStar, FaEye } from "react-icons/fa";
@@ -12,6 +12,7 @@ import axios from "../../api/axios";
 import useAccessToken from "../../hooks/useAccessToken";
 import StarRating from "./StarRating";
 import AvgRating from "./AvgRating";
+import AuthContext from "../../context/AuthContext";
 
 const Doctor = () => {
   const { doctorId } = useParams();
@@ -42,11 +43,9 @@ const Doctor = () => {
 
   const { accessToken, decodedToken } = useAccessToken();
 
-  // const IMG_URL = "http://localhost:3500/uploads/";
-  // const IMG_Placeholder = "http://localhost:3500/uploads/imagePlaceholder.png";
-  const IMG_URL = "https://instadoc-server.vercel.app/uploads/";
-  const IMG_Placeholder =
-    "https://instadoc-server.vercel.app/uploads/imagePlaceholder.png";
+  const { API_URL } = useContext(AuthContext);
+  const IMG_URL = `${API_URL}/uploads/`;
+  const IMG_Placeholder = `${API_URL}imagePlaceholder.png`;
 
   const calculateAverageRating = (ratings) => {
     if (ratings.length === 0) {
