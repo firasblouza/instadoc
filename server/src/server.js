@@ -10,7 +10,8 @@ const corsOptions = require("./config/corsOptions");
 const verifyJWT = require("./api/middleware/verifyJWT");
 const cookieParser = require("cookie-parser");
 const credentials = require("./api/middleware/credentials");
-const io = require("socket.io")(IO_PORT, {
+const httpServer = require("http").createServer(app);
+const io = require("socket.io")(httpServer, {
   cors: {
     origins: "*:*",
     methods: ["GET", "POST"]
