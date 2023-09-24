@@ -1,5 +1,6 @@
 import axios from "axios";
-const BASE_URL = "https://instadoc-api.onrender.com/";
+// const BASE_URL = "http://localhost:3500";
+const BASE_URL = "https://instadoc-server.vercel.app/";
 export default axios.create({
   baseURL: BASE_URL
 });

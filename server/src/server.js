@@ -1,17 +1,52 @@
 require("dotenv").config();
+const PORT = process.env.PORT;
+const IO_PORT = process.env.IO_PORT;
 const express = require("express");
 const cors = require("cors");
 const app = express();
 const dbConnect = require("./config/db");
 const mongoose = require("mongoose");
-const PORT = process.env.PORT;
 const corsOptions = require("./config/corsOptions");
 const verifyJWT = require("./api/middleware/verifyJWT");
 const cookieParser = require("cookie-parser");
 const credentials = require("./api/middleware/credentials");
+const io = require("socket.io")(IO_PORT, {
+  cors: {
+    origin: ["http://localhost:5173", "http://127.0.0.1:5173"]
+  }
+});
+
+io.use((socket, next) => {
+  const apptId = socket.handshake.auth.apptId;
+  if (!apptId) {
+    return next(new Error("Invalid appointment"));
+  }
+  socket.apptId = apptId;
+  next();
+});
+
+// IO Connection
+io.on("connection", (socket) => {
+  console.log(`Client ${socket.id} connected to room ${socket.apptId}`);
+  socket.join(socket.apptId);
+  socket.on("add-note", (updatedNotes, id) => {
+    if (id) {
+      socket.to(id).emit("add-note", updatedNotes);
+    }
+  });
+  socket.on("delete-note", (updatedNotes, id) => {
+    if (id) {
+      socket.to(id).emit("delete-note", updatedNotes);
+    }
+  });
+  socket.on("send-message", (messageObj, id) => {
+    if (id) {
+      socket.to(id).emit("send-message", messageObj);
+    }
+  });
+});
 
 // Server static files
-
 app.use("/uploads", express.static("uploads"));
 
 // Handle 'Access-Control-Allow-Credentials' option for Cors
@@ -50,6 +85,8 @@ app.use("/doctors", require("./api/routes/doctorRoutes"));
 app.use("/users", require("./api/routes/userRoutes"));
 app.use("/appointments", require("./api/routes/appointmentRoutes"));
 app.use("/labs", require("./api/routes/labRoutes"));
+
+app.use("/ratings", require("./api/routes/ratingRoutes"));
 
 mongoose.connection.once("open", () => {
   console.log("Connected to MongoDB");

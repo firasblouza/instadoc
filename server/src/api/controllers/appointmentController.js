@@ -1,4 +1,5 @@
 const Appointment = require("../models/Appointment");
+const jwt = require("jsonwebtoken");
 
 const getAllAppointments = async (req, res) => {
   // Parameters for the pagination
@@ -22,6 +23,13 @@ const getAllAppointments = async (req, res) => {
 
 const getAppointmentById = async (req, res) => {
   const appointmentId = req.params.id;
+  let id;
+  const token = req.headers["authorization"].split(" ")[1];
+  if (!token) return res.status(401).json({ message: "Unauthorized" });
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+  if (decoded) {
+    id = decoded.UserInfo.id;
+  }
   try {
     const appointment = await Appointment.findById(appointmentId).exec();
     if (appointment) {
@@ -63,8 +71,8 @@ const getUserAppointments = async (req, res) => {
 };
 
 const scheduleAppointment = async (req, res) => {
-  const { userId, doctorId, reason, date, duration, type } = req.body;
-  if (!userId || !doctorId || !reason || !date || !duration || !type) {
+  const { userId, doctorId, reason, date, dateTime } = req.body;
+  if (!userId || !doctorId || !reason || !date) {
     return res.status(400).json({ message: "Missing required fields" });
   }
   try {
@@ -72,9 +80,7 @@ const scheduleAppointment = async (req, res) => {
       userId,
       doctorId,
       reason,
-      date,
-      duration,
-      type
+      date
     });
     console.log(newAppointment);
     res.status(201).json({ message: "Appointment created successfully" });
@@ -88,7 +94,7 @@ const cancelAppointment = async (req, res) => {
   try {
     const cancelledAppointment = await Appointment.findByIdAndUpdate(
       appointmentId,
-      { status: "Cancelled" }
+      { status: "cancelled" }
     ).exec();
     if (cancelledAppointment) {
       res.status(200).json({ message: "Appointment cancelled successfully" });
@@ -99,32 +105,31 @@ const cancelAppointment = async (req, res) => {
     res.status(500).json({ message: "Error while cancelling appointment" });
   }
 };
+const rejectAppointment = async (req, res) => {
+  const appointmentId = req.params.id;
+  try {
+    const rejectedAppointment = await Appointment.findByIdAndUpdate(
+      appointmentId,
+      { status: "rejected" }
+    ).exec();
+    if (rejectedAppointment) {
+      res.status(200).json({ message: "Appointment rejected successfully" });
+    } else {
+      res.status(404).json({ message: "Appointment not found" });
+    }
+  } catch (err) {
+    res.status(500).json({ message: "Error while rejecting appointment" });
+  }
+};
 
 const modifyAppointmentById = async (req, res) => {
   const appointmentId = req.params.id;
-  const { userId, doctorId, reason, date, duration, type, status } = req.body;
-  if (
-    !userId ||
-    !doctorId ||
-    !reason ||
-    !date ||
-    !duration ||
-    !type ||
-    !status
-  ) {
-    return res.status(400).json({ message: "Missing required fields" });
-  }
+
   try {
     const updatedAppointment = await Appointment.findByIdAndUpdate(
       appointmentId,
-      {
-        userId,
-        doctorId,
-        reason,
-        date,
-        duration,
-        type
-      }
+      { $set: req.body },
+      { new: true }
     ).exec();
     if (updatedAppointment) {
       res.status(200).json({ message: "Appointment updated successfully" });
@@ -152,6 +157,45 @@ const deleteAppointmentById = async (req, res) => {
   }
 };
 
+const createMessage = async (req, res) => {
+  const apptId = req.params.id;
+  const { senderId, role, content, senderName } = req.body;
+
+  if (!apptId) {
+    return res.status(400).json({ message: "Bad Request" });
+  }
+
+  if (!senderId || !role || !content || !senderName) {
+    return res.status(400).json({ message: "Bad Request, Missing payload" });
+  }
+
+  const messageObj = {
+    senderId,
+    senderName,
+    role,
+    content
+  };
+
+  try {
+    const updatedAppointment = await Appointment.findByIdAndUpdate(
+      apptId,
+      { $push: { messages: messageObj } }, // Use $push to add the message to the array
+      { new: true } // To get the updated document after the update
+    );
+
+    if (!updatedAppointment) {
+      return res.status(404).json({ message: "Appointment not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Message sent successfully", updatedAppointment });
+  } catch (error) {
+    console.error("Error adding message:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   getAllAppointments,
   getAppointmentById,
@@ -160,5 +204,7 @@ module.exports = {
   scheduleAppointment,
   modifyAppointmentById,
   cancelAppointment,
-  deleteAppointmentById
+  rejectAppointment,
+  deleteAppointmentById,
+  createMessage
 };

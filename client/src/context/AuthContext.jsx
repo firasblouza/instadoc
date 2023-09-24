@@ -10,6 +10,8 @@ import {
   isValidEmail
 } from "../utils/Validation";
 
+import { io } from "socket.io-client";
+
 import SignupMain from "../components/Signup/SignupMain";
 import SignupData from "../components/Signup/SignupData";
 import SignupFinish from "../components/Signup/SignupFinish";
@@ -60,6 +62,8 @@ export const AuthProvider = ({ children }) => {
   const [step, setStep] = useState(1);
 
   const [auth, setAuth] = useState({});
+
+  const [selectedAppt, setSelectedAppt] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -188,7 +192,6 @@ export const AuthProvider = ({ children }) => {
         password: "",
         rememberMe: false
       });
-      console.log(response.data);
       navigate(from, { replace: true });
     } catch (err) {
       switch (err.response?.status) {
@@ -236,7 +239,6 @@ export const AuthProvider = ({ children }) => {
         withCredentials: true
       });
 
-      console.log(response.data);
       setSignupMessage({ message: response.data.message, error: false });
       setTimeout(() => {
         navigate("/login");
@@ -341,7 +343,7 @@ export const AuthProvider = ({ children }) => {
     if (e.target.name === "back") {
       step > 1
         ? step === 3
-          ? setStep(1)
+          ? setStep(2)
           : setStep((prev) => prev - 1)
         : setStep(1);
       setUserData({ ...userData, password: "", confirmPassword: "" });
@@ -381,7 +383,9 @@ export const AuthProvider = ({ children }) => {
         loginMessage,
         setLoginMessage,
         userInfo,
-        aboutRef
+        aboutRef,
+        selectedAppt,
+        setSelectedAppt
       }}
     >
       {children}

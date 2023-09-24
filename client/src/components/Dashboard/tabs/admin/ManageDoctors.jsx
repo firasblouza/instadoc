@@ -37,7 +37,9 @@ const ManageDoctors = () => {
 
   const [search, setSearch] = useState("");
 
-  const IMG_URL = "https://instadoc-api.onrender.com/uploads/";
+  // const IMG_URL = "http://localhost:3500/uploads/";
+  const IMG_URL = "https://instadoc-server.vercel.app/uploads/";
+  const imgPlaceholder = `${IMG_URL}imagePlaceholder.png`;
 
   // Function to fetch the doctors
 
@@ -77,45 +79,48 @@ const ManageDoctors = () => {
     };
   }, []);
 
-  // Verify doctor
+  // Verify or reject doctor
 
   const handleVerify = async (id, action) => {
     const endpoint = action === "approve" ? "approve" : "reject";
     const status = action === "approve" ? "approved" : "rejected";
     const pendingApproval = action === "approved" ? true : false;
-    try {
-      const { accessToken } = useAccessToken();
-      if (accessToken && accessToken !== "") {
-        const response = await axios.put(
-          `/admin/doctor/${action}/${id}`,
-          { verifiedStatus: status, pendingApproval },
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`
+    const alert = action === "approve" ? "verifié" : "rejeté";
+    if (window.confirm(`Vous êtes sûr de vouloir ${alert} ce médecin ?`)) {
+      try {
+        const { accessToken } = useAccessToken();
+        if (accessToken && accessToken !== "") {
+          const response = await axios.put(
+            `/admin/doctor/${action}/${id}`,
+            { verifiedStatus: status, pendingApproval },
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`
+              }
             }
-          }
-        );
-        if (response.status === 200) {
-          fetchDoctors();
-          window.alert(`Doctor ${status} successfully`);
-          setShowModal(false);
-        } else {
-          window.alert(
-            `An error occurred while ${
-              action == "approve" ? "verifying" : "rejecting"
-            } the doctor`
           );
+          if (response.status === 200) {
+            fetchDoctors();
+            window.alert(`Doctor ${status} successfully`);
+            setShowModal(false);
+          } else {
+            window.alert(
+              `An error occurred while ${
+                action == "approve" ? "verifying" : "rejecting"
+              } the doctor`
+            );
+          }
+        } else {
+          console.log("No access token found");
         }
-      } else {
-        console.log("No access token found");
+      } catch (err) {
+        console.log(
+          `An error occurred while ${
+            action == "approve" ? "verifying" : "rejecting"
+          } the doctor`,
+          err.message
+        );
       }
-    } catch (err) {
-      console.log(
-        `An error occurred while ${
-          action == "approve" ? "verifying" : "rejecting"
-        } the doctor`,
-        err.message
-      );
     }
   };
 
@@ -217,7 +222,7 @@ const ManageDoctors = () => {
           <p className="text-1xl font-bold">{doctorsNumber}</p>
         </div>
 
-        <div className="flex flex-row justify-center items-center w-full">
+        <div className="flex flex-col md:flex-row justify-center items-center w-full">
           <div className="flex flex-col justify-center items-center bg-white rounded-lg shadow-lg p-4 m-4 ">
             <h2 className="text-1xl font-bold">Médecins Approuvé</h2>
             <p className="text-1xl font-bold text-green-500">
@@ -252,22 +257,23 @@ const ManageDoctors = () => {
           </div>
         </div>
       </div>
+
       <div className="flex flex-col items-center justify-center w-full">
         <div className="flex flex-row justify-center items-center w-full">
           <div className="flex flex-col bg-white rounded-lg shadow-lg p-4 m-4 overflow-x-scroll lg:overflow-x-hidden overflow-y-auto min-h-[250px]">
-            <div className="flex w-full justify-between gap-10 mb-5">
+            <div className="flex w-full justify-between gap-5 md:gap-10 mb-5 items-center">
               {/* Search Field */}
 
               <input
                 type="text"
                 placeholder="Rechercher un médecin"
-                className="border border-gray-300 rounded-lg py-1 px-2 w-1/2"
+                className="border border-gray-300 rounded-lg py-1 px-2 w-full md:w-1/2"
                 onChange={(e) => handleSearch(e)}
               />
 
               {/* Filter By Speciality Select */}
 
-              <div className="icons flex flex-row gap-10">
+              <div className="icons flex flex-row gap-5">
                 <div className="relative inline-block text-left">
                   <FaFilter
                     className="cursor-pointer"
@@ -324,6 +330,7 @@ const ManageDoctors = () => {
                     <th className="px-4 py-2">Actions</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {doctors.length === 0 && (
                     <tr className="text-gray-700 border-b border-gray-200">
@@ -393,15 +400,19 @@ const ManageDoctors = () => {
                 {/* Modal Content */}
 
                 <div className="flex flex-col md:flex-row gap-2">
-                  <div className="w-1/3 flex flex-col">
+                  <div className="w-full flex flex-col">
                     <img
-                      src={`${IMG_URL}${selectedDoctor.profileImage}`}
+                      src={
+                        selectedDoctor.profileImage
+                          ? `${IMG_URL}${selectedDoctor.profileImage}`
+                          : imgPlaceholder
+                      }
                       alt=""
                     />
                   </div>
 
-                  <div className="w-2/3">
-                    <div className="flex flex-row justify-around py-3">
+                  <div className="w-full">
+                    <div className="flex flex-col md:flex-row justify-center items-center md:justify-around py-3">
                       <div className="flex flex-col gap-2">
                         <p className="font-bold">Nom:</p>
                         <p>
@@ -417,7 +428,7 @@ const ManageDoctors = () => {
 
                         <p className="font-bold">ID Type:</p>
 
-                        <div className="flex flex-row gap-2 items-center">
+                        <div className="flex flex-row gap-2 items-center justify-center md:justify-start">
                           <p>{selectedDoctor.idType}</p>
                           <FaEye
                             className="cursor-pointer"
@@ -431,10 +442,10 @@ const ManageDoctors = () => {
                         <p>{selectedDoctor.idNumber}</p>
                       </div>
 
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2 ">
                         <p className="font-bold"># License Médical:</p>
 
-                        <div className="flex flex-row gap-2 items-center">
+                        <div className="flex flex-row gap-2 items-center justify-center md:justify-start">
                           <p>{selectedDoctor.licenseNumber}</p>
                           <FaEye
                             className="cursor-pointer"

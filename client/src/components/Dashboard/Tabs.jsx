@@ -23,11 +23,7 @@ const getTabs = (role) => {
         id: "consultations",
         path: "consultations"
       },
-      {
-        name: "Mes Résultats",
-        id: "results",
-        path: "results"
-      },
+
       {
         name: "Paramètres",
         id: "settings",
@@ -61,11 +57,7 @@ const getTabs = (role) => {
         id: "consultations",
         path: "consultations"
       },
-      {
-        name: "Mes Patients",
-        id: "patients",
-        path: "patients"
-      },
+
       {
         name: "Paramètres",
         id: "settings",

@@ -7,18 +7,16 @@ router.get("/:id", appointmentController.getAppointmentById);
 router.get("/user/:id", appointmentController.getUserAppointments);
 router.get("/doctor/:id", appointmentController.getDoctorAppointments);
 router.put("/cancel/:id", appointmentController.cancelAppointment);
+router.put("/reject/:id", appointmentController.rejectAppointment);
 router.put("/modify/:id", appointmentController.modifyAppointmentById);
-router.post(
-  "/schedule",
-  verifyRole("doctor"),
-  appointmentController.scheduleAppointment
-);
+router.post("/", appointmentController.scheduleAppointment);
 
+router.put("/message/:id", appointmentController.createMessage);
 // Admin related routes
 router.get("/", verifyRole("admin"), appointmentController.getAllAppointments);
 router.delete(
-  "/delete/:id",
-  verifyRole("admin"),
+  "/:id",
+
   appointmentController.deleteAppointmentById
 );
 

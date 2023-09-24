@@ -11,7 +11,7 @@ import AuthContext from "../../context/AuthContext";
 const linkClassName = `text-[16px] font-normal whitespace-nowrap text-[#1E1E1E] lg:text-[18px] hover:text-blue-500 transition-all duration-500`;
 
 const mobileLinkClassName =
-  "w-full py-6 text-center hover:opacity-90 text-2xl text-white";
+  "w-full py-4 text-center hover:opacity-90 text-2xl text-white";
 
 const Navbar = () => {
   const { auth } = useAuth();
@@ -43,10 +43,18 @@ const Navbar = () => {
   const profileDropdown = useRef(null);
 
   const toggleMobileMenu = (e) => {
-    const hamburgerButton = e.target;
     const mobileMenuRef = mobileMenu.current;
-    mobileMenuRef.classList.toggle("hidden");
-    mobileMenuRef.classList.toggle("flex");
+    const body = document.body;
+
+    if (mobileMenuRef.classList.contains("hidden")) {
+      mobileMenuRef.classList.remove("hidden");
+      mobileMenuRef.classList.add("block");
+      body.style.overflow = "hidden"; // Prevent scrolling
+    } else {
+      mobileMenuRef.classList.remove("block");
+      mobileMenuRef.classList.add("hidden");
+      body.style.overflow = "auto"; // Allow scrolling
+    }
   };
 
   const toggleProfileDropdown = () => {
@@ -164,11 +172,11 @@ const Navbar = () => {
         id="mobile-menu"
         ref={mobileMenu}
         onClick={(e) => toggleMobileMenu(e)}
-        className="absolute w-full h-full bg-sky-300 origin-top  flex-col top-0 z-30 animate-open-menu hidden"
+        className="absolute w-full h-full bg-sky-300 origin-top  flex-col top-0 z-30 animate-open-menu hidden md:hidden"
       >
         <button className="text-8xl self-end px-6 text-white">&times;</button>
         <nav
-          className="flex min-h-screen flex-col items-center py-8"
+          className="flex h-screen  flex-col items-center py-4"
           aria-label="mobile"
         >
           <Link to="/" className={`${mobileLinkClassName} mr-2`}>
@@ -193,6 +201,11 @@ const Navbar = () => {
           ) : (
             <Link to="/login" className={mobileLinkClassName}>
               Inscription
+            </Link>
+          )}
+          {auth?.email && (
+            <Link to="/logout" className={`${mobileLinkClassName} mr-2`}>
+              Logout
             </Link>
           )}
         </nav>

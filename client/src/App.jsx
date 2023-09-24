@@ -1,6 +1,7 @@
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { useEffect } from "react";
+
 import jwt_decode from "jwt-decode";
 
 import useLogout from "./hooks/useLogout";
@@ -13,6 +14,10 @@ import Signup from "./components/Signup";
 import RequireAuth from "./components/RequireAuth";
 import Authenticated from "./components/Authenticated";
 import Doctor from "./components/Profiles/Doctor";
+
+// Appointments
+
+import Appointment from "./components/Appointment";
 
 // Dashboard
 import Dashboard from "./components/Dashboard";
@@ -28,6 +33,10 @@ import Labs from "./components/Labs";
 // Hooks
 
 import useAccessToken from "./hooks/useAccessToken";
+import Demandes from "./components/Dashboard/tabs/doctor/Demandes";
+import Contact from "./components/Contact";
+import ManageRatings from "./components/Dashboard/tabs/admin/ManageRatings";
+import PatientHome from "./components/Dashboard/tabs/patient/PatientHome";
 
 const App = () => {
   const location = useLocation();
@@ -51,13 +60,18 @@ const App = () => {
   };
   return (
     <Routes>
+      {/* Home Route */}
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
+        <Route path="contact" element={<Contact />} />
       </Route>
+
+      {/* Doctors Routes */}
       <Route path="doctors" element={<Layout />}>
         <Route index element={<Doctors />} />
       </Route>
 
+      {/* Lab Routes */}
       <Route path="labs" element={<Layout />}>
         <Route index element={<Labs />} />
       </Route>
@@ -67,6 +81,8 @@ const App = () => {
         <Route index element={<Doctor />} />
       </Route>
 
+      {/* Dashboard Routes */}
+
       {accessToken && (
         <Route path="dashboard/*" element={<Dashboard />}>
           {decodedToken.UserInfo.role === "admin" ? (
@@ -74,20 +90,35 @@ const App = () => {
           ) : decodedToken.UserInfo.role === "doctor" ? (
             <Route index element={<DoctorHome />} />
           ) : (
-            <Route index element={<AdminHome />} />
+            <Route index element={<PatientHome />} />
           )}
           <Route path="profile" element={<Profile />} />
+
+          {/* Admin Routes */}
+
           <Route path="admin/patients" element={<ManagePatients />} />
           <Route path="admin/doctors" element={<ManageDoctors />} />
           <Route path="admin/labs" element={<ManageLabs />} />
+          <Route path="admin/reviews" element={<ManageRatings />} />
 
           {/* End Admin Routes */}
+
+          <Route path="consultations">
+            <Route index element={<Demandes />} />
+          </Route>
+
+          {/* Appointment Routes */}
+
+          {/*  Settings Route */}
 
           <Route path="settings" element={<Settings />} />
         </Route>
       )}
 
-      {/* Admin Routes */}
+      {/* End Dashboard Routes */}
+
+      {/* Appointment Route */}
+      <Route path="appointment/:apptId" element={<Appointment />} />
 
       <Route path="login" element={<Login />} />
       <Route path="signup" element={<Signup />} />

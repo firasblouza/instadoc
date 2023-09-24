@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 
 import axios from "../api/axios";
 
+import AvgRating from "./Profiles/AvgRating";
+
 const Doctors = () => {
   const [doctors, setDoctors] = useState([]);
   const [initialDoctors, setInitialDoctors] = useState([]);
@@ -14,10 +16,26 @@ const Doctors = () => {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
 
-  const IMG_URL = "https://instadoc-api.onrender.com/uploads/";
+  const [star, setStar] = useState(0);
+  const [avgRating, setAvgRating] = useState(0);
+
+  // const IMG_URL = "http://localhost:3500/uploads/";
+  const IMG_URL = "https://instadoc-server.vercel.app/uploads/";
 
   const effectRan = useRef(false);
   const navigate = useNavigate();
+
+  const calculateAverageRating = (ratings) => {
+    if (ratings.length === 0) {
+      return 0; // Handle the case where there are no ratings.
+    }
+
+    const sumOfRatings = ratings.reduce(
+      (total, rating) => total + rating.rating,
+      0
+    );
+    return sumOfRatings / ratings.length;
+  };
 
   // Function to fetch the doctors
 
@@ -25,7 +43,24 @@ const Doctors = () => {
     setDoctors([]);
     try {
       const response = await axios.get("/doctors");
-      setDoctors(response.data);
+      const approvedDoctors = response.data.filter(
+        (doctor) => doctor.verifiedStatus === "approved"
+      );
+
+      // Create an array to store promises for fetching ratings for each doctor
+      const fetchRatingsPromises = approvedDoctors.map(async (doctor) => {
+        const docRatings = await axios.get(`/ratings/doctor/${doctor._id}`);
+        const avgRating = calculateAverageRating(docRatings.data);
+        return {
+          ...doctor,
+          rating: avgRating // Add the ratings to the doctor object
+        };
+      });
+
+      // Wait for all promises to resolve
+      const doctorsWithRatings = await Promise.all(fetchRatingsPromises);
+
+      setDoctors(doctorsWithRatings);
       setInitialDoctors(response.data);
     } catch (error) {
       if (error.response && error.response.status === 401) {
@@ -88,6 +123,20 @@ const Doctors = () => {
     );
   };
 
+  const fetchRatings = async (doctorId) => {
+    try {
+      if (docRatings && docRatings.data.length > 0) {
+        const docAvgRating = calculateAverageRating(docRatings.data);
+        setAvgRating(docAvgRating);
+        return docAvgRating;
+      } else {
+        return 0;
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <section className="consultDoctor w-full min-h-screen flex flex-col items-center pt-10">
       <div className="w-full h-auto flex flex-col justify-start items-center gap-5">
@@ -142,7 +191,7 @@ const Doctors = () => {
                     <img
                       src={`${IMG_URL}${doctor.profileImage}`}
                       alt={`${doctor.firstName} ${doctor.lastName}`}
-                      className="w-5/6 h-auto rounded-lg "
+                      className="max-w-5/6 h-[270px] rounded-lg "
                     />
                     <h1 className="text-xl font-bold my-1 text-[#1E1E1E]">
                       {doctor.firstName} {doctor.lastName}
@@ -151,12 +200,9 @@ const Doctors = () => {
                       {capitalize(doctor.speciality)}
                     </h2>
                     {/* Add 5 rating stars  */}
+
                     <div className="flex flex-row justify-center items-center my-2 gap-1">
-                      <FaStar className="text-yellow-500" />
-                      <FaStar className="text-yellow-500" />
-                      <FaStar className="text-yellow-500" />
-                      <FaStarHalfAlt className="text-yellow-500" />
-                      <FaRegStar className="text-yellow-500" />
+                      <AvgRating rating={doctor.rating} />
                     </div>
                     <button
                       className="bg-blue-500 w-5/6 text-white rounded-lg px-2 py-1 mt-2"

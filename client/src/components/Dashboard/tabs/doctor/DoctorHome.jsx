@@ -20,7 +20,8 @@ const DoctorHome = () => {
   const [initialAvailability, setInitialAvailability] = useState([]);
   const [uploadedFile, setUploadedFile] = useState(null);
 
-  const IMG_URL = "https://instadoc-api.onrender.com/uploads/";
+  // const IMG_URL = "http://localhost:3500/uploads/";
+  const IMG_URL = "https://instadoc-server.vercel.app/uploads/";
 
   const [doctor, setDoctor] = useState({
     firstName: "",
@@ -145,21 +146,21 @@ const DoctorHome = () => {
   const getDayOfWeek = (day) => {
     switch (day) {
       case 0:
-        return "Lundi";
-      case 1:
-        return "Mardi";
-      case 2:
-        return "Mercredi";
-      case 3:
-        return "Jeudi";
-      case 4:
-        return "Vendredi";
-      case 5:
-        return "Samedi";
-      case 6:
         return "Dimanche";
-      default:
+      case 1:
         return "Lundi";
+      case 2:
+        return "Mardi";
+      case 3:
+        return "Mercredi";
+      case 4:
+        return "Jeudi";
+      case 5:
+        return "Vendredi";
+      case 6:
+        return "Samedi";
+      default:
+        return "";
     }
   };
 
@@ -228,45 +229,50 @@ const DoctorHome = () => {
           </div>
         </div>
 
-        <div className="availabilityTable flex flex-col bg-white rounded-lg shadow-lg p-2  overflow-x-scroll lg:overflow-x-hidden overflow-y-auto">
-          <div className="flex flex-col md:flex-row w-full justify-between gap-5 mb-2">
+        <div className="availabilityTable flex flex-col bg-white w-full rounded-lg shadow-lg p-2  overflow-x-scroll lg:overflow-x-hidden overflow-y-auto">
+          <div className="flex flex-row w-full justify-between gap-5 mb-4">
             <p className="text-1xl font-bold">Disponibilité :</p>
             <FaEdit
               className="configureBtn text-yellow-500 cursor-pointer text-xl"
               onClick={() => setShowModal(true)}
             />
           </div>
-
-          <table className="availabilityGroup w-full table-fixed border">
-            <tbody>
-              {doctor.availability.map((day, index) => (
-                <tr key={index}>
-                  <td className="text-xl font-bold border">
-                    {getDayOfWeek(day.dayOfWeek)}:
-                  </td>
-                  <td className="border text-center">
-                    {day.isAvailable ? (
-                      <p className="text-green-500 font-bold">Disponible</p>
-                    ) : (
-                      <p className="text-red-500 font-bold">Non disponible</p>
-                    )}
-                  </td>
-                  <td className="text-xl font-bold text-center ">De :</td>
-                  <td>
-                    <p className="text-xl font-medium text-center">
-                      {day.startTime}
-                    </p>
-                  </td>
-                  <td className="text-xl font-bold text-center">à :</td>
-                  <td>
-                    <p className="text-xl font-medium text-center">
-                      {day.endTime}
-                    </p>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto w-full">
+            <table className="min-w-full table-auto availabilityGroup w-full border">
+              <tbody>
+                {doctor.availability.map((day, index) => (
+                  <tr key={index}>
+                    <td className="text-xl font-bold border px-2 py-2">
+                      {getDayOfWeek(day.dayOfWeek)}:
+                    </td>
+                    <td className="border text-center px-2 py-2">
+                      {day.isAvailable ? (
+                        <p className="text-green-500 font-bold">Disponible</p>
+                      ) : (
+                        <p className="text-red-500 font-bold">Non disponible</p>
+                      )}
+                    </td>
+                    <td className="text-xl font-bold text-center px-2 py-2 whitespace-nowrap">
+                      De :
+                    </td>
+                    <td>
+                      <p className="text-xl font-medium text-center">
+                        {day.startTime}
+                      </p>
+                    </td>
+                    <td className="text-xl font-bold text-center px-2 py-2 whitespace-nowrap">
+                      à :
+                    </td>
+                    <td>
+                      <p className="text-xl font-medium text-center">
+                        {day.endTime}
+                      </p>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {showModal && (
@@ -279,58 +285,60 @@ const DoctorHome = () => {
             secondAction={resetAvailability}
             secondButton={"Reset"}
           >
-            <table className="w-full table-fixed border">
-              <tbody>
-                {doctor.availability.map((day, index) => (
-                  <tr key={index}>
-                    <td className="text-xl font-bold border">
-                      {getDayOfWeek(day.dayOfWeek)}:
-                    </td>
-                    <td className="border text-center">
-                      <input
-                        type="checkbox"
-                        name={getDayOfWeek(day.dayOfWeek)}
-                        id={getDayOfWeek(day.dayOfWeek)}
-                        checked={newAvailability[index].isAvailable}
-                        onChange={(e) => changeAvailability(index, e)}
-                      />
-                    </td>
-                    <td className="text-xl font-bold text-center ">De :</td>
-                    <td>
-                      <select
-                        name="startTime"
-                        id="startTime"
-                        className="border-2 border-gray-300 rounded-lg p-1"
-                        value={newAvailability[index].startTime}
-                        onChange={(e) => changeStartTime(index, e)}
-                      >
-                        {startTime.map((time, index) => (
-                          <option key={index} value={time}>
-                            {time}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="text-xl font-bold text-center">à :</td>
-                    <td>
-                      <select
-                        name="endTime"
-                        id="endTime"
-                        className="border-2 border-gray-300 rounded-lg p-1"
-                        value={newAvailability[index].endTime}
-                        onChange={(e) => changeEndTime(index, e)}
-                      >
-                        {endTime.map((time, index) => (
-                          <option key={index} value={time}>
-                            {time}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="overflow-x-auto min-w-full">
+              <table className="w-full table-auto border">
+                <tbody>
+                  {doctor.availability.map((day, index) => (
+                    <tr key={index}>
+                      <td className="text-xl font-bold border">
+                        {getDayOfWeek(day.dayOfWeek)}:
+                      </td>
+                      <td className="border text-center">
+                        <input
+                          type="checkbox"
+                          name={getDayOfWeek(day.dayOfWeek)}
+                          id={getDayOfWeek(day.dayOfWeek)}
+                          checked={newAvailability[index].isAvailable}
+                          onChange={(e) => changeAvailability(index, e)}
+                        />
+                      </td>
+                      <td className="text-xl font-bold text-left md:text-center px-2 py-2 whitespace-nowrap  gap-3">
+                        De :{"  "}
+                        <select
+                          name="startTime"
+                          id="startTime"
+                          className="border-2 border-gray-300 rounded-lg p-1"
+                          value={newAvailability[index].startTime}
+                          onChange={(e) => changeStartTime(index, e)}
+                        >
+                          {startTime.map((time, index) => (
+                            <option key={index} value={time}>
+                              {time}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="text-xl font-bold text-left md:text-center px-2 py-2 whitespace-nowrap flex flex-row gap-3">
+                        à :
+                        <select
+                          name="endTime"
+                          id="endTime"
+                          className="border-2 border-gray-300 rounded-lg p-1"
+                          value={newAvailability[index].endTime}
+                          onChange={(e) => changeEndTime(index, e)}
+                        >
+                          {endTime.map((time, index) => (
+                            <option key={index} value={time}>
+                              {time}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </Modal>
         )}
       </section>

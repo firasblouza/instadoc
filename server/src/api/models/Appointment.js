@@ -17,22 +17,42 @@ const appointmentSchema = new Schema({
     required: true
   },
   date: {
-    type: Date,
+    type: String,
     required: true
+  },
+  notes: {
+    type: Array
   },
   duration: {
     type: Number,
-    required: true
+    required: true,
+    default: 1
   },
-  type: {
-    type: String,
-    enum: ["Chat", "Video"],
-    required: true
-  },
+
+  messages: [
+    {
+      senderId: {
+        type: String
+      },
+      senderName: {
+        type: String
+      },
+      role: {
+        type: String
+      },
+      content: {
+        type: String
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ],
   status: {
     type: String,
-    enum: ["Scheduled", "Completed", "Cancelled"],
-    default: "Scheduled"
+    enum: ["pending", "approved", "completed", "cancelled", "rejected"],
+    default: "pending"
   }
 });
 

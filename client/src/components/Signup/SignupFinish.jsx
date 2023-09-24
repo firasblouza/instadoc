@@ -28,10 +28,10 @@ const SignupFinish = ({
       <h2 className="text-l font-bold text-gray-800 my-3">
         Select a profile image
       </h2>
-      <div className="profileUpload w-5/6 h-8 bg-transparent rounded-full my-3 flex justify-around items-center px-3 flex-row max-w-[280px]">
+      <div className="profileUpload w-full md:w-5/6 h-auto bg-transparent rounded-full my-3 flex justify-around items-center px-3 flex-col md:flex-row md:max-w-[280px]">
         <button
           type="button"
-          className="relative overflow-hidden bg-blue-400 hover:bg-blue-300 max-w-[120px] w-full h-8 text-white font-bold text-[16px] px-1 rounded-md my-3 flex justify-center items-center cursor-pointer"
+          className="relative overflow-hidden bg-blue-400 hover:bg-blue-300 md:max-w-[120px] w-full h-8 text-white font-bold text-[16px] px-1 rounded-md my-3 flex justify-center items-center cursor-pointer"
         >
           <FaUpload className="mr-2" />
           Upload
@@ -54,10 +54,10 @@ const SignupFinish = ({
       <h2 className="text-l font-bold text-gray-800 my-3">
         Select a resumé image
       </h2>
-      <div className="cvUpload w-5/6 h-8 bg-transparent rounded-full my-3 flex justify-around items-center px-3 flex-row max-w-[280px]">
+      <div className="cvUpload w-full md:w-5/6 h-auto bg-transparent rounded-full my-3 flex justify-around items-center px-3 flex-col md:flex-row md:max-w-[280px]">
         <button
           type="button"
-          className="relative overflow-hidden bg-blue-400 hover:bg-blue-300 max-w-[120px] w-full h-8 text-white font-bold text-[16px] px-1 rounded-md my-3 flex justify-center items-center cursor-pointer"
+          className="relative overflow-hidden bg-blue-400 hover:bg-blue-300 md:max-w-[120px] w-full h-8 text-white font-bold text-[16px] px-1 rounded-md my-3 flex justify-center items-center cursor-pointer"
         >
           <FaUpload className="mr-2" />
           Upload
@@ -75,11 +75,11 @@ const SignupFinish = ({
           {userData.cvImage ? userData.cvImage.name : "No file chosen"}
         </p>
       </div>
-      <div className="flex flex-col w-5/6 h-8  sm:justify-center items-center sm:flex-row gap-2 my-3">
+      <div className="flex flex-col w-full px-4 md:w-5/6 h-8  sm:justify-center items-center sm:flex-row gap-2 my-3">
         <button
           name="back"
           type="button"
-          className="bg-blue-400 hover:bg-blue-300 max-w-[140px] w-full h-8 text-white font-bold text-[16px] px-4 rounded-md"
+          className="bg-blue-400 hover:bg-blue-300 md:max-w-[140px] w-full h-8 text-white font-bold text-[16px] px-4 rounded-md"
           onClick={(e) => changeStep(e)}
         >
           Back
@@ -87,7 +87,7 @@ const SignupFinish = ({
         <button
           name="doctorSignup"
           type="submit"
-          className="bg-blue-400 hover:bg-blue-300 max-w-[140px] w-full h-8 text-white font-bold text-[16px] px-4 rounded-md"
+          className="bg-blue-400 hover:bg-blue-300 md:max-w-[140px] w-full h-8 text-white font-bold text-[16px] px-4 rounded-md"
         >
           Signup
         </button>

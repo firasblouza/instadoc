@@ -47,7 +47,16 @@ const ManageLabs = () => {
     error: false
   });
 
-  const IMG_URL = "https://instadoc-api.onrender.com/uploads/";
+  useEffect(() => {
+    if (showAddModal || showEditModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+  }, [showAddModal, showEditModal]);
+
+  // const IMG_URL = "http://localhost:3500/uploads/";
+  const IMG_URL = "https://instadoc-server.vercel.app/uploads/";
   const IMG_Placeholder = "imagePlaceholder.png";
 
   const effectRan = useRef(false);
@@ -199,7 +208,7 @@ const ManageLabs = () => {
       const { accessToken } = useAccessToken();
       if (accessToken && accessToken !== "") {
         const formData = new FormData();
-        formData.append("lab", selectedLab);
+        formData.append("lab", JSON.stringify(selectedLab));
         if (editFile) {
           formData.append("labImage", editFile);
         }
@@ -208,9 +217,9 @@ const ManageLabs = () => {
           formData,
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`
-            },
-            "Content-Type": "multipart/form-data"
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "multipart/form-data"
+            }
           }
         );
         if (response.status === 200) {
