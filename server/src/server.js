@@ -15,7 +15,8 @@ const io = require("socket.io")(IO_PORT, {
     origin: [
       "http://localhost:5173",
       "http://127.0.0.1:5173",
-      "https://instadoc.vercel.app"
+      "https://instadoc.vercel.app",
+      "https://instadoc-server.vercel.app"
     ]
   }
 });
