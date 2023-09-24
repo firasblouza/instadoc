@@ -20,7 +20,8 @@ const Doctors = () => {
   const [avgRating, setAvgRating] = useState(0);
 
   // const IMG_URL = "http://localhost:3500/uploads/";
-  const IMG_URL = "https://instadoc-server.vercel.app/uploads/";
+  const { API_URL } = useContext(AuthContext);
+  const IMG_URL = `${API_URL}/uploads/`;
 
   const effectRan = useRef(false);
   const navigate = useNavigate();
