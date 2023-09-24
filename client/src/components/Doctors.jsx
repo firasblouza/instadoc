@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import { FaSync } from "react-icons/fa";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { doctorSpecialties } from "../data/data";
@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "../api/axios";
 
 import AvgRating from "./Profiles/AvgRating";
+import AuthContext from "../context/AuthContext";
 
 const Doctors = () => {
   const [doctors, setDoctors] = useState([]);
