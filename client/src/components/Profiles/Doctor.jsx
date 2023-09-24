@@ -45,7 +45,7 @@ const Doctor = () => {
 
   const { API_URL } = useContext(AuthContext);
   const IMG_URL = `${API_URL}/uploads/`;
-  const IMG_Placeholder = `${API_URL}imagePlaceholder.png`;
+  const IMG_Placeholder = `${API_URL}/imagePlaceholder.png`;
 
   const calculateAverageRating = (ratings) => {
     if (ratings.length === 0) {
