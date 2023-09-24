@@ -9,10 +9,10 @@ const mongoose = require("mongoose");
 const corsOptions = require("./config/corsOptions");
 const verifyJWT = require("./api/middleware/verifyJWT");
 const cookieParser = require("cookie-parser");
-const httpServer = require("http").createServer(app);
+const http = require("http").createServer(app);
 const credentials = require("./api/middleware/credentials");
 
-const io = require("socket.io")(httpServer);
+const io = require("socket.io")(http);
 
 io.use((socket, next) => {
   const apptId = socket.handshake.auth.apptId;
@@ -92,7 +92,9 @@ app.use((req, res) => {
 
 mongoose.connection.once("open", () => {
   console.log("Connected to MongoDB");
-  app.listen(PORT, () => {
-    console.log("Server is running on port ", PORT);
+  http.listen(process.env.PORT || 3000, function () {
+    var host = http.address().address;
+    var port = http.address().port;
+    console.log("App listening at http://%s:%s", host, port);
   });
 });
