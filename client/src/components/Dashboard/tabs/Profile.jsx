@@ -1,27 +1,29 @@
 import { useState, useEffect, useRef, useContext } from "react";
-import { FaUpload, FaEdit, FaSave } from "react-icons/fa";
+import { FaUpload, FaEdit, FaSave, FaUser, FaEnvelope, FaPhone, FaCalendarAlt, FaFileAlt, FaCamera } from "react-icons/fa";
 import axios from "../../../api/axios";
-import jwt_decode from "jwt-decode";
 import useAccessToken from "../../../hooks/useAccessToken";
 import AuthContext from "../../../context/AuthContext";
+import LoadingButton from "../../LoadingButton";
+import MedicalLoader from "../../MedicalLoader";
 
 const Profile = () => {
   const effectRan = useRef(false);
+  const { accessToken, decodedToken } = useAccessToken();
 
   const [isModifying, setIsModifying] = useState(false);
   const [uploadedProfile, setUploadedProfile] = useState(null);
   const [uploadedCV, setUploadedCV] = useState(null);
-
-  const [statistics, setStatistics] = useState({
-    consultations: 0
-  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   const [user, setUser] = useState({
     firstName: "",
     lastName: "",
     email: "",
     dateOfBirth: "",
-    profileImage: null
+    phoneNumber: "",
+    profileImage: null,
+    role: ""
   });
 
   const { API_URL } = useContext(AuthContext);
@@ -31,7 +33,7 @@ const Profile = () => {
   // Save Changes
   const saveChanges = async () => {
     try {
-      const { accessToken, decodedToken } = useAccessToken();
+      setSaving(true);
       if (accessToken && accessToken !== "" && decodedToken) {
         const formData = new FormData();
         formData.append("user", JSON.stringify(user));
@@ -57,14 +59,38 @@ const Profile = () => {
           }
         );
         if (response.status === 200) {
+          // Update user data with the response to get the new file paths
+          setUser(prevUser => ({
+            ...prevUser,
+            ...response.data,
+            role: prevUser.role // Preserve the role
+          }));
           setIsModifying(false);
-          window.alert("Profile updated successfully");
+          // DON'T clear uploaded files - keep the preview showing until page refresh
+          // This prevents the broken image issue and provides better UX
+          // setUploadedProfile(null);
+          // setUploadedCV(null);
+          
+          // Show success message with modern styling
+          const successDiv = document.createElement('div');
+          successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-pulse';
+          successDiv.textContent = 'Profil mis à jour avec succès!';
+          document.body.appendChild(successDiv);
+          setTimeout(() => document.body.removeChild(successDiv), 3000);
         }
       } else {
         console.log("No access token found");
       }
-    } catch {
-      console.log("An error occurred while updating the user");
+    } catch (error) {
+      console.log("An error occurred while updating the user:", error);
+      // Show error message
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+      errorDiv.textContent = 'Erreur lors de la mise à jour du profil';
+      document.body.appendChild(errorDiv);
+      setTimeout(() => document.body.removeChild(errorDiv), 3000);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -82,7 +108,7 @@ const Profile = () => {
     if (effectRan.current === false) {
       const fetchUser = async () => {
         try {
-          const { accessToken, decodedToken } = useAccessToken();
+          setLoading(true);
           if (accessToken && accessToken !== "" && decodedToken) {
             const path =
               decodedToken.UserInfo.role === "user" ||
@@ -97,8 +123,7 @@ const Profile = () => {
                 }
               }
             );
-            setUser(response.data);
-            console.log(response.data);
+            setUser({...response.data, role: decodedToken.UserInfo.role});
           } else {
             console.log("No id found");
           }
@@ -110,6 +135,8 @@ const Profile = () => {
           } else {
             console.log("An error occurred while fetching data:", err.message);
           }
+        } finally {
+          setLoading(false);
         }
       };
       fetchUser();
@@ -118,249 +145,274 @@ const Profile = () => {
     return () => {
       effectRan.current = true;
     };
-  }, []);
+  }, [accessToken, decodedToken]);
+
+  if (loading) {
+    return (
+      <div className="w-full h-[calc(100vh-60px)] flex items-center justify-center">
+        <MedicalLoader type="heartbeat" />
+      </div>
+    );
+  }
 
   return (
-    <section className="profile w-full h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] overflow-y-auto ">
-      {/* Create a page to view the user data and the ability to modify them */}
-
-      <div className="flex flex-col  w-full">
-        <h1 className="text-3xl font-bold text-[#1E1E1E] my-2 text-center">
-          Profile
-        </h1>
-      </div>
-
-      <div className="flex flex-col justify-center">
-        <div className="flex flex-col w-full justify-center items-center pb-5 ">
-          <div className="flex flex-col">
-            <h1 className="text-1xl font-bold text-[#1E1E1E]  my-3">
-              Personal Information
-            </h1>
+    <section className="w-full bg-gradient-to-br from-primary-50 via-white to-secondary-50 p-4">
+      {/* Header */}
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sky-600 text-sm font-medium mb-4">
+            <FaUser className="mr-2" />
+            Mon Profil
           </div>
-          <div className="mainContainer flex flex-col md:flex-row justify-center items-start  rounded-lg shadow-lg px-3 mb-9 md:mb-0 ">
-            <div className="infoContainer flex flex-col   rounded-lg shadow-lg px-3 ">
-              <div className="flowControlContainer   flex flex-col md:flex-row w-auto  gap-4">
-                <div className="imageContainer  flex flex-col justify-start rounded-lg w-full">
+          <h1 className="heading-1 text-neutral-900 mb-2">
+            Gérez votre{' '}
+            <span className="bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
+              profil
+            </span>
+          </h1>
+          <p className="body-large text-neutral-600 max-w-2xl mx-auto">
+            Gérez vos informations personnelles et préférences
+          </p>
+        </div>
+
+        {/* Main Profile Card */}
+        <div className="card overflow-hidden mb-6">
+          {/* Profile Header */}
+          <div className="bg-gradient-to-r from-sky-500 to-blue-600 px-8 py-6">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              {/* Profile Image */}
+              <div className="relative group">
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white/30 shadow-lg">
                   <img
                     src={
-                      user.profileImage
-                        ? uploadedProfile
-                          ? URL.createObjectURL(uploadedProfile)
-                          : `${IMG_URL}${user.profileImage}`
+                      uploadedProfile
+                        ? URL.createObjectURL(uploadedProfile)
+                        : user.profileImage
+                        ? `${IMG_URL}${user.profileImage}`
                         : imgPlaceholder
                     }
-                    alt=""
-                    className=" rounded-lg w-[300px] h-[250px]"
+                    alt="Profile"
+                    className="w-full h-full object-cover"
                   />
-                  {/* Avatar Upload Button */}
-
-                  <div className="avatarUpload bg-transparent   rounded-full my-3 flex justify-around items-center px-5 md:px-1 flex-col md:flex-row md:md:max-w-[280px] h-auto">
-                    <button
-                      type="button"
-                      className={`relative overflow-hidden ${
-                        !isModifying
-                          ? "bg-gray-400"
-                          : "bg-blue-400 hover:bg-blue-300 cursor-pointer"
-                      } w-full md:max-w-[120px] h-8 text-white font-bold text-[16px]  md:px-1 rounded-md my-3 flex justify-center items-center `}
-                    >
-                      <FaUpload className="mr-2" />
-                      Upload
-                      <input
-                        type="file"
-                        accept="image/*"
-                        name="profileImage"
-                        disabled={!isModifying}
-                        className="absolute top-0 left-0 opacity-0 w-full h-full cursor-pointer transform scale-[3]"
-                        placeholder="Profile Image"
-                        onChange={(e) => handleFileUpload(e)}
-                      />
-                    </button>
-
-                    <p className="text-[12px] text-gray-400">
-                      {uploadedProfile
-                        ? uploadedProfile.name
-                        : "No file chosen"}
-                    </p>
-                  </div>
                 </div>
-
-                <div className="flex flex-col w-full items-center text-center">
-                  <div className="formGroup">
-                    <label
-                      htmlFor="firstName"
-                      className="text-[#1E1E1E] text-sm font-bold mb-2 px-2"
-                    >
-                      Prénom :{" "}
-                    </label>
-
-                    <input
-                      type="text"
-                      name="firstName"
-                      id="firstName"
-                      value={user.firstName}
-                      disabled={!isModifying}
-                      onChange={(e) =>
-                        setUser({ ...user, firstName: e.target.value })
-                      }
-                      className="border border-grey-300 md:max-w-[280px] w-full md:w-5/6 h-8 rounded-full shadow-md my-2 flex justify-around items-center overflow-hidden py-2 px-5"
-                    />
-                  </div>
-
-                  <div className="formGroup">
-                    <label
-                      htmlFor="lastName"
-                      className="text-[#1E1E1E] text-sm font-bold mb-2 px-2"
-                    >
-                      Nom :{" "}
-                    </label>
-
-                    <input
-                      type="text"
-                      name="lastName"
-                      id="lastName"
-                      value={user.lastName}
-                      disabled={!isModifying}
-                      onChange={(e) =>
-                        setUser({ ...user, lastName: e.target.value })
-                      }
-                      className="border border-grey-300 md:max-w-[280px] w-full md:w-5/6 h-8 rounded-full shadow-md my-2 flex justify-around items-center overflow-hidden py-2 px-5"
-                    />
-                  </div>
-                  <div className="formGroup">
-                    <label
-                      htmlFor="email"
-                      className="text-[#1E1E1E] text-sm font-bold mb-2 px-2"
-                    >
-                      Email :{" "}
-                    </label>
-
-                    <input
-                      type="text"
-                      name="email"
-                      id="email"
-                      value={user.email}
-                      disabled={!isModifying}
-                      onChange={(e) =>
-                        setUser({ ...user, email: e.target.value })
-                      }
-                      className="border border-grey-300 md:max-w-[280px] w-full md:w-5/6 h-8 rounded-full shadow-md my-2 flex justify-around items-center overflow-hidden py-2 px-5"
-                    />
-                  </div>
-
-                  <div className="formGroup">
-                    <label
-                      htmlFor="email"
-                      className="text-[#1E1E1E] text-sm font-bold mb-2 px-2"
-                    >
-                      Phone Number :{" "}
-                    </label>
-
-                    <input
-                      type="text"
-                      name="phoneNumber"
-                      id="phoneNumber"
-                      value={user.phoneNumber ? user.phoneNumber : ""}
-                      disabled={!isModifying}
-                      onChange={(e) =>
-                        setUser({ ...user, phoneNumber: e.target.value })
-                      }
-                      className="border border-grey-300 md:max-w-[280px] w-full md:w-5/6 h-8 rounded-full shadow-md my-2 flex justify-around items-center overflow-hidden py-2 px-5"
-                    />
-                  </div>
-
-                  <div className="formGroup">
-                    <label
-                      htmlFor="dateOfBirth"
-                      className="text-[#1E1E1E] text-sm font-bold mb-2 px-2"
-                    >
-                      Date du Naissance :{" "}
-                    </label>
-
-                    <input
-                      type="date"
-                      name="dateOfBirth"
-                      id="dateOfBirth"
-                      defaultValue={user.dateOfBirth.substring(0, 10)}
-                      onChange={(e) => (user.dateOfBirth = e.target.value)}
-                      disabled={!isModifying}
-                      className="border border-grey-300 md:max-w-[280px] w-full md:w-5/6 h-8 rounded-full shadow-md my-2 flex justify-around items-center py-2 px-5"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="flex flex-col w-full md:w-auto md:flex-row gap-3 justify-center px-5 py-5 md:px-0">
-                <button
-                  type="button"
-                  className={`relative overflow-hidden ${
-                    !isModifying
-                      ? "bg-blue-400 hover:bg-blue-300"
-                      : "bg-red-400 hover:bg-red-300"
-                  } md:max-w-[120px] w-full h-8 text-white font-bold text-[16px] px-1 rounded-md my-2 flex justify-center items-center cursor-pointer`}
-                  onClick={() => setIsModifying(!isModifying)}
-                >
-                  <FaEdit className="mr-2" />
-                  {isModifying ? "Cancel" : "Edit"}
-                </button>
-                <button
-                  type="submit"
-                  className={`relative overflow-hidden ${
-                    !isModifying
-                      ? "bg-gray-400"
-                      : "bg-green-400 hover:bg-green-300 cursor-pointer"
-                  } md:max-w-[120px] w-full h-8 text-white font-bold text-[16px] px-1 rounded-md my-2 flex justify-center items-center `}
-                  disabled={!isModifying}
-                  onClick={saveChanges}
-                >
-                  <FaSave className="mr-2" />
-                  Save
-                </button>
-              </div>
-            </div>
-
-            {/* Doctor CV Section */}
-
-            {user.role === "doctor" && (
-              <div className="flex flex-col w-full md:w-1/4  items-center justify-start mt-3 md:mt-0 ">
-                {/* CV Upload Button */}
-                <img
-                  src={
-                    user.cvImage
-                      ? uploadedCV
-                        ? URL.createObjectURL(uploadedCV)
-                        : `${IMG_URL}${user.cvImage}`
-                      : imgPlaceholder
-                  }
-                  className="w-1/2 md:w-4/5"
-                  alt="Doctor Resumé"
-                />
-                <div className="cvUpload bg-transparent  h-auto rounded-full my-3 flex justify-around items-center px-5 md:px-1 flex-col w-full md:max-w-[280px] ">
-                  <button
-                    type="button"
-                    className={`relative overflow-hidden ${
-                      !isModifying
-                        ? "bg-gray-400"
-                        : "bg-blue-400 hover:bg-blue-300 cursor-pointer"
-                    } w-full md:max-w-[120px] h-8 text-white font-bold text-[16px]  md:px-1 rounded-md my-3 flex justify-center items-center `}
-                  >
-                    <FaUpload className="mr-2" />
-                    Upload
+                {isModifying && (
+                  <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
+                    <FaCamera className="text-white text-xl" />
                     <input
                       type="file"
                       accept="image/*"
-                      name="cvImage"
-                      disabled={!isModifying}
-                      className="absolute top-0 left-0 opacity-0 w-full h-full cursor-pointer transform scale-[3]"
-                      placeholder="CV Image"
-                      onChange={(e) => handleFileUpload(e)}
+                      name="profileImage"
+                      className="hidden"
+                      onChange={handleFileUpload}
                     />
-                  </button>
+                  </label>
+                )}
+              </div>
 
-                  <p className="text-[12px] text-gray-400">
-                    {uploadedCV ? uploadedCV.name : "No file chosen"}
-                  </p>
+              {/* Profile Info */}
+              <div className="text-center md:text-left text-white">
+                <h2 className="text-3xl font-bold mb-2">
+                  {user.firstName} {user.lastName}
+                </h2>
+                <p className="text-blue-100 mb-1">{user.email}</p>
+                <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-sm">
+                  {user.role === 'doctor' ? '👨‍⚕️ Médecin' : user.role === 'admin' ? '👨‍💼 Administrateur' : '👤 Patient'}
                 </div>
               </div>
-            )}
+            </div>
+          </div>
+
+          {/* Profile Form */}
+          <div className="p-8">
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Personal Information */}
+              <div className="space-y-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                  <FaUser className="text-blue-600 mr-2" />
+                  Informations Personnelles
+                </h3>
+
+                {/* First Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Prénom
+                  </label>
+                  <input
+                    type="text"
+                    value={user.firstName || ''}
+                    disabled={!isModifying}
+                    onChange={(e) => setUser({ ...user, firstName: e.target.value })}
+                    className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                      !isModifying ? 'bg-gray-50 text-gray-500' : 'bg-white'
+                    }`}
+                    placeholder="Votre prénom"
+                  />
+                </div>
+
+                {/* Last Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nom
+                  </label>
+                  <input
+                    type="text"
+                    value={user.lastName || ''}
+                    disabled={!isModifying}
+                    onChange={(e) => setUser({ ...user, lastName: e.target.value })}
+                    className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                      !isModifying ? 'bg-gray-50 text-gray-500' : 'bg-white'
+                    }`}
+                    placeholder="Votre nom"
+                  />
+                </div>
+
+                {/* Date of Birth */}
+                <div>
+                  <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+                    <FaCalendarAlt className="text-blue-600 mr-2" />
+                    Date de Naissance
+                  </label>
+                  <input
+                    type="date"
+                    value={user.dateOfBirth ? user.dateOfBirth.substring(0, 10) : ''}
+                    disabled={!isModifying}
+                    onChange={(e) => setUser({ ...user, dateOfBirth: e.target.value })}
+                    className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                      !isModifying ? 'bg-gray-50 text-gray-500' : 'bg-white'
+                    }`}
+                  />
+                </div>
+              </div>
+
+              {/* Contact Information */}
+              <div className="space-y-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                  <FaEnvelope className="text-blue-600 mr-2" />
+                  Contact
+                </h3>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={user.email || ''}
+                    disabled={!isModifying}
+                    onChange={(e) => setUser({ ...user, email: e.target.value })}
+                    className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                      !isModifying ? 'bg-gray-50 text-gray-500' : 'bg-white'
+                    }`}
+                    placeholder="votre.email@example.com"
+                  />
+                </div>
+
+                {/* Phone */}
+                <div>
+                  <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+                    <FaPhone className="text-blue-600 mr-2" />
+                    Téléphone
+                  </label>
+                  <input
+                    type="tel"
+                    value={user.phoneNumber || ''}
+                    disabled={!isModifying}
+                    onChange={(e) => setUser({ ...user, phoneNumber: e.target.value })}
+                    className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                      !isModifying ? 'bg-gray-50 text-gray-500' : 'bg-white'
+                    }`}
+                    placeholder="+216 XX XXX XXX"
+                  />
+                </div>
+
+                {/* Doctor CV Section */}
+                {user.role === "doctor" && (
+                  <div>
+                    <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+                      <FaFileAlt className="text-blue-600 mr-2" />
+                      Curriculum Vitae
+                    </label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                      {user.cvImage || uploadedCV ? (
+                        <div className="space-y-3">
+                          <img
+                            src={
+                              uploadedCV
+                                ? URL.createObjectURL(uploadedCV)
+                                : user.cvImage
+                                ? `${IMG_URL}${user.cvImage}`
+                                : imgPlaceholder
+                            }
+                            alt="CV"
+                            className="mx-auto max-h-40 rounded-lg shadow-md"
+                          />
+                          {isModifying && (
+                            <label className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer transition-colors">
+                              <FaUpload className="mr-2" />
+                              Changer CV
+                              <input
+                                type="file"
+                                accept="image/*"
+                                name="cvImage"
+                                className="hidden"
+                                onChange={handleFileUpload}
+                              />
+                            </label>
+                          )}
+                        </div>
+                      ) : (
+                        isModifying && (
+                          <label className="cursor-pointer">
+                            <div className="space-y-2">
+                              <FaUpload className="mx-auto text-3xl text-gray-400" />
+                              <p className="text-gray-600">Cliquez pour télécharger votre CV</p>
+                              <p className="text-sm text-gray-400">PNG, JPG jusqu&apos;à 10MB</p>
+                            </div>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              name="cvImage"
+                              className="hidden"
+                              onChange={handleFileUpload}
+                            />
+                          </label>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 mt-8 pt-6 border-t border-gray-200">
+              <button
+                onClick={() => setIsModifying(!isModifying)}
+                className={`flex items-center justify-center px-6 py-3 rounded-lg font-semibold transition-all ${
+                  !isModifying
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg'
+                    : 'bg-gray-600 hover:bg-gray-700 text-white'
+                }`}
+              >
+                <FaEdit className="mr-2" />
+                {isModifying ? 'Annuler' : 'Modifier'}
+              </button>
+              
+              <LoadingButton
+                onClick={saveChanges}
+                disabled={!isModifying}
+                isLoading={saving}
+                className={`flex items-center justify-center px-6 py-3 rounded-lg font-semibold transition-all ${
+                  !isModifying
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg'
+                }`}
+              >
+                <FaSave className="mr-2" />
+                {saving ? 'Enregistrement...' : 'Enregistrer'}
+              </LoadingButton>
+            </div>
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useRef } from "react";
-
-import Input from "../Input";
+import { FaUser, FaEnvelope, FaLock, FaCalendarAlt, FaUserMd, FaEye, FaEyeSlash, FaArrowRight, FaArrowLeft } from "react-icons/fa";
+import LoadingButton from "../LoadingButton";
 
 const SignupMain = ({
   changeStep,
@@ -9,110 +9,104 @@ const SignupMain = ({
   setUserData,
   handleUserSignup
 }) => {
-  const currentRef = useRef();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    setIsLoading(true);
+    try {
+      if (userData.role === "patient") {
+        await handleUserSignup(e);
+      } else {
+        changeStep(e);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <>
-      <form
-        onSubmit={handleUserSignup}
-        className="w-full h-full flex flex-col justify-start items-center"
-      >
-        <Input
-          currentRef={currentRef}
-          id="firstName"
-          type="text"
-          placeholder="First Name"
-          autoComplete={false}
-          required={true}
-          value={userData.firstName}
-          onChange={(e) =>
-            setUserData({ ...userData, firstName: e.target.value })
-          }
-        />
-        <Input
-          id="lastName"
-          type="text"
-          placeholder="Last Name"
-          autoComplete={false}
-          required={true}
-          value={userData.lastName}
-          onChange={(e) =>
-            setUserData({ ...userData, lastName: e.target.value })
-          }
-        />
-        <Input
-          id="email"
-          type="text"
-          placeholder="Email"
-          autoComplete={false}
-          required={true}
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Name Fields */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="flex items-center gap-2 text-sm font-medium text-neutral-700 mb-2">
+            <FaUser className="text-primary-500" />
+            Prénom
+          </label>
+          <input
+            type="text"
+            value={userData.firstName}
+            onChange={(e) => setUserData({ ...userData, firstName: e.target.value })}
+            placeholder="Votre prénom"
+            required
+            className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+          />
+        </div>
+        <div>
+          <label className="flex items-center gap-2 text-sm font-medium text-neutral-700 mb-2">
+            <FaUser className="text-primary-500" />
+            Nom
+          </label>
+          <input
+            type="text"
+            value={userData.lastName}
+            onChange={(e) => setUserData({ ...userData, lastName: e.target.value })}
+            placeholder="Votre nom"
+            required
+            className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+          />
+        </div>
+      </div>
+
+      {/* Email Field */}
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-neutral-700 mb-2">
+          <FaEnvelope className="text-primary-500" />
+          Adresse email
+        </label>
+        <input
+          type="email"
           value={userData.email}
           onChange={(e) => setUserData({ ...userData, email: e.target.value })}
+          placeholder="votre@email.com"
+          required
+          className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
         />
-        <Input
-          id="password"
-          type="password"
-          placeholder="Password"
-          autoComplete={false}
-          required={true}
-          value={userData.password}
-          onChange={(e) =>
-            setUserData({ ...userData, password: e.target.value })
-          }
-        />
-        <Input
-          id="confirmPassword"
-          type="password"
-          placeholder="Confirm Password"
-          autoComplete={false}
-          required={true}
-          value={userData.confirmPassword}
-          onChange={(e) =>
-            setUserData({ ...userData, confirmPassword: e.target.value })
-          }
-        />
-        {/* Add date of birth input  */}
-        <Input
-          id="dateOfBirth"
-          type="date"
-          placeholder="Date of Birth"
-          autoComplete={false}
-          required={true}
-          value={userData.dateOfBirth}
-          onChange={(e) =>
-            setUserData({ ...userData, dateOfBirth: e.target.value })
-          }
-        />
+      </div>
+
+      {/* Role Selection */}
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-neutral-700 mb-2">
+          <FaUserMd className="text-primary-500" />
+          Je suis un(e)
+        </label>
         <select
-          className="border border-grey-300 max-w-[280px] w-5/6 h-8 rounded-full shadow-md my-3 flex justify-around items-center px-3 outline-none"
-          name="role"
-          id="role"
           value={userData.role}
           onChange={(e) => setUserData({ ...userData, role: e.target.value })}
+          required
+          className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white transition-all duration-200"
         >
-          <option value="default">Select your role</option>
+          <option value="">Sélectionnez votre rôle</option>
           <option value="patient">Patient</option>
-          <option value="doctor">Doctor</option>
+          <option value="doctor">Médecin</option>
         </select>
-        <button
-          name={userData.role === "patient" ? "userSubmit" : "next"}
-          type={userData.role === "patient" ? "submit" : "button"}
-          className="bg-blue-400 max-w-[280px] w-5/6 h-8 text-white font-bold text-[16px] px-4 rounded-md my-3"
-          {...(userData.role === "patient"
-            ? {}
-            : { onClick: (e) => changeStep(e) })}
-        >
-          {userData.role === "patient" ? "Sign Up" : "Next"}
-        </button>
-        <p className="w-5/6 mb-3 text-center text-[#1E1E1E] text-sm ">
-          Already have an account?{" "}
-          <Link className="text-blue-400 underline" to="/login">
-            Login
-          </Link>
-          !
-        </p>
-      </form>
-    </>
+      </div>
+
+      {/* Submit Button */}
+      <LoadingButton
+        type="button"
+        isLoading={isLoading}
+        loadingText="Chargement..."
+        className="btn-primary btn-lg w-full group"
+        onClick={changeStep}
+        name="next"
+      >
+        <span>Continuer</span>
+        <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+      </LoadingButton>
+    </form>
   );
 };
 

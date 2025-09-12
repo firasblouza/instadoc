@@ -1,115 +1,206 @@
-import { Link } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect, useContext } from "react";
 import getTabs from "./Tabs";
-
-import axios from "../../api/axios";
-
 import useAccessToken from "../../hooks/useAccessToken";
+import axios from "../../api/axios";
+import { FaChevronLeft } from "react-icons/fa";
+import { logo, btechIcon } from "../../assets";
+import AuthContext from "../../context/AuthContext";
 
-const Sidebar = ({ selectedTab, onTabSelect, isOpen, role }) => {
-  const handleTabClick = (tab) => {
-    onTabSelect(tab);
-  };
-
-  const effectRan = useRef(false);
-
+/* eslint-disable react/prop-types */
+const Sidebar = ({ isSidebarOpen, setSidebarOpen }) => {
+  const { auth } = useContext(AuthContext);
+  const location = useLocation();
   const [demandes, setDemandes] = useState(0);
+  const { accessToken, decodedToken } = useAccessToken();
 
-  const activeTab = "bg-gray-700";
-
-  // Function to get pending appointments for both users and doctors
-
-  const getAppointments = async () => {
-    const { accessToken, decodedToken } = useAccessToken();
-    if (accessToken && accessToken !== "") {
+  useEffect(() => {
+    let isMounted = true;
+    
+    const getAppointments = async () => {
+      // More strict validation
+      if (!accessToken || !decodedToken?.UserInfo?.id || !isMounted) {
+        return;
+      }
+      
       const id = decodedToken.UserInfo.id;
       const userRole = decodedToken.UserInfo.role;
       const path = userRole === "doctor" ? "doctor" : "user";
+      
       try {
-        const response = await axios.get(`/appointments/${path}/${id}`);
-        if (response.status === 200) {
+        const response = await axios.get(`/appointments/${path}/${id}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          },
+          timeout: 5000 // Add timeout to prevent hanging requests
+        });
+        
+        if (isMounted && response.status === 200) {
           const appointments = response.data;
           const filtered = appointments.filter(
             (appointment) => appointment.status === "pending"
           );
           setDemandes(filtered.length);
-        } else {
-          setDemandes(0);
         }
       } catch (err) {
-        if (err?.response) {
-          console.log(err.response.data);
+        // Only set to 0 if component is still mounted
+        if (isMounted) {
           setDemandes(0);
         }
       }
-    }
-  };
-
-  // Get appointments on component load
-
-  useEffect(() => {
-    if (effectRan.current === false) {
-      getAppointments();
-    }
-    return () => {
-      effectRan.current === true;
     };
-  }, []);
 
-  const tabs = getTabs(role);
+    // Longer delay to ensure token is fully ready
+    const timer = setTimeout(() => {
+      if (isMounted) {
+        getAppointments();
+      }
+    }, 1000);
 
-  const updatedTabs = getTabs(role).map((tab) => {
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [accessToken, decodedToken]);
+  
+  const tabs = getTabs(auth.role).map((tab) => {
     if (tab.id === "consultations") {
-      return {
-        ...tab,
-        demandes: demandes, // Use the correct property name here
-        demandesContent: `"${demandes.toString().replace(/"/g, '\\"')}"`
-      };
+      return { ...tab, notificationCount: demandes };
     }
     return tab;
   });
 
+  const isActive = (path) => {
+    if (path === "") return location.pathname === "/dashboard";
+    return location.pathname.includes(path);
+  };
+
   return (
-    <nav
-      className={`absolute md:static w-full origin-top md:w-1/5 bg-gray-800 text-white h-[calc(100vh-60px)] z-20  ${
-        isOpen ? "block" : "hidden md:block"
-      }`}
-    >
-      <ul className="flex flex-col w-full h-full">
-        {/* <li
-          className={`p-4 cursor-pointer hover:bg-gray-700 ${
-            selectedTab === "profile" ? "bg-gray-700" : ""
-          }`}
-          onClick={() => handleTabClick("home")}
-        >
-          <Link to="/">Home</Link>
-        </li> */}
-        {updatedTabs.map((tab, index) => (
-          <li
-            key={tab.id}
-            className={`cursor-pointer   hover:bg-gray-700 ${
-              selectedTab === tab.id ? activeTab : ""
-            } `}
-            onClick={() => handleTabClick(tab.id)}
+    <>
+      {/* Backdrop for mobile */}
+      <div
+        className={`fixed inset-0 bg-black/60 z-40 lg:hidden transition-opacity duration-300 ${
+          isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setSidebarOpen(false)}
+      />
+
+      {/* Sidebar */}
+      <aside
+        className={`fixed top-0 left-0 h-full bg-neutral-900 text-white flex flex-col transition-all duration-300 z-50 ${
+          isSidebarOpen ? "w-72" : "-translate-x-full w-72 lg:translate-x-0 lg:w-20"
+        }`}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-center p-4 border-b border-neutral-800 h-20">
+          {/* Expanded State: Full Logo */}
+          <div className={`transition-all duration-300 flex justify-center ${isSidebarOpen ? "w-40 opacity-100" : "w-0 opacity-0"}`}>
+            <img src={logo} alt="InstaDoc" className="h-12" />
+          </div>
+          
+          {/* Collapsed State: B-Tech Icon */}
+          <div className={`transition-all duration-300 ${isSidebarOpen ? "w-0 opacity-0" : "w-12 opacity-100"}`}>
+            <img src={btechIcon} alt="B-Tech Solutions" className="h-12" />
+          </div>
+        </div>
+        
+        {/* Collapse Button */}
+        <button
+            onClick={() => setSidebarOpen(!isSidebarOpen)}
+            className={`absolute top-6 -right-4 p-2 rounded-full bg-primary-500 hover:bg-primary-600 text-white shadow-lg transition-all duration-300 hidden lg:block z-50 ${
+              !isSidebarOpen && "rotate-180"
+            }`}
           >
-            <Link className="w-full block p-4" to={tab.path}>
-              <div className={"relative flex items-center"}>
-                {tab.name}
-                {tab.id === "consultations" && (
-                  <div
-                    className={
-                      "w-fit px-1 h-6 text-white bg-red-500 ml-2 rounded-sm"
-                    }
+            <FaChevronLeft />
+        </button>
+
+        {/* User Profile */}
+        <div className="p-4 space-y-3">
+          <div className={`flex items-center gap-3 ${!isSidebarOpen && "justify-center"}`}>
+            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center font-bold text-lg">
+              {auth.fullName?.charAt(0) || 'U'}
+            </div>
+            <div className={`${!isSidebarOpen && "hidden"}`}>
+              <h4 className="font-semibold">{auth.fullName}</h4>
+              <p className="text-xs text-neutral-400">{auth.role}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-3 space-y-2 overflow-y-auto scrollbar-hide">
+          {tabs.map((tab) => {
+            if (["settings", "logout", "accueil"].includes(tab.id)) return null; // We'll render these at the bottom
+            const Icon = tab.icon;
+            return (
+              <Link
+                key={tab.id}
+                to={tab.path}
+                className={`flex items-center gap-3 p-3 rounded-lg transition-colors duration-200 ${
+                  isActive(tab.path)
+                    ? "bg-primary-500 text-white shadow-lg"
+                    : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
+                } ${!isSidebarOpen && "justify-center"}`}
+              >
+                <Icon className="text-lg flex-shrink-0" />
+                <span className={`flex-1 ${!isSidebarOpen && "hidden"}`}>{tab.name}</span>
+                {tab.notificationCount > 0 && (
+                  <span
+                    className={`bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center ${
+                      !isSidebarOpen && "absolute top-2 right-2"
+                    }`}
                   >
-                    {tab.demandes}
-                  </div>
+                    {tab.notificationCount}
+                  </span>
                 )}
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </nav>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Footer Navigation */}
+        <div className="px-3 py-4 border-t border-neutral-800 space-y-2">
+          {tabs.map((tab) => {
+            if (!["settings", "logout", "accueil"].includes(tab.id)) return null;
+            const Icon = tab.icon;
+            return (
+              <Link
+                key={tab.id}
+                to={tab.path}
+                className={`flex items-center gap-3 p-3 rounded-lg transition-colors duration-200 ${
+                  isActive(tab.path)
+                    ? "bg-neutral-700 text-white"
+                    : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                } ${!isSidebarOpen && "justify-center"}`}
+              >
+                <Icon className="text-lg flex-shrink-0" />
+                <span className={`flex-1 ${!isSidebarOpen && "hidden"}`}>{tab.name}</span>
+              </Link>
+            );
+          })}
+        </div>
+        
+        {/* B-Tech Branding */}
+        <div className={`p-4 border-t border-neutral-800`}>
+          <a
+            href="https://btech-solutions.tn" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-2"
+          >
+            <img 
+              src={btechIcon} 
+              alt="B-Tech Solutions" 
+              className="w-8 h-8 opacity-80 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0"
+            />
+            <div className={`overflow-hidden transition-all duration-300 ${isSidebarOpen ? "w-full opacity-100" : "w-0 opacity-0"}`}>
+              <p className="text-xs text-neutral-500 whitespace-nowrap">Powered by</p>
+              <p className="font-medium text-neutral-300 whitespace-nowrap">B-Tech Solutions</p>
+            </div>
+          </a>
+        </div>
+      </aside>
+    </>
   );
 };
 

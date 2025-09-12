@@ -63,6 +63,20 @@ const doctorSchema = new Schema({
     }
   ],
 
+  // New simplified weekly schedule (Monday=0 .. Sunday=6)
+  // Example: [{ day:0, ranges:[{start:"08:00", end:"12:00"},{start:"14:00", end:"18:00"}] }]
+  scheduleV2: [
+    {
+      day: { type: Number, required: true },
+      ranges: [
+        {
+          start: { type: String, required: true },
+          end: { type: String, required: true }
+        }
+      ]
+    }
+  ],
+
   idType: {
     type: String,
     required: true
@@ -124,6 +138,9 @@ doctorSchema.pre("save", function (next) {
     endTime: "00:00",
     isAvailable: true
   }));
+
+  // Initialize scheduleV2 with closed days (empty ranges)
+  this.scheduleV2 = Array.from({ length: 7 }).map((_, i) => ({ day: i, ranges: [] }));
 
   next();
 });

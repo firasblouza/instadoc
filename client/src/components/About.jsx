@@ -1,77 +1,112 @@
-import { DrLeft, DrRight, Doctor3, verified, team } from "../assets";
+import { DrRight, verified, team } from "../assets";
+import { FaHospital, FaShieldAlt, FaUsers } from "react-icons/fa";
+import { useState, useEffect, useRef } from "react";
 
-import { FaHospital, FaCertificate } from "react-icons/fa6";
-import { FaHospitalAlt } from "react-icons/fa";
 const About = ({ aboutRef }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef(null);
+
+  const features = [
+    {
+      icon: FaHospital,
+      title: "Santé, 24/7",
+      description: "Nous nous engageons envers votre santé et votre bien-être, en proposant les dernières avancées en matière de soins complets basés sur des preuves solides.",
+      color: "from-blue-500 to-blue-600"
+    },
+    {
+      icon: FaShieldAlt,
+      title: "Confiance Assurée",
+      description: "Appréciés par nos utilisateurs pour notre fiabilité et notre engagement envers leur bien-être.",
+      color: "from-green-500 to-green-600"
+    },
+    {
+      icon: FaUsers,
+      title: "Écoute, Conseil, Soutien",
+      description: "Notre équipe est là pour écouter vos préoccupations, vous offrir des conseils avisés et vous soutenir tout au long de votre parcours de santé.",
+      color: "from-purple-500 to-purple-600"
+    }
+  ];
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section
       id="about"
       ref={aboutRef}
-      className="w-full min-h-screen flex flex-col px-5 bg-white mt-[100px]"
+      className="section bg-gradient-to-b from-neutral-50 to-white relative overflow-hidden"
     >
-      <div className="w-full h-full flex flex-col gap-5 md:flex-row">
-        <div className="flex flex-col pt-20 w-full md:w-3/5 md:pl-20">
-          <h1 className="text-5xl font-bold text-gray-800 text-center md:text-left ">
-            Qui Sommes Nous?
-          </h1>
-          <p className="text-gray-600 text-lg mt-4 px-5 md:px-0 text-center md:text-left">
-            Chez InstaDoc, nous aspirons à améliorer la santé et le bien-être de
-            tous en faisant de la consultation médicale un processus fluide,
-            accessible et fiable.
-          </p>
-          {/* Icons and cards to add some services */}
-          <div className="flex flex-col mt-10 shadow-lg py-3 rounded-lg">
-            <div className="flex flex-row  gap-6 items-center justify-center">
-              <FaHospital className="w-[70px] h-auto text-[#179CF0] mt-2" />
-              <div className="flex flex-col w-2/3">
-                <p className="text-gray-600 text-lg font-semi mt-4">
-                  Santé, 24/24
-                </p>
-                <p className="text-gray-600 font-light">
-                  Nous nous engageons envers votre santé et votre bien-être, en
-                  proposant les dernières avancées en matière de soins complets
-                  basés sur des preuves solides.
-                </p>
+      <div ref={sectionRef} className="container">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className={`space-y-8 ${isVisible ? 'animate-slideInLeft' : 'opacity-0'}`}>
+            <div className="space-y-6">
+              <div className="inline-flex items-center px-4 py-2 bg-primary-100 text-primary-600 rounded-full text-sm font-medium">
+                <FaUsers className="mr-2" />
+                À Propos de Nous
               </div>
+              <h2 className="heading-2">
+                Qui Sommes{' '}
+                <span className="bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent">
+                  Nous?
+                </span>
+              </h2>
+              <p className="body-large">
+                Chez InstaDoc, nous aspirons à améliorer la santé et le bien-être de tous 
+                en faisant de la consultation médicale un processus fluide, accessible et fiable.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {features.map((feature, index) => {
+                const IconComponent = feature.icon;
+                return (
+                  <div
+                    key={index}
+                    className={`card-hover bg-white p-6 ${isVisible ? 'animate-fadeInUp' : 'opacity-0'}`}
+                    style={{ animationDelay: `${index * 0.2}s` }}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${feature.color} flex items-center justify-center flex-shrink-0`}>
+                        <IconComponent className="text-white text-lg" />
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="heading-4 text-neutral-800">{feature.title}</h3>
+                        <p className="body-normal">{feature.description}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          <div className="flex flex-col mt-2 shadow-lg py-3 rounded-lg">
-            <div className="flex flex-row  gap-6 items-center justify-center">
-              <img
-                src={verified}
-                className="w-[70px] h-auto text-blue-500 mt-2"
+          <div className={`relative ${isVisible ? 'animate-slideInRight' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }}>
+            <div className="relative">
+              <div className="absolute -top-4 -left-4 w-24 h-24 bg-primary-100 rounded-full opacity-50"></div>
+              <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-secondary-100 rounded-full opacity-50"></div>
+              <img 
+                src={DrRight} 
+                alt="Médecin professionnel" 
+                className="relative z-10 w-full h-auto rounded-2xl shadow-2xl"
               />
-              <div className="flex flex-col w-2/3">
-                <p className="text-gray-600 text-lg font-semi mt-4">
-                  Confiance Assuré
-                </p>
-                <p className="text-gray-600 font-light">
-                  Appréciés par nos utilisateurs pour notre fiabilité et notre
-                  engagement envers leur bien-être.
-                </p>
-              </div>
             </div>
           </div>
-
-          <div className="flex flex-col mt-2 shadow-lg py-3 rounded-lg">
-            <div className="flex flex-row  gap-6 items-center justify-center">
-              <img src={team} className="w-[70px] h-auto text-blue-500 mt-2" />
-              <div className="flex flex-col w-2/3">
-                <p className="text-gray-600 text-lg font-semi mt-4">
-                  Écoute, Conseil, Soutien
-                </p>
-                <p className="text-gray-600 font-light">
-                  Notre équipe est là pour écouter vos préoccupations, vous
-                  offrir des conseils avisés et vous soutenir tout au long de
-                  votre parcours de santé.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col w-full md:w-1/2 justify-center items-center">
-          <img src={DrRight} alt="DrLeft" className="w-5/6 h-auto" />
         </div>
       </div>
     </section>

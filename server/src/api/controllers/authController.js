@@ -43,7 +43,8 @@ const handleAuth = async (req, res) => {
               id: doctor._id,
               email: doctor.email,
               fullName: `${doctor.firstName} ${doctor.lastName}`,
-              role: doctor.role
+              role: doctor.role,
+              profileImage: doctor.profileImage
             }
           },
           process.env.ACCESS_TOKEN_SECRET,
@@ -56,7 +57,8 @@ const handleAuth = async (req, res) => {
               id: doctor._id,
               email: doctor.email,
               fullName: `${doctor.firstName} ${doctor.lastName}`,
-              role: doctor.role
+              role: doctor.role,
+              profileImage: doctor.profileImage
             }
           },
           process.env.REFRESH_TOKEN_SECRET,
@@ -102,7 +104,8 @@ const handleAuth = async (req, res) => {
             id: user._id,
             email: user.email,
             fullName: `${user.firstName} ${user.lastName}`,
-            role: user.role
+            role: user.role,
+            profileImage: user.profileImage
           }
         },
         process.env.ACCESS_TOKEN_SECRET,
@@ -115,7 +118,8 @@ const handleAuth = async (req, res) => {
             id: user._id,
             email: user.email,
             fullName: `${user.firstName} ${user.lastName}`,
-            role: user.role
+            role: user.role,
+            profileImage: user.profileImage
           }
         },
         process.env.REFRESH_TOKEN_SECRET,

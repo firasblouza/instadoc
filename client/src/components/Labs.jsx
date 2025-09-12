@@ -1,27 +1,31 @@
-import { useState, useEffect, useRef, useContext } from "react";
+import { useState, useEffect, useRef, useContext, useCallback } from "react";
 import {
-  FaTrashAlt,
+  FaFlask,
   FaEye,
-  FaEdit,
-  FaSync,
+  FaMapMarkerAlt,
+  FaPhone,
+  FaEnvelope,
+  FaSearch,
   FaFilter,
-  FaPlus
+  FaBuilding,
+  FaGlobe
 } from "react-icons/fa";
 
 import Modal from "./Dashboard/UI/Modal";
-import Input from "./Input";
 
 import axios from "../api/axios";
-import jwt_decode from "jwt-decode";
 import AuthContext from "../context/AuthContext";
+import MedicalLoader from "./MedicalLoader";
 
 const Labs = () => {
   const [labs, setLabs] = useState([]);
   const [initialLabs, setInitialLabs] = useState([]);
+  const [filteredLabs, setFilteredLabs] = useState([]);
   const [selectedLab, setSelectedLab] = useState({});
-
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [search, setSearch] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCity, setSelectedCity] = useState("all");
 
   const { API_URL } = useContext(AuthContext);
   const IMG_URL = `${API_URL}/uploads/`;
@@ -35,68 +39,45 @@ const Labs = () => {
       document.body.style.overflow = "auto";
     }
   }, [showModal]);
-  // Function to fetch the labs.
-
-  const fetchLabs = async () => {
-    setLabs([]); // Empty the labs array
+  const fetchLabs = useCallback(async () => {
+    setLoading(true);
     try {
       const response = await axios.get("/labs/");
       if (response.status === 200) {
         setLabs(response.data);
         setInitialLabs(response.data);
-        setLabsNumber(response.data.length);
+        setFilteredLabs(response.data);
       }
     } catch (err) {
-      if (err?.response) {
-        console.log(err.response.data);
-      }
+      console.log("Error fetching labs:", err.message);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
-  const handleSearch = (e) => {
-    const searchString = e.target.value.toLowerCase(); // Convert the search string to lowercase
-    setSearch(searchString); // Update the search state
+  useEffect(() => {
+    let filtered = [...initialLabs];
 
-    if (searchString === "") {
-      setLabs(initialLabs);
-    } else {
-      setLabs(
-        initialLabs.filter(
-          (lab) =>
-            lab.name.toLowerCase().includes(searchString) ||
-            lab.address.location.toLowerCase().includes(searchString) ||
-            lab.contact.email.toLowerCase().includes(searchString) ||
-            lab.contact.phoneNumber.includes(searchString)
-        )
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (lab) =>
+          lab.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          lab.address.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          lab.address.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          lab.contact.email.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-  };
 
-  const handleFilter = (e) => {
-    const city = e.target.value;
-    if (city === "all") {
-      if (search === "") {
-        setLabs(initialLabs); // No search input, show all labs
-      } else {
-        // Apply search filter on the initialLabs and then filter by city
-        const searchFilteredLabs = initialLabs.filter(
-          (lab) =>
-            lab.name.toLowerCase().includes(search) ||
-            lab.address.location.toLowerCase().includes(search) ||
-            lab.contact.email.toLowerCase().includes(search) ||
-            lab.contact.phoneNumber.includes(search)
-        );
-        setLabs(searchFilteredLabs);
-      }
-    } else {
-      // Filter by city, but only within the current labs state (search-filtered)
-      setLabs(labs.filter((lab) => lab.address.city === city));
+    if (selectedCity !== "all") {
+      filtered = filtered.filter((lab) => lab.address.city === selectedCity);
     }
-  };
+
+    setFilteredLabs(filtered);
+  }, [searchTerm, selectedCity, initialLabs]);
 
   const handleReset = () => {
-    fetchLabs();
-    setSearch("");
+    setSearchTerm("");
+    setSelectedCity("all");
   };
 
   useEffect(() => {
@@ -106,160 +87,297 @@ const Labs = () => {
     return () => {
       effectRan.current = true;
     };
-  }, []);
+  }, [fetchLabs]);
+
+  if (loading) {
+    return <MedicalLoader type="pulse" message="Chargement des laboratoires..." />;
+  }
 
   return (
-    <section className="consultLabs w-full min-h-screen flex flex-col items-center pt-10">
-      <div className="w-full h-auto flex flex-col justify-start items-center gap-5">
-        <h1 className="text-2xl font-bold text-center md:text-left">
-          Laboratoires
-        </h1>
-        <div className="flex flex-col items-center justify-center w-full">
-          <div className="flex flex-row justify-center items-center w-full md:px-16 mb-5">
-            {/* Main Container */}
-            <div className="mainContainer  w-full flex flex-col bg-white rounded-lg shadow-lg p-4 m-4 overflow-x-scroll lg:overflow-x-hidden overflow-y-auto min-h-screen ">
-              <div className="flex flex-col md:flex-row w-full justify-between items-center gap-10 mb-5 ">
-                {/* Search Field */}
-
-                <input
-                  type="text"
-                  id="searchMedecin"
-                  name="searchMedecin"
-                  value={search}
-                  placeholder="Rechercher un laboratoire"
-                  className="border border-gray-300 rounded-lg py-1 px-2 w-full md:w-1/2 outline-none"
-                  onChange={(e) => handleSearch(e)}
-                />
-
-                {/* Filter By City Select */}
-
-                <select
-                  name="city"
-                  id="city"
-                  className="border border-gray-300 rounded-lg py-1 px-2 w-full md:w-1/2"
-                  onChange={(e) => handleFilter(e)}
-                >
-                  <option value="all">Toutes les villes</option>
-                  {[...new Set(labs.map((lab) => lab.address.city))].map(
-                    (city, index) => (
-                      <option key={index} value={city}>
-                        {city}
-                      </option>
-                    )
-                  )}
-                </select>
-
-                {/* Reset Button */}
-                <FaSync
-                  className="cursor-pointer text-xl text-blue-500"
-                  onClick={handleReset}
-                />
+    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-secondary-500 to-primary-500 text-white py-16">
+        <div className="container">
+          <div className="text-center space-y-6">
+            <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium">
+              <FaFlask className="mr-2" />
+              Nos Laboratoires
+            </div>
+            <h1 className="heading-1 text-white">
+              Trouvez votre{' '}
+              <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
+                laboratoire
+              </span>
+            </h1>
+            <p className="body-large text-white/90 max-w-3xl mx-auto">
+              Découvrez notre réseau de laboratoires partenaires équipés des dernières 
+              technologies pour vos analyses médicales.
+            </p>
+            <div className="flex justify-center gap-4 pt-4">
+              <div className="text-center">
+                <div className="text-3xl font-bold">{initialLabs.length}+</div>
+                <div className="text-white/80 text-sm">Laboratoires Partenaires</div>
               </div>
-              <div className="overflow-x-auto">
-                <table className="table-auto border-collapse w-full rounded-lg">
-                  <thead className="text-md font-semibold tracking-wide text-left text-gray-900 bg-gray-100 uppercase border-b border-gray-600">
-                    <tr className="text-center">
-                      <th className=" px-4 py-2">Nom</th>
-                      <th className=" px-4 py-2">Adresse</th>
-                      <th className=" px-4 py-2">Ville</th>
-                      <th className=" px-4 py-2">Téléphone</th>
-                      <th className=" px-4 py-2">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {labs.length === 0 && (
-                      <tr className="text-gray-700 border-b border-gray-200">
-                        <td
-                          colSpan="5"
-                          className="px-4 py-3 text-ms font-semibold border text-center"
-                        >
-                          Aucun laboratoire trouvé
-                        </td>
-                      </tr>
-                    )}
-                    {labs.map((lab, index) => (
-                      <tr
-                        className="text-center text-gray-700 border-b border-gray-200"
-                        key={index}
-                      >
-                        <td className="border px-4 py-2">{lab.name}</td>
-                        <td className="border px-4 py-2">
-                          {lab.address.location}
-                        </td>
-                        <td className="border px-4 py-2">{lab.address.city}</td>
-                        <td className="border px-4 py-2">
-                          {lab.contact.phoneNumber}
-                        </td>
-                        <td className="border text-center  px-4 py-2 w-1/12 ">
-                          <FaEye
-                            className="cursor-pointer text-xl text-blue-500 inline-block"
-                            onClick={() => {
-                              setSelectedLab(lab);
-                              setShowModal(true);
-                            }}
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {showModal && (
-                  <Modal
-                    showModal={showModal}
-                    setShowModal={setShowModal}
-                    title={"Laboratoire"}
-                    secondAction={() => setShowModal(false)}
-                    secondButton="Fermer"
-                  >
-                    <div className="flex flex-col md:flex-row justify-center md:justify-between items-center md:items-start  gap-7 ">
-                      <div className="flex flex-col w-full justify-center items-center md:w-1/3">
-                        <img
-                          src={`${IMG_URL}${selectedLab.labImage}`}
-                          alt={`${selectedLab.name}`}
-                          className="max-w-[200px] rounded-lg "
-                        />
-                      </div>
-                      <div className="flex flex-col justify-start items-start w-2/3">
-                        <h1 className="text-xl font-bold my-1 text-[#1E1E1E]">
-                          Nom :{" "}
-                          <span className="font-normal">
-                            {selectedLab.name}
-                          </span>
-                        </h1>
-                        <h2 className="text-lg font-semibold">
-                          Address :{" "}
-                          <span className="font-normal">
-                            {selectedLab.address.location}
-                          </span>
-                        </h2>
-                        <h2 className="text-lg font-semibold">
-                          Ville :{" "}
-                          <span className="font-normal">
-                            {selectedLab.address.city}
-                          </span>
-                        </h2>
-                        <h2 className="text-lg font-semibold">
-                          Téléphone :{" "}
-                          <span className="font-normal">
-                            {selectedLab.contact.phoneNumber}
-                          </span>
-                        </h2>
-                        <h2 className="text-lg font-semibold">
-                          Email :{" "}
-                          <span className="font-normal">
-                            {selectedLab.contact.email}
-                          </span>
-                        </h2>
-                      </div>
-                    </div>
-                  </Modal>
-                )}
+              <div className="w-px bg-white/30"></div>
+              <div className="text-center">
+                <div className="text-3xl font-bold">100%</div>
+                <div className="text-white/80 text-sm">Certifiés</div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* Search and Filters */}
+      <section className="py-8 bg-white shadow-sm sticky top-0 z-30">
+        <div className="container">
+          <div className="flex flex-col lg:flex-row gap-6 items-center">
+            <div className="flex-1 relative">
+              <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400" />
+              <input
+                type="text"
+                placeholder="Rechercher un laboratoire..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+              <select
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
+                className="px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white min-w-[200px]"
+              >
+                <option value="all">Toutes les villes</option>
+                {[...new Set(initialLabs.map((lab) => lab.address.city))].map(
+                  (city, index) => (
+                    <option key={index} value={city}>
+                      {city}
+                    </option>
+                  )
+                )}
+              </select>
+
+              <button
+                onClick={handleReset}
+                className="btn-secondary px-6 py-3 whitespace-nowrap"
+              >
+                <FaFilter className="mr-2" />
+                Réinitialiser
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-6 flex justify-between items-center text-sm text-neutral-600">
+            <p>
+              {filteredLabs.length} laboratoire{filteredLabs.length > 1 ? 's' : ''} trouvé{filteredLabs.length > 1 ? 's' : ''}
+              {searchTerm && ` pour "${searchTerm}"`}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Labs Grid */}
+      <section className="py-12">
+        <div className="container">
+          {filteredLabs.length === 0 ? (
+            <div className="text-center py-16">
+              <FaFlask className="text-6xl text-neutral-300 mx-auto mb-4" />
+              <h3 className="heading-4 text-neutral-600 mb-2">Aucun laboratoire trouvé</h3>
+              <p className="text-neutral-500 mb-6">
+                Essayez de modifier vos critères de recherche ou réinitialisez les filtres.
+              </p>
+              <button onClick={handleReset} className="btn-primary">
+                Réinitialiser les filtres
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredLabs.map((lab) => (
+                <div
+                  key={lab._id}
+                  className="card-hover group cursor-pointer"
+                  onClick={() => {
+                    setSelectedLab(lab);
+                    setShowModal(true);
+                  }}
+                >
+                  <div className="relative overflow-hidden rounded-t-xl">
+                    <img
+                      src={`${IMG_URL}${lab.labImage}`}
+                      alt={lab.name}
+                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute top-4 right-4">
+                      <div className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium text-neutral-700">
+                        <FaFlask className="inline text-secondary-500 mr-1" />
+                        Laboratoire
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="card-body space-y-4">
+                    <div className="space-y-2">
+                      <h3 className="heading-4 group-hover:text-primary-600 transition-colors duration-200">
+                        {lab.name}
+                      </h3>
+                      <div className="flex items-center gap-2 text-neutral-600">
+                        <FaMapMarkerAlt className="text-primary-500" />
+                        <span className="text-sm">{lab.address.location}, {lab.address.city}</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm text-neutral-600">
+                        <FaPhone className="text-secondary-500" />
+                        <span>{lab.contact.phoneNumber}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-neutral-600">
+                        <FaEnvelope className="text-secondary-500" />
+                        <span>{lab.contact.email}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                      <button className="btn-primary flex-1 group-hover:scale-105 transition-transform duration-200">
+                        <FaEye className="mr-2" />
+                        Voir détails
+                      </button>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(`tel:${lab.contact.phoneNumber}`, '_self');
+                        }}
+                        className="btn-secondary p-3"
+                      >
+                        <FaPhone />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Lab Details Modal */}
+      {showModal && (
+        <Modal
+          showModal={showModal}
+          setShowModal={setShowModal}
+          title={selectedLab.name}
+          firstButton="Appeler"
+          firstAction={() => window.open(`tel:${selectedLab.contact?.phoneNumber}`, '_self')}
+          secondButton="Fermer"
+          secondAction="close"
+          size="lg"
+        >
+          <div className="space-y-6">
+            {/* Lab Image */}
+            <div className="text-center">
+              <img
+                src={`${IMG_URL}${selectedLab.labImage}`}
+                alt={selectedLab.name}
+                className="w-full max-w-md mx-auto rounded-xl shadow-lg"
+              />
+            </div>
+
+            {/* Lab Information */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="bg-primary-50 rounded-xl p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <FaBuilding className="text-primary-500 text-xl" />
+                    <h4 className="font-semibold text-neutral-800">Informations générales</h4>
+                  </div>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="text-sm font-medium text-neutral-500">Nom du laboratoire</label>
+                      <p className="text-neutral-800 font-medium">{selectedLab.name}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-secondary-50 rounded-xl p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <FaMapMarkerAlt className="text-secondary-500 text-xl" />
+                    <h4 className="font-semibold text-neutral-800">Localisation</h4>
+                  </div>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="text-sm font-medium text-neutral-500">Adresse</label>
+                      <p className="text-neutral-800">{selectedLab.address?.location}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-neutral-500">Ville</label>
+                      <p className="text-neutral-800">{selectedLab.address?.city}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-green-50 rounded-xl p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <FaPhone className="text-green-500 text-xl" />
+                    <h4 className="font-semibold text-neutral-800">Contact</h4>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-neutral-500">Téléphone</label>
+                      <div className="flex items-center gap-2">
+                        <p className="text-neutral-800">{selectedLab.contact?.phoneNumber}</p>
+                        <button
+                          onClick={() => window.open(`tel:${selectedLab.contact?.phoneNumber}`, '_self')}
+                          className="text-green-600 hover:text-green-700 transition-colors duration-200"
+                        >
+                          <FaPhone className="text-sm" />
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-neutral-500">Email</label>
+                      <div className="flex items-center gap-2">
+                        <p className="text-neutral-800">{selectedLab.contact?.email}</p>
+                        <button
+                          onClick={() => window.open(`mailto:${selectedLab.contact?.email}`, '_blank')}
+                          className="text-blue-600 hover:text-blue-700 transition-colors duration-200"
+                        >
+                          <FaEnvelope className="text-sm" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-purple-50 rounded-xl p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <FaGlobe className="text-purple-500 text-xl" />
+                    <h4 className="font-semibold text-neutral-800">Services</h4>
+                  </div>
+                  <div className="space-y-2 text-sm text-neutral-600">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      <span>Analyses médicales complètes</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      <span>Résultats rapides</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      <span>Équipements modernes</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Modal>
+      )}
+    </div>
   );
 };
 

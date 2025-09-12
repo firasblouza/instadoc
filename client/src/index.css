@@ -1,3 +1,202 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Design System Components */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-sky-500 text-white hover:bg-sky-600 focus:ring-sky-500 shadow-md hover:shadow-lg;
+  }
+
+  .btn-secondary {
+    @apply btn bg-neutral-100 text-neutral-700 hover:bg-neutral-200 focus:ring-neutral-500 border border-neutral-300;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-md border border-neutral-200 overflow-hidden;
+  }
+
+  .card-hover {
+    @apply card transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+
+  .card-body {
+    @apply p-6;
+  }
+
+  .heading-1 {
+    @apply text-4xl md:text-5xl lg:text-6xl font-bold text-neutral-900 leading-tight;
+  }
+
+  .heading-2 {
+    @apply text-3xl md:text-4xl font-bold text-neutral-900 leading-tight;
+  }
+
+  .heading-4 {
+    @apply text-xl md:text-2xl font-semibold text-neutral-900;
+  }
+
+  .body-large {
+    @apply text-lg text-neutral-600 leading-relaxed;
+  }
+
+  .body-normal {
+    @apply text-base text-neutral-600 leading-relaxed;
+  }
+
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .section {
+    @apply py-16 md:py-24;
+  }
+
+  .gradient-overlay {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.9) 0%, rgba(20, 184, 166, 0.9) 100%);
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Z-index utilities for proper layering */
+  .z-modal-backdrop {
+    z-index: 1040;
+  }
+
+  .z-modal {
+    z-index: 1050;
+  }
+
+  .z-sticky-nav {
+    z-index: 30;
+  }
+
+  /* Medical Animation Delays */
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .animation-delay-600 {
+    animation-delay: 600ms;
+  }
+
+  /* Heartbeat Line Animation */
+  .heartbeat-line {
+    animation: heartbeat-pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes heartbeat-pulse {
+    0%, 100% {
+      width: 0%;
+    }
+    50% {
+      width: 100%;
+    }
+  }
+
+  /* Medical Cross Pulse */
+  @keyframes medical-cross-pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.8;
+    }
+  }
+
+  .medical-cross-pulse {
+    animation: medical-cross-pulse 2s ease-in-out infinite;
+  }
+
+  /* Heartbeat Scale Animation */
+  .heartbeat-scale {
+    animation: heartbeat-scale 1.2s ease-in-out infinite;
+  }
+
+  @keyframes heartbeat-scale {
+    0%, 100% {
+      transform: scale(1);
+    }
+    14% {
+      transform: scale(1.1);
+    }
+    28% {
+      transform: scale(1);
+    }
+    42% {
+      transform: scale(1.15);
+    }
+    70% {
+      transform: scale(1);
+    }
+  }
+
+  /* Sequential Loading Dots */
+  .loading-dot-1 {
+    animation: loading-dot 1.2s ease-in-out infinite;
+  }
+
+  .loading-dot-2 {
+    animation: loading-dot 1.2s ease-in-out infinite;
+    animation-delay: 0.2s;
+  }
+
+  .loading-dot-3 {
+    animation: loading-dot 1.2s ease-in-out infinite;
+    animation-delay: 0.4s;
+  }
+
+  @keyframes loading-dot {
+    0%, 80%, 100% {
+      transform: scale(0.8);
+      opacity: 0.5;
+    }
+    40% {
+      transform: scale(1.2);
+      opacity: 1;
+    }
+  }
+}
+
+/* Global base styles */
+@layer base {
+  * {
+    @apply antialiased;
+  }
+  
+  body {
+    @apply text-neutral-900 bg-neutral-50;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  
+  html {
+    @apply scroll-smooth;
+  }
+}

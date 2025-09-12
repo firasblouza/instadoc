@@ -1,7 +1,7 @@
-import Input from "../Input";
+import { useState } from "react";
+import { FaLock, FaCalendarAlt, FaEye, FaEyeSlash, FaArrowRight, FaArrowLeft, FaUserMd } from "react-icons/fa";
 import { doctorSpecialties } from "../../data/data";
-import { FaUpload } from "react-icons/fa";
-import { useState, useRef } from "react";
+import LoadingButton from "../LoadingButton";
 
 const SignupData = ({
   userData,
@@ -9,161 +9,142 @@ const SignupData = ({
   changeStep,
   handleUserSignup
 }) => {
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const currentRef = useRef();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleFileUpload = (e) => {
-    if (e.target.name === "idImage") {
-      setUploadedFile(e.target.files[0]);
-      setUserData({ ...userData, idImage: e.target.files[0] });
-    } else if (e.target.name === "licenseImage") {
-      setUploadedFile(e.target.files[0]);
-      setUserData({ ...userData, licenseImage: e.target.files[0] });
+  const handleSubmit = async (e) => {
+    setIsLoading(true);
+    try {
+      if (userData.role === "patient") {
+        await handleUserSignup(e);
+      } else {
+        changeStep(e);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <>
-      <form
-        onSubmit={handleUserSignup}
-        encType="multipart/form-data"
-        className="w-full h-full flex flex-col justify-start items-center"
-      >
-        {/* Check if the selected role is a doctor */}
-        {userData.role === "doctor" ? (
-          <>
-            {/* ID Type Select */}
-            <select
-              className="border border-grey-300 max-w-[280px] w-5/6 h-8 rounded-full shadow-md my-3 px-3"
-              value={userData.idType}
-              onChange={(e) =>
-                setUserData({ ...userData, idType: e.target.value })
-              }
-            >
-              <option value="">ID Type</option>
-              <option value="idcard">National ID</option>
-              <option value="passport">Passport</option>
-            </select>
-            {/* ID Number Input */}
-            <Input
-              type="text"
-              currentRef={currentRef}
-              value={userData.idNumber}
-              placeholder={
-                userData.type === "idcard"
-                  ? "National ID Number"
-                  : userData.type === "passport"
-                  ? "Passport Number"
-                  : "Document Number"
-              }
-              onChange={(e) =>
-                setUserData({ ...userData, idNumber: e.target.value })
-              }
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Password Fields */}
+      <div className="space-y-4">
+        <div>
+          <label className="flex items-center gap-2 text-sm font-medium text-neutral-700 mb-2">
+            <FaLock className="text-primary-500" />
+            Mot de passe
+          </label>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={userData.password}
+              onChange={(e) => setUserData({ ...userData, password: e.target.value })}
+              placeholder="Créez un mot de passe sécurisé"
+              required
+              className="w-full px-4 py-3 pr-12 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
             />
-
-            {/* ID Image Upload */}
-
-            <div className="idUpload w-full md:w-5/6 h-auto bg-transparent rounded-full my-3 flex justify-around items-center px-3 flex-col md:flex-row md:max-w-[280px]">
-              <button
-                type="button"
-                className="relative overflow-hidden bg-blue-400 hover:bg-blue-300 md:max-w-[120px] w-full h-8 text-white font-bold text-[16px] px-1 rounded-md my-3 flex justify-center items-center cursor-pointer"
-              >
-                <FaUpload className="mr-2" />
-                Upload
-                <input
-                  type="file"
-                  accept="image/*"
-                  name="idImage"
-                  className="absolute top-0 left-0 opacity-0 w-full h-full cursor-pointer transform scale-[3]"
-                  placeholder="ID Number Image"
-                  onChange={(e) => handleFileUpload(e)}
-                />
-              </button>
-
-              <p className="text-[12px] text-gray-400">
-                {userData.idImage ? userData.idImage.name : "No file chosen"}
-              </p>
-            </div>
-
-            {/* License Number Input */}
-
-            <Input
-              type="text"
-              value={userData.licenseNumber}
-              placeholder="Medical License Number"
-              onChange={(e) =>
-                setUserData({ ...userData, licenseNumber: e.target.value })
-              }
-            />
-
-            {/* License Image Upload */}
-
-            <div className="licenseUplaod w-full md:w-5/6 h-auto bg-transparent rounded-full my-3 flex justify-around items-center px-3 flex-col md:flex-row md:max-w-[280px]">
-              <button
-                type="button"
-                className="relative overflow-hidden bg-blue-400 hover:bg-blue-300 md:max-w-[120px] w-full h-8 text-white font-bold text-[16px] px-1 rounded-md my-3 flex justify-center items-center cursor-pointer"
-              >
-                <FaUpload className="mr-2" />
-                Upload
-                <input
-                  type="file"
-                  accept="image/*"
-                  name="licenseImage"
-                  className="absolute top-0 left-0 opacity-0 w-full h-full cursor-pointer transform scale-[3]"
-                  placeholder="Medical License Image"
-                  onChange={(e) => handleFileUpload(e)}
-                />
-              </button>
-
-              <p className="text-[12px] text-gray-400">
-                {userData.licenseImage
-                  ? userData.licenseImage.name
-                  : "No file chosen"}
-              </p>
-            </div>
-
-            {/* Speciality Select */}
-
-            <select
-              className="border border-grey-300 max-w-[280px] w-5/6 h-8 rounded-full shadow-md my-3 flex justify-around items-center px-3 outline-none"
-              name="role"
-              id="role"
-              value={userData.speciality}
-              onChange={(e) =>
-                setUserData({ ...userData, speciality: e.target.value })
-              }
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-neutral-500 hover:text-neutral-700 transition-colors duration-200"
             >
-              <option value="">Select your speciality</option>
-              {doctorSpecialties.map((speciality, index) => (
-                <option key={index} value={speciality.value}>
-                  {speciality.name}
-                </option>
-              ))}
-            </select>
-          </>
-        ) : null}
-
-        {/* Buttons */}
-        <div className="flex flex-col w-full md:w-5/6 h-8  sm:justify-center px-4 md:px-0 items-center sm:flex-row gap-2 my-3">
-          <button
-            name="back"
-            type="button"
-            className="bg-blue-400 hover:bg-blue-300 md:max-w-[140px] w-full h-8 text-white font-bold text-[16px] px-4 rounded-md"
-            onClick={(e) => changeStep(e)}
-          >
-            Back
-          </button>
-          <button
-            name="doctor_next"
-            type="button"
-            className="bg-blue-400 hover:bg-blue-300 md:max-w-[140px] w-full h-8 text-white font-bold text-[16px] px-4 rounded-md"
-            onClick={(e) => changeStep(e)}
-          >
-            Next
-          </button>
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
+          <p className="text-xs text-neutral-500 mt-1">
+            Minimum 8 caractères avec majuscules, minuscules et chiffres
+          </p>
         </div>
-      </form>
-    </>
+        
+        <div>
+          <label className="flex items-center gap-2 text-sm font-medium text-neutral-700 mb-2">
+            <FaLock className="text-primary-500" />
+            Confirmer le mot de passe
+          </label>
+          <div className="relative">
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              value={userData.confirmPassword}
+              onChange={(e) => setUserData({ ...userData, confirmPassword: e.target.value })}
+              placeholder="Confirmez votre mot de passe"
+              required
+              className="w-full px-4 py-3 pr-12 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-neutral-500 hover:text-neutral-700 transition-colors duration-200"
+            >
+              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Date of Birth */}
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-neutral-700 mb-2">
+          <FaCalendarAlt className="text-primary-500" />
+          Date de naissance
+        </label>
+        <input
+          type="date"
+          value={userData.dateOfBirth}
+          onChange={(e) => setUserData({ ...userData, dateOfBirth: e.target.value })}
+          required
+          className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+        />
+      </div>
+
+      {/* Specialty for Doctors */}
+      {userData.role === "doctor" && (
+        <div>
+          <label className="flex items-center gap-2 text-sm font-medium text-neutral-700 mb-2">
+            <FaUserMd className="text-primary-500" />
+            Spécialité médicale
+          </label>
+          <select
+            value={userData.speciality}
+            onChange={(e) => setUserData({ ...userData, speciality: e.target.value })}
+            required
+            className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white transition-all duration-200"
+          >
+            <option value="">Sélectionnez votre spécialité</option>
+            {doctorSpecialties.map((specialty, index) => (
+              <option key={index} value={specialty.value}>
+                {specialty.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {/* Navigation Buttons */}
+      <div className="flex gap-4 pt-4">
+        <LoadingButton
+          type="button"
+          className="btn-secondary flex-1"
+          onClick={changeStep}
+          name="back"
+        >
+          <FaArrowLeft className="mr-2" />
+          Retour
+        </LoadingButton>
+        
+        <LoadingButton
+          type={userData.role === "patient" ? "submit" : "button"}
+          isLoading={isLoading}
+          loadingText={userData.role === "patient" ? "Inscription..." : "Chargement..."}
+          className="btn-primary flex-1 group"
+          onClick={userData.role === "doctor" ? changeStep : (e) => handleSubmit(e)}
+          name={userData.role === "patient" ? "userSubmit" : "doctor_next"}
+        >
+          <span>{userData.role === "patient" ? "Créer mon compte" : "Continuer"}</span>
+          <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+        </LoadingButton>
+      </div>
+    </form>
   );
 };
 

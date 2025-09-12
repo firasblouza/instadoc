@@ -1,69 +1,53 @@
 import { useState } from "react";
-import { Routes, Route, useNavigate, Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
+import { FaBars, FaBell, FaUserCircle } from "react-icons/fa";
 import useAuth from "../../hooks/useAuth";
-import ManagePatients from "./tabs/admin/ManagePatients";
-import Home from "./tabs/admin/AdminHome";
-import ManageDoctors from "./tabs/admin/ManageDoctors";
-import Profile from "./tabs/Profile";
 
 const Dashboard = () => {
-  const [selectedTab, setSelectedTab] = useState("home");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const navigate = useNavigate();
-
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
   const { auth } = useAuth();
 
-  const handleTabSelect = (tab) => {
-    setSelectedTab(tab);
-    setIsSidebarOpen(false);
-  };
-
-  const handleSidebarToggle = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
   return (
-    <section id="userDashboard" className="relative w-full flex flex-col">
-      <div className="flex justify-between items-center bg-sky-400 text-white p-4">
-        <button
-          className="block md:hidden text-white focus:outline-none"
-          onClick={handleSidebarToggle}
-        >
-          <svg
-            className="h-6 w-6 fill-current"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
+    <div className="flex h-screen bg-neutral-100">
+      <Sidebar isSidebarOpen={isSidebarOpen} setSidebarOpen={setSidebarOpen} />
+      
+      <main className={`flex-1 flex flex-col transition-all duration-300 lg:ml-20 ${isSidebarOpen && "lg:ml-72"}`}>
+        {/* Top Header */}
+        <header className="bg-white shadow-md p-4 flex items-center justify-between z-30">
+          {/* Hamburger Menu for Mobile */}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 rounded-full hover:bg-neutral-200 lg:hidden"
           >
-            {isSidebarOpen ? (
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M19.293 4.293a1 1 0 0 0-1.414-1.414L12 10.586 5.121 3.707a1 1 0 1 0-1.414 1.414L10.586 12l-6.879 6.879a1 1 0 1 0 1.414 1.414L12 13.414l6.879 6.879a1 1 0 1 0 1.414-1.414L13.414 12l6.879-6.879z"
-              />
-            ) : (
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M4 6a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1zm0 5a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1zm0 5a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1z"
-              />
-            )}
-          </svg>
-        </button>
-        <h1 className="text-xl font-bold">Dashboard</h1>
-      </div>
-      <div className="dashContainer flex flex-row w-full">
-        <Sidebar
-          selectedTab={selectedTab}
-          onTabSelect={handleTabSelect}
-          isOpen={isSidebarOpen}
-          role={auth.role}
-        />
-        <div className="w-full md:w-4/5 p-4 max-h-[calc(100vh-60px)] overflow-y-hidden">
+            <FaBars className="text-neutral-600" />
+          </button>
+          
+          {/* Placeholder for left side on desktop to balance the layout */}
+          <div className="hidden lg:block w-8"></div>
+
+          <div className="flex items-center gap-4">
+            <button className="p-2 rounded-full hover:bg-neutral-200 relative">
+              <FaBell className="text-neutral-600" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+            <div className="w-px h-6 bg-neutral-300"></div>
+            <div className="flex items-center gap-2">
+              <FaUserCircle className="text-2xl text-neutral-500" />
+              <div>
+                <h4 className="font-semibold text-sm text-neutral-800">{auth.fullName}</h4>
+                <p className="text-xs text-neutral-500">{auth.role}</p>
+              </div>
+            </div>
+          </div>
+        </header>
+        
+        {/* Main Content */}
+        <div className="flex-1 p-6 overflow-y-auto">
           <Outlet />
         </div>
-      </div>
-    </section>
+      </main>
+    </div>
   );
 };
 

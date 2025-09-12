@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }) => {
   const LOGIN_URL = "/login";
   const REGISTER_URL = "/register";
 
-  const API_URL = "https://instadoc-api.onrender.com";
+  const API_URL = "http://localhost:3001";
 
   // Section Refs
 
@@ -87,6 +87,7 @@ export const AuthProvider = ({ children }) => {
           email: decodedToken.UserInfo.email,
           fullName: decodedToken.UserInfo.fullName,
           role: decodedToken.UserInfo.role,
+          profileImage: decodedToken.UserInfo.profileImage,
           accessToken: accessToken
         });
       } else {
@@ -95,6 +96,7 @@ export const AuthProvider = ({ children }) => {
           email: "",
           fullName: "",
           role: "",
+          profileImage: null,
           accessToken: ""
         });
       }
@@ -187,6 +189,7 @@ export const AuthProvider = ({ children }) => {
         email: loginData.email,
         fullName: decodedToken.UserInfo.fullName,
         role: decodedToken.UserInfo.role,
+        profileImage: decodedToken.UserInfo.profileImage,
         accessToken
       });
       setLoginData({
@@ -223,14 +226,12 @@ export const AuthProvider = ({ children }) => {
     try {
       const formData = new FormData();
       formData.append("userData", JSON.stringify(userData));
-      if (step === 2) {
-        formData.append("idImage", userData.idImage);
-        formData.append("licenseImage", userData.licenseImage);
-      }
-      if (step === 3) {
-        formData.append("idImage", userData.idImage);
-        formData.append("licenseImage", userData.licenseImage);
+
+      // Append files only if the user is a doctor
+      if (userData.role === 'doctor') {
         formData.append("profileImage", userData.profileImage);
+        formData.append("idImage", userData.idImage);
+        formData.append("licenseImage", userData.licenseImage);
         formData.append("cvImage", userData.cvImage);
       }
 

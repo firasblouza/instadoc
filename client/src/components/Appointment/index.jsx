@@ -79,6 +79,28 @@ const Appointment = () => {
     }
   };
 
+  const endConsultation = async (id) => {
+    try {
+      const response = await axios.put(
+        `/appointments/modify/${id}`,
+        { status: "completed" },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        }
+      );
+      if (response.status === 200) {
+        window.alert("Consultation Terminée avec succés");
+        navigate("/dashboard/consultations");
+      } else {
+        window.alert("Désole, une erreur s'est produit");
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   // Load the appointments on component mount
 
   useEffect(() => {
@@ -128,54 +150,35 @@ const Appointment = () => {
   }, []); // This effect runs once when the component mounts
 
   return (
-    <section id="apptDashboard" className="relative w-full flex flex-col">
-      <div className="flex justify-between items-center bg-sky-400 text-white p-4">
-        <button
-          className="block md:hidden text-white focus:outline-none"
-          onClick={handleSidebarToggle}
-        >
-          <svg
-            className="h-6 w-6 fill-current"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            {isSidebarOpen ? (
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M19.293 4.293a1 1 0 0 0-1.414-1.414L12 10.586 5.121 3.707a1 1 0 1 0-1.414 1.414L10.586 12l-6.879 6.879a1 1 0 1 0 1.414 1.414L12 13.414l6.879 6.879a1 1 0 1 0 1.414-1.414L13.414 12l6.879-6.879z"
-              />
-            ) : (
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M4 6a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1zm0 5a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1zm0 5a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1z"
-              />
-            )}
-          </svg>
-        </button>
-        {Object.keys(appointment).length > 0 && (
-          <h1 className="text-xl font-bold">
-            Consultation - {appointment.patient.firstName}{" "}
-            {appointment.patient.lastName}
-          </h1>
-        )}
-      </div>
-      <div className="dashContainer flex flex-row w-full">
-        {Object.keys(appointment).length > 0 && (
+    <section className="flex h-screen bg-white overflow-hidden">
+      {Object.keys(appointment).length > 0 ? (
+        <>
+          {isSidebarOpen && <div onClick={handleSidebarToggle} className="fixed inset-0 bg-black/30 z-10 md:hidden" />}
           <Sidebar
             appointment={appointment}
-            isOpen={isSidebarOpen}
+            isOpen={isSidebarOpen} // isSidebarOpen can be controlled for mobile
             role={auth.role}
             notes={notes}
             setNotes={setNotes}
             socket={socket}
+            handleSidebarToggle={handleSidebarToggle}
+            endConsultation={() => endConsultation(appointment._id)}
           />
-        )}
-        <div className="w-full md:w-4/5 p-4 max-h-[calc(100vh-60px)] overflow-y-hidden">
-          <Interface socket={socket} appointment={appointment} client={auth} />
+          <main className="flex-1 flex flex-col h-screen">
+            <Interface 
+              socket={socket} 
+              appointment={appointment} 
+              client={auth} 
+              handleSidebarToggle={handleSidebarToggle}
+              endConsultation={() => endConsultation(appointment._id)}
+            />
+          </main>
+        </>
+      ) : (
+        <div className="w-full h-full flex items-center justify-center">
+          <p>Chargement de la consultation...</p>
         </div>
-      </div>
+      )}
     </section>
   );
 };

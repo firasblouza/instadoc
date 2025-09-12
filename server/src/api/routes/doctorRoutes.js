@@ -7,6 +7,7 @@ const verifyJWT = require("../middleware/verifyJWT");
 router.get("/", doctorController.getAllDoctors);
 router.get("/statistics/:id", doctorController.fetchStatistics);
 router.get("/:id", doctorController.getDoctorById);
+router.get("/:id/available-slots", doctorController.getAvailableSlots);
 router.put(
   "/:id",
   upload.fields([

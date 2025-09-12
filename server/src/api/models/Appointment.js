@@ -20,6 +20,13 @@ const appointmentSchema = new Schema({
     type: String,
     required: true
   },
+  // New time-based fields
+  startDateTime: {
+    type: Date
+  },
+  endDateTime: {
+    type: Date
+  },
   notes: {
     type: Array
   },
@@ -42,6 +49,17 @@ const appointmentSchema = new Schema({
       },
       content: {
         type: String
+      },
+      fileUrl: {
+        type: String
+      },
+      fileName: {
+        type: String
+      },
+      fileType: {
+        type: String,
+        enum: ['text', 'image', 'file'],
+        default: 'text'
       },
       createdAt: {
         type: Date,

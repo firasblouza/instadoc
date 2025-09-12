@@ -1,34 +1,39 @@
-import { facebook, github } from "../../assets";
 import { Link } from "react-router-dom";
-import { useContext, useState, useRef } from "react";
-import { FaPowerOff } from "react-icons/fa6";
+import { useContext, useState } from "react";
+import { FaUserMd, FaBars, FaChevronDown, FaSignOutAlt, FaTachometerAlt } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import useAuth from "../../hooks/useAuth";
 import useLogout from "../../hooks/useLogout";
 import AuthContext from "../../context/AuthContext";
+import MobileMenu from "./MobileMenu";
 
-const linkClassName = `text-[16px] font-normal whitespace-nowrap text-[#1E1E1E] lg:text-[18px] hover:text-blue-500 transition-all duration-500`;
-
-const mobileLinkClassName =
-  "w-full py-4 text-center hover:opacity-90 text-2xl text-white";
+const linkClassName = `text-base font-medium text-neutral-700 hover:text-primary-600 transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary-500 after:transition-all after:duration-300 hover:after:w-full`;
 
 const Navbar = () => {
   const { auth } = useAuth();
-
   const navigate = useNavigate();
   const location = useLocation();
-
   const handleLogout = useLogout();
 
-  const [activeTab, setActiveTab] = useState("accueil");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
   const { aboutRef } = useContext(AuthContext);
 
-  const scrollToAbout = () => {
-    const aboutSection = aboutRef.current;
-    setActiveTab("apropos");
+  const getActiveTab = () => {
+    const path = location.pathname;
+    if (path === '/') return 'accueil';
+    if (path.startsWith('/doctors')) return 'doctors';
+    if (path.startsWith('/labs')) return 'labs';
+    if (path.startsWith('/contact')) return 'contact';
+    if (location.hash === '#about') return 'apropos';
+    return '';
+  };
 
+  const activeTab = getActiveTab();
+
+  const scrollToAbout = () => {
     if (location.pathname !== "/") {
       navigate("/");
     }
@@ -39,177 +44,146 @@ const Navbar = () => {
     navigate("/");
   };
 
-  const mobileMenu = useRef(null);
-  const profileDropdown = useRef(null);
-
-  const toggleMobileMenu = (e) => {
-    const mobileMenuRef = mobileMenu.current;
-    const body = document.body;
-
-    if (mobileMenuRef.classList.contains("hidden")) {
-      mobileMenuRef.classList.remove("hidden");
-      mobileMenuRef.classList.add("block");
-      body.style.overflow = "hidden"; // Prevent scrolling
-    } else {
-      mobileMenuRef.classList.remove("block");
-      mobileMenuRef.classList.add("hidden");
-      body.style.overflow = "auto"; // Allow scrolling
-    }
-  };
-
-  const toggleProfileDropdown = () => {
-    const profileDropdownRef = profileDropdown.current;
-    profileDropdownRef.classList.toggle("hidden");
-  };
+  const navItems = [
+    { name: "Accueil", path: "/", key: "accueil" },
+    { name: "À propos", href: "#about", key: "apropos", onClick: scrollToAbout },
+    { name: "Médecins", path: "/doctors", key: "doctors" },
+    { name: "Laboratoires", path: "/labs", key: "labs" },
+    { name: "Contact", path: "/contact", key: "contact" },
+  ];
 
   return (
     <>
-      <section className="Navbar w-full h-full flex flex-row items-center justify-between py-3 px-2">
-        <div className="flex justify-between w-full">
-          <button
-            id="hamburger-button"
-            className="w-10 h-10  flex flex-col justify-center items-center relative lg:hidden cursor-pointer"
-            onClick={(e) => toggleMobileMenu(e)}
-          >
-            <div className="absolute  -mt-0.5 h-1 w-8 rounded bg-blue-400 transition-all duration-500 before:absolute before:h-1 before:w-8 before:-translate-x-4 before:-translate-y-2 before:rounded before:bg-blue-400 before:transition-all before:duration-500 before:content-[''] after:absolute after:h-1 after:w-8 after:-translate-x-4 after:translate-y-2 after:rounded after:bg-blue-400 after:transition-all after:duration-500 after:content-['']"></div>
-          </button>
+      <nav className="bg-white/95 backdrop-blur-sm border-b border-neutral-200 sticky top-0 z-40">
+        <div className="container">
+          <div className="flex items-center justify-between h-16">
+            
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-3 group">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+                <FaUserMd className="text-white text-lg" />
+              </div>
+              <span className="text-xl font-bold text-neutral-800 hidden sm:block">
+                InstaDoc
+              </span>
+            </Link>
 
-          <nav
-            className="w-full hidden lg:flex lg:flex-row gap-3 lg:gap-5 lg:justify-between items-center"
-            aria-label="main"
-          >
-            <div className="navbar__item hidden lg:flex lg:flex-row gap-1 lg:gap-5 justify-start items-center">
-              <Link
-                to="/"
-                onClick={() => setActiveTab("accueil")}
-                className={`${linkClassName} mr-2 ${
-                  activeTab === "accueil" ? "text-blue-500" : ""
-                }`}
-              >
-                Acceuil
-              </Link>
-              <a
-                href="#about"
-                onClick={scrollToAbout}
-                className={`${linkClassName} mr-2 ${
-                  activeTab === "apropos" ? "text-blue-500" : ""
-                }`}
-              >
-                A propos
-              </a>
-              <Link
-                to="/doctors"
-                onClick={() => setActiveTab("doctors")}
-                className={`${linkClassName} mr-2 ${
-                  activeTab === "doctors" ? "text-blue-500" : ""
-                }`}
-              >
-                Consulter un médecin
-              </Link>
-              <Link
-                to="/labs"
-                onClick={() => setActiveTab("labs")}
-                className={`${linkClassName} mr-2 ${
-                  activeTab === "labs" ? "text-blue-500" : ""
-                }`}
-              >
-                Laboratoires
-              </Link>
-              <Link
-                to="/contact"
-                onClick={() => setActiveTab("contact")}
-                className={`${linkClassName} mr-2 ${
-                  activeTab === "contact" ? "text-blue-500" : ""
-                }`}
-              >
-                Contact
-              </Link>
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex items-center gap-8">
+              {navItems.map((item) => (
+                item.href ? (
+                  <a
+                    key={item.key}
+                    href={item.href}
+                    onClick={item.onClick}
+                    className={`${linkClassName} ${
+                      activeTab === item.key ? "text-primary-600 after:w-full" : ""
+                    }`}
+                  >
+                    {item.name}
+                  </a>
+                ) : (
+                  <Link
+                    key={item.key}
+                    to={item.path}
+                    className={`${linkClassName} ${
+                      activeTab === item.key ? "text-primary-600 after:w-full" : ""
+                    }`}
+                  >
+                    {item.name}
+                  </Link>
+                )
+              ))}
             </div>
 
-            <div className="navbar__item w-auto flex lg:flex lg:flex-row gap-3 justify-end items-center">
+            {/* Desktop Auth Section */}
+            <div className="hidden lg:flex items-center gap-4">
               {auth?.email ? (
-                // Create Dropdown Menu for the dashboard
                 <div className="relative">
-                  <p
-                    className={`${linkClassName} cursor-pointer`}
-                    onClick={toggleProfileDropdown}
+                  <button
+                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                    className="flex items-center gap-3 px-4 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 transition-colors duration-200"
                   >
-                    <FaPowerOff className="inline-block mr-2" />
-                    {auth.fullName}
-                  </p>
-                  <div
-                    id="profie_dropdown"
-                    ref={profileDropdown}
-                    className="absolute top-10 left-0 h-full bg-white z-30 hidden "
-                  >
-                    <div className="bg-white w-full shadow-lg rounded-lg  p-2">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center">
+                      <span className="text-white text-sm font-medium">
+                        {auth.fullName?.charAt(0) || 'U'}
+                      </span>
+                    </div>
+                    <span className="text-sm font-medium text-neutral-700">
+                      {auth.fullName}
+                    </span>
+                    <FaChevronDown className={`text-neutral-500 text-xs transition-transform duration-200 ${
+                      isProfileDropdownOpen ? 'rotate-180' : ''
+                    }`} />
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {isProfileDropdownOpen && (
+                    <div className="absolute right-0 top-12 w-48 bg-white rounded-xl shadow-lg border border-neutral-200 py-2 z-50">
                       <Link
                         to="/dashboard"
-                        className="block py-2 px-4 hover:bg-gray-100 w-full cursor-pointer"
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-50 transition-colors duration-200"
                       >
-                        Dashboard
+                        <FaTachometerAlt className="text-neutral-500" />
+                        <span className="text-sm text-neutral-700">Dashboard</span>
                       </Link>
-                      <Link
-                        to="/logout"
-                        onClick={signOut}
-                        className="block py-2 px-4 hover:bg-gray-100 cursor-pointer"
+                      <hr className="my-2 border-neutral-100" />
+                      <button
+                        onClick={() => {
+                          setIsProfileDropdownOpen(false);
+                          signOut();
+                        }}
+                        className="flex items-center gap-3 px-4 py-2 hover:bg-red-50 transition-colors duration-200 w-full text-left"
                       >
-                        Logout
-                      </Link>
+                        <FaSignOutAlt className="text-red-500" />
+                        <span className="text-sm text-red-600">Déconnexion</span>
+                      </button>
                     </div>
-                  </div>
+                  )}
                 </div>
               ) : (
-                <Link to="/login" className={linkClassName}>
-                  Connexion / Inscription
-                </Link>
+                <div className="flex items-center gap-3">
+                  <Link
+                    to="/login"
+                    className="text-sm font-medium text-neutral-700 hover:text-primary-600 transition-colors duration-200"
+                  >
+                    Connexion
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="btn-primary btn text-sm"
+                  >
+                    S'inscrire
+                  </Link>
+                </div>
               )}
             </div>
-          </nav>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="lg:hidden w-10 h-10 rounded-lg bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center transition-colors duration-200"
+            >
+              <FaBars className="text-neutral-600" />
+            </button>
+          </div>
         </div>
-      </section>
-      <section
-        id="mobile-menu"
-        ref={mobileMenu}
-        onClick={(e) => toggleMobileMenu(e)}
-        className="absolute w-full h-full bg-sky-300 origin-top  flex-col top-0 z-30 animate-open-menu hidden md:hidden"
-      >
-        <button className="text-8xl self-end px-6 text-white">&times;</button>
-        <nav
-          className="flex h-screen  flex-col items-center py-4"
-          aria-label="mobile"
-        >
-          <Link to="/" className={`${mobileLinkClassName} mr-2`}>
-            Acceuil
-          </Link>
-          <Link to="/about" className={`${mobileLinkClassName} mr-2`}>
-            A propos
-          </Link>
-          <Link to="/doctors" className={`${mobileLinkClassName} mr-2`}>
-            Consulter un médecin
-          </Link>
-          <Link to="/labs" className={`${mobileLinkClassName} mr-2`}>
-            Laboratoires
-          </Link>
-          <Link to="/contact" className={`${mobileLinkClassName} mr-2`}>
-            Contact
-          </Link>
-          {auth?.email ? (
-            <Link to="/dashboard" className={`${mobileLinkClassName} mr-2`}>
-              Dashboard
-            </Link>
-          ) : (
-            <Link to="/login" className={mobileLinkClassName}>
-              Inscription
-            </Link>
-          )}
-          {auth?.email && (
-            <Link to="/logout" className={`${mobileLinkClassName} mr-2`}>
-              Logout
-            </Link>
-          )}
-        </nav>
-      </section>
+
+        {/* Click outside to close dropdown */}
+        {isProfileDropdownOpen && (
+          <div
+            className="fixed inset-0 z-30"
+            onClick={() => setIsProfileDropdownOpen(false)}
+          />
+        )}
+      </nav>
+
+      {/* Mobile Menu */}
+      <MobileMenu 
+        isOpen={isMobileMenuOpen} 
+        onClose={() => setIsMobileMenuOpen(false)} 
+      />
     </>
   );
 };

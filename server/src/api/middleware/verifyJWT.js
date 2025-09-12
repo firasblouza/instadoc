@@ -8,9 +8,11 @@ const verifyJWT = (req, res, next) => {
   const token = authHeader.split(" ")[1];
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) return res.sendStatus(403); // Forbidden
-    req.email = decoded.email;
-    req.id = decoded.id;
-    req.role = decoded.role;
+    // Handle both token structures: direct and UserInfo nested
+    const userInfo = decoded.UserInfo || decoded;
+    req.email = userInfo.email;
+    req.id = userInfo.id;
+    req.role = userInfo.role;
     next();
   });
 };

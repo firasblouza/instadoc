@@ -34,15 +34,21 @@ import Labs from "./components/Labs";
 
 import useAccessToken from "./hooks/useAccessToken";
 import Demandes from "./components/Dashboard/tabs/doctor/Demandes";
+import PatientDemandes from "./components/Dashboard/tabs/patient/Demandes";
 import Contact from "./components/Contact";
 import ManageRatings from "./components/Dashboard/tabs/admin/ManageRatings";
 import PatientHome from "./components/Dashboard/tabs/patient/PatientHome";
+import GlobalLoader from "./components/GlobalLoader";
 
 const App = () => {
   const location = useLocation();
   const accessToken = localStorage.getItem("accessToken");
   const navigate = useNavigate();
   const decodedToken = accessToken ? jwt_decode(accessToken) : null;
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   const Logout = () => {
     const handleLogout = useLogout();
@@ -59,7 +65,9 @@ const App = () => {
     return null; // Render nothing while the logout process is being executed
   };
   return (
-    <Routes>
+    <>
+      <GlobalLoader />
+      <Routes>
       {/* Home Route */}
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
@@ -104,7 +112,11 @@ const App = () => {
           {/* End Admin Routes */}
 
           <Route path="consultations">
-            <Route index element={<Demandes />} />
+            <Route index element={
+              decodedToken.UserInfo.role === "doctor" ? <Demandes /> : 
+              decodedToken.UserInfo.role === "user" ? <PatientDemandes /> : 
+              <Demandes />
+            } />
           </Route>
 
           {/* Appointment Routes */}
@@ -127,7 +139,8 @@ const App = () => {
         <Route path="dashboard" element={<Dashboard />} />
       </Route>
       <Route path="logout" element={<Logout />} />
-    </Routes>
+      </Routes>
+    </>
   );
 };
 

@@ -121,27 +121,13 @@ const isValidData = (data, setSignupMessage, step) => {
         message: errorMessages.email,
         error: true
       });
-    if (!isValidEmail(data.email, setSignupMessage)) return;
-    if (
-      !isValidPassword({
-        from: "signup",
-        password: data.password,
-        confirmPassword: data.confirmPassword,
-        setMessage: setSignupMessage
-      })
-    )
-      return;
+    if (!isValidEmail(data.email, setSignupMessage)) return false;
     if (!data.role || data.role === "default") {
-      return setSignupMessage({
+      setSignupMessage({
         message: errorMessages.role,
         error: true
       });
-    }
-    if (!data.dateOfBirth) {
-      return setSignupMessage({
-        message: "Please select your date of birth",
-        error: true
-      });
+      return false;
     }
     setSignupMessage({
       message: "",
@@ -149,55 +135,84 @@ const isValidData = (data, setSignupMessage, step) => {
     });
     return true;
   } else if (step === 2) {
-    if (!data.idType) {
-      return setSignupMessage({
-        message: "Please select an ID type",
+    // Step 2: Security & Profile (Password, Date of Birth, Specialty)
+    if (!isValidPassword({
+      from: "signup",
+      password: data.password,
+      confirmPassword: data.confirmPassword,
+      setMessage: setSignupMessage
+    })) {
+      return false;
+    }
+    if (!data.dateOfBirth) {
+      setSignupMessage({
+        message: "Please select your date of birth",
         error: true
       });
+      return false;
     }
-    if (!data.idNumber) {
-      return setSignupMessage({
-        message: "Please enter your ID number",
-        error: true
-      });
-    }
-    if (!data.idImage) {
-      return setSignupMessage({
-        message: "Please upload your ID image",
-        error: true
-      });
-    }
-    if (!data.licenseNumber) {
-      return setSignupMessage({
-        message: "Please enter your license number",
-        error: true
-      });
-    }
-    if (!data.licenseImage) {
-      return setSignupMessage({
-        message: "Please upload your license image",
-        error: true
-      });
-    }
-    if (!data.speciality) {
-      return setSignupMessage({
+    if (data.role === "doctor" && !data.speciality) {
+      setSignupMessage({
         message: "Please select your speciality",
         error: true
       });
+      return false;
     }
+    setSignupMessage({
+      message: "",
+      error: false
+    });
+    return true;
   } else if (step === 3) {
-    console.log("checking here");
+    // Step 3: Professional Documents (Doctor only)
+    if (!data.idType) {
+      setSignupMessage({
+        message: "Please select an ID type",
+        error: true
+      });
+      return false;
+    }
+    if (!data.idNumber) {
+      setSignupMessage({
+        message: "Please enter your ID number",
+        error: true
+      });
+      return false;
+    }
+    if (!data.licenseNumber) {
+      setSignupMessage({
+        message: "Please enter your license number",
+        error: true
+      });
+      return false;
+    }
     if (!data.profileImage) {
-      return setSignupMessage({
+      setSignupMessage({
         message: "Please upload your profile image",
         error: true
       });
+      return false;
+    }
+    if (!data.idImage) {
+      setSignupMessage({
+        message: "Please upload your ID image",
+        error: true,
+      });
+      return false;
+    }
+    if (!data.licenseImage) {
+      setSignupMessage({
+        message: "Please upload your license image",
+        error: true,
+      });
+      return false;
     }
     if (!data.cvImage) {
-      return setSignupMessage({
-        message: "Please upload your profile image",
-        error: true
+      setSignupMessage({
+        message: "Please upload your CV image",
+        error: true,
       });
+      return false;
     }
     setSignupMessage({
       message: "",

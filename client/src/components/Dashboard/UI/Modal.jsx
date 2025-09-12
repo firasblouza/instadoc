@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { FaTimes, FaEye } from "react-icons/fa";
+import { useEffect } from "react";
+import { FaTimes } from "react-icons/fa";
+
 const Modal = ({
   title,
   children,
@@ -10,7 +11,8 @@ const Modal = ({
   firstButton,
   secondButton,
   showModal,
-  setShowModal
+  setShowModal,
+  size = "md"
 }) => {
   useEffect(() => {
     if (showModal) {
@@ -18,82 +20,95 @@ const Modal = ({
     } else {
       document.body.style.overflow = "auto";
     }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
   }, [showModal]);
 
   const handleModalClose = () => {
     setShowModal(false);
-    document.body.style.overflow = "auto";
   };
 
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      handleModalClose();
+    }
+  };
+
+  const sizeClasses = {
+    sm: "sm:max-w-md",
+    md: "sm:max-w-lg",
+    lg: "sm:max-w-2xl",
+    xl: "sm:max-w-4xl"
+  };
+
+  if (!showModal) return null;
+
   return (
-    <div className="fixed z-10 inset-0 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-          <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-        </div>
-        <span
-          className="hidden sm:inline-block sm:align-middle sm:h-screen"
-          aria-hidden="true"
-        >
-          &#8203;
-        </span>
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300"
+        onClick={handleBackdropClick}
+      />
+
+      {/* Modal Container */}
+      <div className="flex min-h-screen items-center justify-center p-4">
         <div
-          className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full"
+          className={`relative bg-white rounded-2xl shadow-2xl transform transition-all duration-300 w-full ${sizeClasses[size]} max-h-[95vh] flex flex-col`}
           role="dialog"
           aria-modal="true"
-          aria-labelledby="modal-headline"
+          aria-labelledby="modal-title"
         >
-          <div className=" bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div className="flex flex-col lg:flex-row sm:items-start">
-              <div className="mt-3 text-center sm:mt-0  sm:text-left w-full">
-                <div className="flex flex-row justify-between w-full">
-                  <h3
-                    className="text-lg leading-6 text-center md:text-left font-medium text-gray-900"
-                    id="modal-headline"
-                  >
-                    {title}
-                  </h3>
-                  <button
-                    className="m-2 text-gray-500 hover:text-gray-800"
-                    onClick={handleModalClose}
-                  >
-                    <FaTimes />
-                  </button>
-                </div>
-                <div className="ModalContent  mt-2">{children}</div>
-                <div className="flex flex-row justify-center md:justify-end my-3">
-                  {firstButton && firstButton !== "" && (
-                    <button
-                      type="button"
-                      className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-green-400 border border-transparent rounded-md hover:bg-green-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
-                      onClick={
-                        firstAction
-                          ? () => firstAction(...(firstActionArgs || []))
-                          : undefined
-                      }
-                    >
-                      {firstButton}
-                    </button>
-                  )}
-                  {secondButton && secondButton !== "" && (
-                    <button
-                      type="button"
-                      className="inline-flex justify-center px-4 py-2 ml-3 text-sm font-medium text-white bg-red-400 border border-transparent rounded-md hover:bg-red-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
-                      onClick={
-                        secondAction
-                          ? secondAction === "close"
-                            ? handleModalClose
-                            : () => secondAction(...(secondActionArgs || []))
-                          : undefined
-                      }
-                    >
-                      {secondButton}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-neutral-200 flex-shrink-0">
+            <h3
+              id="modal-title"
+              className="heading-4 text-neutral-900"
+            >
+              {title}
+            </h3>
+            <button
+              onClick={handleModalClose}
+              className="w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-500 hover:text-neutral-700 transition-all duration-200"
+            >
+              <FaTimes />
+            </button>
           </div>
+
+          {/* Content */}
+          <div className="p-6 overflow-y-auto flex-1 min-h-0">
+            {children}
+          </div>
+
+          {/* Footer */}
+          {(firstButton || secondButton) && (
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-neutral-200 bg-neutral-50 flex-shrink-0">
+              {secondButton && (
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={
+                    secondAction === "close"
+                      ? handleModalClose
+                      : () => secondAction?.(...(secondActionArgs || []))
+                  }
+                >
+                  {secondButton}
+                </button>
+              )}
+              {firstButton && (
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => firstAction?.(...(firstActionArgs || []))}
+                >
+                  {firstButton}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,267 +1,399 @@
-import { useState, useEffect, useRef } from "react";
-import {
-  FaTrashAlt,
-  FaSync,
-  FaFilter,
-  FaCheck,
-  FaEye,
-  FaTimes,
-  FaChevronCircleDown
-} from "react-icons/fa";
-
-import { Link, useNavigate } from "react-router-dom";
-
+import { useState, useEffect, useRef, useCallback } from "react";
+import { FaTrashAlt, FaEye, FaSync, FaStar, FaSearch, FaUserMd, FaUser, FaCalendarAlt } from "react-icons/fa";
 import axios from "../../../../api/axios";
-import Modal from "../../UI/Modal";
-
-import { capitalize } from "../../../../utils/Capitalize";
-
 import useAccessToken from "../../../../hooks/useAccessToken";
+import MedicalLoader from "../../../MedicalLoader";
+import LoadingButton from "../../../LoadingButton";
 
 const ManageRatings = () => {
-  const [ratings, setRatings] = useState([]);
-  const [selectedRating, setSelectedRating] = useState(null);
-  const [ratingsNumber, setRatingsNumber] = useState(0);
-  const [showModal, setShowModal] = useState(false);
-
-  const navigate = useNavigate();
-
   const effectRan = useRef(false);
+  const [loading, setLoading] = useState(true);
+  const [ratings, setRatings] = useState([]);
+  const [filteredRatings, setFilteredRatings] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRating, setSelectedRating] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
-  const { accessToken, decodedToken } = useAccessToken();
+  const { accessToken } = useAccessToken();
 
-  const fetchRatings = async () => {
-    if (accessToken && accessToken !== "") {
-      try {
-        const response = await axios.get("/ratings");
-        if (response.status === 200 && response.data.length > 0) {
-          // Create an array to store ratings
-          const newRatings = [];
-
-          // Iterate through each rating object in the array
-          for (const ratingData of response.data) {
-            // Access userId and doctorId for each rating object
-            const userId = ratingData.userId;
-            const doctorId = ratingData.doctorId;
-
-            // Fetch patient and doctor data using userId and doctorId
-            const [patient, doctor] = await Promise.all([
-              axios.get(`/users/${userId}`),
-              axios.get(`/doctors/${doctorId}`)
-            ]);
-
-            if (patient && doctor) {
-              // Create ratingData object with patient and doctor data
-              const ratingInfo = {
-                ...ratingData,
-                patient: patient.data,
-                doctor: doctor.data
-              };
-
-              // Add the ratingInfo object to the newRatings array
-              newRatings.push(ratingInfo);
-            }
+  const fetchRatings = useCallback(async () => {
+    try {
+      setLoading(true);
+      if (accessToken) {
+        const response = await axios.get("/ratings", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
           }
-
-          // Set the state with the newRatings array
-          setRatings(newRatings.reverse());
-          setRatingsNumber(newRatings.length);
-        } else {
-          console.log("No ratings found");
-        }
-      } catch (err) {
-        if (err.response && err.response.status === 401) {
-          console.log("Unauthorized: You need to log in or refresh your token");
-        } else {
-          console.log("An error occurred while fetching data:", err.message);
-        }
+        });
+        setRatings(response.data);
+        setFilteredRatings(response.data);
       }
-    } else {
-      console.log("No access token found");
+    } catch (error) {
+      console.error("Error fetching ratings:", error);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [accessToken]);
 
   useEffect(() => {
     if (effectRan.current === false) {
       fetchRatings();
     }
-
     return () => {
       effectRan.current = true;
     };
-  }, []);
+  }, [fetchRatings]);
 
-  const viewAvis = (id) => {
-    navigate(`/doctor/${id}`);
+  // Search functionality
+  useEffect(() => {
+    const filtered = ratings.filter(rating =>
+      rating.doctorName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      rating.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      rating.comment?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredRatings(filtered);
+  }, [ratings, searchTerm]);
+
+  const handleViewDetails = (rating) => {
+    setSelectedRating(rating);
+    setShowDetailsModal(true);
   };
 
-  const handleDelete = async (id) => {
+  const handleDeleteClick = (rating) => {
+    setSelectedRating(rating);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedRating) return;
+    
     try {
-      const response = await axios.delete(`/ratings/${id}`, {
+      setActionLoading(true);
+      await axios.delete(`/admin/rating/${selectedRating._id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }
       });
-      if (response.status === 200) {
-        fetchRatings();
-        window.alert("Avis supprimer avec success");
-      } else {
-        window.alert("Désolé, une erreur s'est produite");
-      }
-    } catch (err) {
-      if (err.response && err.response.status === 401) {
-        console.log("Unauthorized: You need to log in or refresh your token");
-      } else {
-        console.log("An error occurred while fetching data:", err.message);
-      }
+      
+      await fetchRatings();
+      setShowDeleteModal(false);
+      setSelectedRating(null);
+    } catch (error) {
+      console.error("Error deleting rating:", error);
+    } finally {
+      setActionLoading(false);
     }
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "Non définie";
+    return new Date(dateString).toLocaleDateString('fr-FR');
+  };
+
+  const renderStars = (rating) => {
+    return Array.from({ length: 5 }, (_, index) => (
+      <FaStar
+        key={index}
+        className={`${index < rating ? 'text-yellow-500' : 'text-neutral-300'} text-sm`}
+      />
+    ));
+  };
+
+  const averageRating = ratings.length > 0 
+    ? (ratings.reduce((sum, rating) => sum + rating.rating, 0) / ratings.length).toFixed(1)
+    : 0;
+
+  if (loading) {
+    return (
+      <div className="w-full h-[calc(100vh-60px)] flex items-center justify-center">
+        <MedicalLoader type="heartbeat" />
+      </div>
+    );
+  }
+
   return (
-    <section className="admin-manage-ratings w-full h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] overflow-scroll overflow-y-scroll">
-      <div className="flex flex-col items-center justify-center w-full">
-        <h1 className="text-1xl font-bold text-[#1E1E1E] text-center my-3">
-          Gestion des avis
-        </h1>
-        <div className="flex flex-col justify-center items-center bg-white rounded-lg shadow-lg p-4 m-4 ">
-          <h2 className="text-1xl font-bold">Nombre des avis</h2>
-          <p className="text-1xl font-bold">{ratingsNumber}</p>
+    <section className="w-full bg-gradient-to-br from-primary-50 via-white to-secondary-50 p-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sky-600 text-sm font-medium mb-4">
+            <FaStar className="mr-2" />
+            Gestion des Avis
+          </div>
+          <h1 className="heading-1 text-neutral-900 mb-2">
+            Gestion des{' '}
+            <span className="bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
+              avis
+            </span>
+          </h1>
+          <p className="body-large text-neutral-600 max-w-2xl mx-auto">
+            Supervisez et gérez les avis des patients
+          </p>
         </div>
-        <div className="flex flex-col items-center justify-center w-full">
-          <div className="flex flex-row justify-center items-center w-full">
-            <div className="flex flex-col bg-white rounded-lg shadow-lg p-4 m-4 overflow-x-scroll lg:overflow-x-hidden overflow-y-auto min-h-[250px]">
-              <div className="flex w-full justify-between gap-5 md:gap-10 mb-5 items-center">
-                {/* Search Field */}
 
-                <input
-                  type="text"
-                  placeholder="Rechercher un avis"
-                  className="border border-gray-300 rounded-lg py-1 px-2 w-full md:w-1/2"
-                  onChange={(e) => handleSearch(e)}
-                />
-
-                {/* Filter By Speciality Select */}
-
-                <div className="icons flex flex-row gap-5">
-                  <FaSync className="cursor-pointer" onClick={fetchRatings} />
+        {/* Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="card-hover border-l-4 border-sky-500">
+            <div className="card-body">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-neutral-600">Total Avis</p>
+                  <p className="text-2xl font-bold text-neutral-900">{ratings.length}</p>
                 </div>
+                <FaStar className="text-sky-500 text-2xl" />
               </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full table-auto text-center">
-                  <thead className="text-md font-semibold tracking-wide text-left text-gray-900 bg-gray-100 uppercase border-b border-gray-600">
-                    <tr>
-                      <th className="px-4 py-2">Doctor</th>
-                      <th className="px-4 py-2">Patient</th>
-                      <th className="px-4 py-2">Stars</th>
-                      <th className="px-4 py-2">Comment</th>
-                      <th className="px-4 py-2">Actions</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {ratings.length === 0 && (
-                      <tr className="text-gray-700 border-b border-gray-200">
-                        <td
-                          colSpan="6"
-                          className="px-4 py-3 text-ms font-semibold border text-center"
-                        >
-                          Aucun avis trouvé
-                        </td>
-                      </tr>
-                    )}
-                    {ratings.map((rating) => (
-                      <tr key={rating._id}>
-                        <td className="border px-2 py-2">
-                          {rating.doctorName}
-                        </td>
-                        <td className="border px-2 py-2">
-                          {rating.patientName}
-                        </td>
-                        <td className="border px-2 py-2">{rating.rating}</td>
-                        <td className="border px-2 py-2">{rating.review}</td>
-
-                        <td className="border flex justify-center flex-row gap-3 px-2 py-2">
-                          <FaEye
-                            className="cursor-pointer text-blue-500"
-                            onClick={() =>
-                              setSelectedRating(rating) & setShowModal(true)
-                            }
-                          />
-                          <FaTrashAlt
-                            className="cursor-pointer text-red-500"
-                            onClick={() => handleDelete(rating._id)}
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            </div>
+          </div>
+          
+          <div className="card-hover border-l-4 border-yellow-500">
+            <div className="card-body">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-neutral-600">Note Moyenne</p>
+                  <p className="text-2xl font-bold text-neutral-900">{averageRating}</p>
+                </div>
+                <FaStar className="text-yellow-500 text-2xl" />
               </div>
-              {showModal && (
-                <Modal
-                  title={"Avis"}
-                  firstAction={viewAvis}
-                  secondAction={handleDelete}
-                  secondActionArgs={[selectedRating._id]}
-                  firstButton={"Voir"}
-                  secondButton={"Supprimer"}
-                  showModal={showModal}
-                  setShowModal={setShowModal}
-                >
-                  {/* Modal Content */}
-
-                  <div className="flex flex-col md:flex-row gap-2">
-                    <div className="w-full">
-                      <div className="flex flex-col md:flex-row justify-center items-start md:justify-around py-3">
-                        <div className="flex flex-col gap-2">
-                          <div className="flex flex-row gap-3">
-                            <p className="font-bold">Médecin:</p>
-                            <p>{selectedRating.doctorName}</p>
-                          </div>
-
-                          <div className="flex flex-row gap-3">
-                            <p className="font-bold">Patient:</p>
-                            <p>{selectedRating.patientName}</p>
-                          </div>
-
-                          <div className="flex flex-row gap-3">
-                            <p className="font-bold">Date:</p>
-
-                            <div className="flex flex-row gap-2 items-center justify-center md:justify-start">
-                              <p>
-                                {new Date(
-                                  selectedRating.createdAt
-                                ).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-row gap-3">
-                            <p className="font-bold">Rating:</p>
-                            <p>{selectedRating.rating}</p>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-row gap-3">
-                          <p className="font-bold">Commentaire:</p>
-
-                          <p>{selectedRating.review}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Modal>
-              )}
-              {/* {imageModal.state && showModal && (
-                <ImagePreview
-                  imageModal={imageModal}
-                  setImageModal={setImageModal}
-                />
-              )} */}
+            </div>
+          </div>
+          
+          <div className="card-hover border-l-4 border-green-500">
+            <div className="card-body">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-neutral-600">Avis ce mois</p>
+                  <p className="text-2xl font-bold text-neutral-900">15</p>
+                </div>
+                <FaStar className="text-green-500 text-2xl" />
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Search and Actions */}
+        <div className="card mb-6">
+          <div className="card-body">
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+              <div className="relative flex-1 max-w-md">
+                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" />
+                <input
+                  type="text"
+                  placeholder="Rechercher par médecin, patient ou commentaire..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                />
+              </div>
+              
+              <button
+                onClick={fetchRatings}
+                className="btn-secondary flex items-center gap-2"
+              >
+                <FaSync />
+                Actualiser
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Ratings List */}
+        <div className="card overflow-hidden">
+          {filteredRatings.length === 0 ? (
+            <div className="text-center py-12">
+              <FaStar className="text-neutral-300 text-6xl mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-neutral-600 mb-2">
+                {ratings.length === 0 ? "Aucun avis trouvé" : "Aucun résultat"}
+              </h3>
+              <p className="text-neutral-500">
+                {ratings.length === 0 
+                  ? "Aucun avis n'a encore été laissé" 
+                  : "Essayez de modifier votre recherche"
+                }
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-neutral-200">
+              {filteredRatings.map((rating) => (
+                <div key={rating._id} className="p-6 hover:bg-neutral-50 transition-all duration-200">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div className="flex items-start space-x-4">
+                      <div className="w-14 h-14 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <FaStar className="text-yellow-600 text-xl" />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
+                          <div className="flex items-center gap-1">
+                            {renderStars(rating.rating)}
+                            <span className="ml-2 text-sm font-medium text-neutral-700">({rating.rating}/5)</span>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-neutral-600 mb-2">
+                          <div className="flex items-center gap-2">
+                            <FaUserMd className="text-sky-500 flex-shrink-0" />
+                            <span className="truncate">Dr. {rating.doctorName || "Médecin"}</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <FaUser className="text-sky-500 flex-shrink-0" />
+                            <span className="truncate">{rating.patientName || "Patient"}</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <FaCalendarAlt className="text-sky-500 flex-shrink-0" />
+                            <span>{formatDate(rating.createdAt)}</span>
+                          </div>
+                        </div>
+                        
+                        {rating.comment && (
+                          <p className="text-sm text-neutral-600 bg-neutral-50 p-3 rounded-lg">
+                            <strong className="text-neutral-800">Commentaire:</strong> {rating.comment}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                      <button
+                        onClick={() => handleViewDetails(rating)}
+                        className="btn-secondary px-4 py-2 font-medium flex items-center justify-center gap-2"
+                      >
+                        <FaEye />
+                        <span className="hidden sm:inline">Voir détails</span>
+                        <span className="sm:hidden">Détails</span>
+                      </button>
+                      
+                      <button
+                        onClick={() => handleDeleteClick(rating)}
+                        className="btn bg-red-500 text-white hover:bg-red-600 focus:ring-red-500 px-4 py-2 font-medium flex items-center justify-center gap-2"
+                      >
+                        <FaTrashAlt />
+                        <span className="hidden sm:inline">Supprimer</span>
+                        <span className="sm:hidden">Supprimer</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Rating Details Modal */}
+      {showDetailsModal && selectedRating && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-gradient-to-r from-sky-500 to-blue-600 text-white p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold">Détails de l&apos;Avis</h2>
+                <button
+                  onClick={() => {
+                    setShowDetailsModal(false);
+                    setSelectedRating(null);
+                  }}
+                  className="text-white/80 hover:text-white text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <div className="text-center p-4 bg-yellow-50 rounded-xl">
+                <div className="flex items-center justify-center gap-1 mb-2">
+                  {renderStars(selectedRating.rating)}
+                </div>
+                <p className="text-2xl font-bold text-neutral-900">{selectedRating.rating}/5</p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <FaUserMd className="text-sky-600" />
+                    <div>
+                      <p className="text-sm text-neutral-500">Médecin</p>
+                      <p className="font-semibold">Dr. {selectedRating.doctorName}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    <FaUser className="text-sky-600" />
+                    <div>
+                      <p className="text-sm text-neutral-500">Patient</p>
+                      <p className="font-semibold">{selectedRating.patientName}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    <FaCalendarAlt className="text-sky-600" />
+                    <div>
+                      <p className="text-sm text-neutral-500">Date</p>
+                      <p className="font-semibold">{formatDate(selectedRating.createdAt)}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {selectedRating.comment && (
+                    <div>
+                      <p className="text-sm text-neutral-500 mb-2">Commentaire</p>
+                      <p className="font-semibold bg-neutral-50 p-3 rounded-lg">{selectedRating.comment}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t border-neutral-200">
+                <button
+                  onClick={() => {
+                    setShowDetailsModal(false);
+                    setSelectedRating(null);
+                  }}
+                  className="btn-secondary flex-1"
+                >
+                  Fermer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && selectedRating && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold text-neutral-900 mb-4">Confirmer la suppression</h3>
+            <p className="text-neutral-600 mb-6">
+              Êtes-vous sûr de vouloir supprimer cet avis ?
+              Cette action est irréversible.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setSelectedRating(null);
+                }}
+                className="flex-1 btn-secondary"
+                disabled={actionLoading}
+              >
+                Annuler
+              </button>
+              <LoadingButton
+                onClick={handleDeleteConfirm}
+                isLoading={actionLoading}
+                className="flex-1 btn bg-red-500 text-white hover:bg-red-600 focus:ring-red-500"
+              >
+                {actionLoading ? "Suppression..." : "Supprimer"}
+              </LoadingButton>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

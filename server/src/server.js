@@ -52,6 +52,7 @@ io.on("connection", (socket) => {
 
 // Server static files
 app.use("/uploads", express.static("uploads"));
+app.use(express.static('public'));
 
 // Handle 'Access-Control-Allow-Credentials' option for Cors
 app.use(credentials);

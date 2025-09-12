@@ -71,19 +71,51 @@ const getUserAppointments = async (req, res) => {
 };
 
 const scheduleAppointment = async (req, res) => {
-  const { userId, doctorId, reason, date, dateTime } = req.body;
-  if (!userId || !doctorId || !reason || !date) {
+  const { userId, doctorId, reason, date, startDateTime, durationMin } = req.body;
+  if (!userId || !doctorId || !reason) {
     return res.status(400).json({ message: "Missing required fields" });
   }
+
   try {
+    // If new time-based booking provided, perform conflict check
+    let start = null;
+    let end = null;
+    if (startDateTime) {
+      start = new Date(startDateTime);
+      if (Number.isNaN(start.getTime())) {
+        return res.status(400).json({ message: "Invalid startDateTime" });
+      }
+      // Prevent past bookings
+      const now = new Date();
+      if (start < now) {
+        return res.status(400).json({ message: "Start time must be in the future" });
+      }
+      const duration = typeof durationMin === "number" && durationMin > 0 ? durationMin : 30; // default 30 minutes
+      end = new Date(start.getTime() + duration * 60 * 1000);
+
+      // Overlap condition: existing.start < new.end AND existing.end > new.start
+      const overlapping = await Appointment.findOne({
+        doctorId,
+        status: { $in: ["approved"] },
+        startDateTime: { $lt: end },
+        endDateTime: { $gt: start }
+      }).exec();
+
+      if (overlapping) {
+        return res.status(409).json({ message: "Selected time slot is not available" });
+      }
+    }
+
     const newAppointment = await Appointment.create({
       userId,
       doctorId,
       reason,
-      date
+      date: date || (start ? start.toISOString().substring(0, 10) : undefined),
+      startDateTime: start || undefined,
+      endDateTime: end || undefined
     });
-    console.log(newAppointment);
-    res.status(201).json({ message: "Appointment created successfully" });
+
+    res.status(201).json({ message: "Appointment created successfully", appointmentId: newAppointment._id });
   } catch (err) {
     res.status(500).json({ message: "Error while creating appointment" });
   }
@@ -159,7 +191,7 @@ const deleteAppointmentById = async (req, res) => {
 
 const createMessage = async (req, res) => {
   const apptId = req.params.id;
-  const { senderId, role, content, senderName } = req.body;
+  const { senderId, role, content, senderName, fileUrl, fileName, fileType } = req.body;
 
   if (!apptId) {
     return res.status(400).json({ message: "Bad Request" });
@@ -173,14 +205,17 @@ const createMessage = async (req, res) => {
     senderId,
     senderName,
     role,
-    content
+    content,
+    fileUrl,
+    fileName,
+    fileType
   };
 
   try {
     const updatedAppointment = await Appointment.findByIdAndUpdate(
       apptId,
-      { $push: { messages: messageObj } }, // Use $push to add the message to the array
-      { new: true } // To get the updated document after the update
+      { $push: { messages: messageObj } },
+      { new: true }
     );
 
     if (!updatedAppointment) {
@@ -196,6 +231,20 @@ const createMessage = async (req, res) => {
   }
 };
 
+const uploadChatFile = (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'No file uploaded.' });
+  }
+  
+  const fileUrl = `/uploads/${req.file.filename}`;
+  res.status(201).json({ 
+    message: 'File uploaded successfully', 
+    fileUrl: fileUrl,
+    fileName: req.file.originalname,
+    fileType: req.file.mimetype.startsWith('image/') ? 'image' : 'file'
+  });
+};
+
 module.exports = {
   getAllAppointments,
   getAppointmentById,
@@ -206,5 +255,6 @@ module.exports = {
   cancelAppointment,
   rejectAppointment,
   deleteAppointmentById,
-  createMessage
+  createMessage,
+  uploadChatFile
 };

@@ -190,6 +190,133 @@ const fetchStatistics = async (req, res) => {
   }
 };
 
+// Helpers for available slots
+const parseHHMM = (hhmm) => {
+  const [h, m] = (hhmm || "00:00").split(":").map((v) => parseInt(v, 10));
+  return { h: isNaN(h) ? 0 : h, m: isNaN(m) ? 0 : m };
+};
+
+const addMinutes = (date, minutes) => new Date(date.getTime() + minutes * 60000);
+
+const ymdLocal = (d) => {
+  // Return YYYY-MM-DD in local time
+  return d.toLocaleDateString('en-CA');
+};
+
+const getAvailableSlots = async (req, res) => {
+  try {
+    const doctorId = req.params.id;
+    const { start, end, slotMinutes } = req.query;
+    const slotSize = Math.max(parseInt(slotMinutes || "30", 10), 5);
+
+    const doctor = await Doctor.findById(doctorId).select("availability scheduleV2").exec();
+    if (!doctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+
+    const rangeStart = start ? new Date(start) : new Date();
+    const rangeEnd = end ? new Date(end) : addMinutes(rangeStart, 60 * 24 * 14); // default 14 days
+
+    if (isNaN(rangeStart.getTime()) || isNaN(rangeEnd.getTime())) {
+      return res.status(400).json({ message: "Invalid date range" });
+    }
+
+    const now = new Date();
+
+    // Fetch approved appointments in range
+    const appts = await Appointment.find({
+      doctorId,
+      status: { $in: ["approved"] },
+      startDateTime: { $gte: rangeStart, $lt: rangeEnd }
+    })
+      .select("startDateTime endDateTime")
+      .exec();
+
+    const isOverlapping = (startA, endA, startB, endB) => startA < endB && endA > startB;
+
+    const results = [];
+    const dayMs = 24 * 60 * 60 * 1000;
+    const startMidnight = new Date(rangeStart.getFullYear(), rangeStart.getMonth(), rangeStart.getDate()).getTime();
+    const endExclusive = new Date(rangeEnd.getFullYear(), rangeEnd.getMonth(), rangeEnd.getDate()).getTime();
+    const v2 = doctor.scheduleV2 || [];
+    const useV2Globally = Array.isArray(v2) && v2.some((d) => d && Array.isArray(d.ranges) && d.ranges.length > 0);
+
+    for (let t = startMidnight; t < endExclusive; t += dayMs) {
+      const day = new Date(t);
+      const jsDow = day.getDay(); // 0 Sun .. 6 Sat
+      // DB uses Monday=0..Sunday=6 (new). Some legacy data may use Sunday=0..Saturday=6.
+      const dbDowMonFirst = (jsDow + 6) % 7; // preferred
+      const dbDowSunFirst = jsDow;           // legacy
+
+      // Prefer scheduleV2 if present
+      const rangesV2 = (() => {
+        const dayEntry = v2.find((d) => d && d.day === dbDowMonFirst);
+        if (!dayEntry || !Array.isArray(dayEntry.ranges) || dayEntry.ranges.length === 0) return [];
+        return dayEntry.ranges
+          .map((r) => ({ start: parseHHMM(r.start), end: parseHHMM(r.end) }))
+          .filter((r) => (r.end.h * 60 + r.end.m) > (r.start.h * 60 + r.start.m));
+      })();
+
+      let ranges = rangesV2;
+
+      // Fallback to legacy availability (single range per day) ONLY if V2 is not in use anywhere
+      if ((!ranges || ranges.length === 0) && !useV2Globally) {
+        const candidates = (doctor.availability || []).filter(
+          (s) => s && s.isAvailable && (s.dayOfWeek === dbDowMonFirst || s.dayOfWeek === dbDowSunFirst)
+        );
+        if (candidates && candidates.length > 0) {
+          let best = null;
+          let bestSpan = -1;
+          for (const s of candidates) {
+            const { h: sh0, m: sm0 } = parseHHMM(s.startTime);
+            const { h: eh0, m: em0 } = parseHHMM(s.endTime);
+            const span = eh0 * 60 + em0 - (sh0 * 60 + sm0);
+            if (span > bestSpan) {
+              best = { start: { h: sh0, m: sm0 }, end: { h: eh0, m: em0 } };
+              bestSpan = span;
+            }
+          }
+          ranges = bestSpan > 0 ? [best] : [];
+        } else {
+          ranges = [];
+        }
+      }
+
+      for (const r of ranges) {
+        const dayStart = new Date(day.getFullYear(), day.getMonth(), day.getDate(), r.start.h, r.start.m);
+        const dayEnd = new Date(day.getFullYear(), day.getMonth(), day.getDate(), r.end.h, r.end.m);
+        if (!(dayEnd > dayStart)) continue;
+
+        for (let slotStart = new Date(dayStart); addMinutes(slotStart, slotSize) <= dayEnd; slotStart = addMinutes(slotStart, slotSize)) {
+          const slotEnd = addMinutes(slotStart, slotSize);
+          // Skip past times on current day
+          if (
+            slotStart.getFullYear() === now.getFullYear() &&
+            slotStart.getMonth() === now.getMonth() &&
+            slotStart.getDate() === now.getDate() &&
+            slotStart < now
+          ) {
+            continue;
+          }
+          const conflict = appts.some((a) => isOverlapping(slotStart, slotEnd, a.startDateTime, a.endDateTime));
+          if (!conflict) {
+            results.push({
+              date: ymdLocal(day),
+              start: slotStart.toISOString(),
+              end: slotEnd.toISOString()
+            });
+          }
+        }
+      }
+    }
+
+    res.status(200).json({ slots: results });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error computing available slots" });
+  }
+};
+
 module.exports = {
   getAllDoctors,
   getDoctorById,
@@ -199,5 +326,6 @@ module.exports = {
   approveDoctorById,
   rejectDoctorById,
   modifyDoctorPasswordById,
-  fetchStatistics
+  fetchStatistics,
+  getAvailableSlots
 };
