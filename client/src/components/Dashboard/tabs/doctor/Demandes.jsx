@@ -1,10 +1,12 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaTrashAlt, FaCheck, FaTimes, FaCalendarAlt, FaUser, FaClock, FaFilter, FaSearch, FaEnvelope, FaUserMd } from "react-icons/fa";
 import axios from "../../../../api/axios";
 import useAccessToken from "../../../../hooks/useAccessToken";
 import MedicalLoader from "../../../MedicalLoader";
 import LoadingButton from "../../../LoadingButton";
+import { useToast } from "../../../Notifications/ToastContainer";
+import NotificationContext from "../../../../context/NotificationContext";
 
 const DoctorDemandes = () => {
   const effectRan = useRef(false);
@@ -21,6 +23,7 @@ const DoctorDemandes = () => {
   const [actionLoading, setActionLoading] = useState(false);
 
   const { accessToken, decodedToken } = useAccessToken();
+  const { showSuccess, showError } = useToast();
 
   // Fetch appointments with patient details
   const fetchAppointments = useCallback(async () => {
@@ -32,7 +35,7 @@ const DoctorDemandes = () => {
         const response = await axios.get(
           `/appointments/doctor/${decodedToken.UserInfo.id}`,
           {
-            headers: {
+          headers: {
               Authorization: `Bearer ${accessToken}`
             }
           }
@@ -176,6 +179,33 @@ const DoctorDemandes = () => {
           }
         }
       );
+
+      // Create notification for patient
+      try {
+        await axios.post("/notifications", {
+          userId: selectedAppointment.userId,
+          title: actionType === "approve" ? "Rendez-vous confirmé" : "Rendez-vous rejeté",
+          message: actionType === "approve" 
+            ? `Votre rendez-vous avec Dr. ${decodedToken.UserInfo.fullName} a été confirmé.`
+            : `Votre demande de rendez-vous avec Dr. ${decodedToken.UserInfo.fullName} a été rejetée.`,
+          type: "appointment",
+          priority: "high",
+          actionUrl: "/dashboard/consultations"
+        }, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+      } catch (notifError) {
+        console.error("Error creating notification:", notifError);
+      }
+
+      // Show toast notification
+      if (actionType === "approve") {
+        showSuccess("Rendez-vous approuvé avec succès!");
+      } else {
+        showSuccess("Rendez-vous rejeté.");
+      }
       
       // Refresh appointments
       await fetchAppointments();
@@ -184,6 +214,7 @@ const DoctorDemandes = () => {
       setActionType("");
     } catch (error) {
       console.error(`Error ${actionType}ing appointment:`, error);
+      showError(`Erreur lors de l'${actionType === "approve" ? "approbation" : "rejet"} du rendez-vous`);
     } finally {
       setActionLoading(false);
     }
@@ -192,14 +223,14 @@ const DoctorDemandes = () => {
   const handleDeleteAppointment = async (appointmentId) => {
     try {
       await axios.delete(`/appointments/${appointmentId}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
-      });
+            headers: {
+              Authorization: `Bearer ${accessToken}`
+            }
+          });
       
       // Refresh appointments
       await fetchAppointments();
-    } catch (error) {
+      } catch (error) {
       console.error("Error deleting appointment:", error);
     }
   };
@@ -235,11 +266,11 @@ const DoctorDemandes = () => {
             <span className="bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
               demandes
             </span>
-          </h1>
+        </h1>
           <p className="body-large text-neutral-600 max-w-2xl mx-auto">
             Gérez les demandes de consultation de vos patients
-          </p>
-        </div>
+            </p>
+          </div>
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
@@ -273,7 +304,7 @@ const DoctorDemandes = () => {
               <p className="text-sm text-neutral-600">Rejetées</p>
             </div>
           </div>
-        </div>
+          </div>
 
         {/* Filters and Search */}
         <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
@@ -288,7 +319,7 @@ const DoctorDemandes = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-            </div>
+          </div>
 
             {/* Status Filter */}
             <div className="flex items-center gap-2">
@@ -305,9 +336,9 @@ const DoctorDemandes = () => {
                 <option value="rejected">Rejetées</option>
                 <option value="cancelled">Annulées</option>
               </select>
-            </div>
           </div>
         </div>
+      </div>
 
         {/* Appointments List */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -323,7 +354,7 @@ const DoctorDemandes = () => {
                   : "Essayez de modifier vos filtres de recherche"
                 }
               </p>
-            </div>
+                        </div>
           ) : (
             <div className="divide-y divide-gray-200">
               {filteredAppointments.map((appointment) => (
@@ -333,7 +364,7 @@ const DoctorDemandes = () => {
                       {/* Patient Avatar */}
                       <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                         <FaUser className="text-blue-600 text-xl" />
-                      </div>
+                        </div>
                       
                       {/* Appointment Details */}
                       <div className="flex-1">
@@ -350,28 +381,28 @@ const DoctorDemandes = () => {
                           <div className="flex items-center gap-1">
                             <FaEnvelope className="text-gray-400" />
                             <span>{appointment.patient?.email}</span>
-                          </div>
+                        </div>
                           
                           <div className="flex items-center gap-1">
                             <FaCalendarAlt className="text-gray-400" />
                             <span>
                               {formatDate(appointment.startDateTime || appointment.date)}
                             </span>
-                          </div>
+                        </div>
                           
                           {appointment.startDateTime && (
                             <div className="flex items-center gap-1">
                               <FaClock className="text-gray-400" />
                               <span>{formatTime(appointment.startDateTime)}</span>
-                            </div>
-                          )}
-                        </div>
+                    </div>
+                  )}
+                </div>
                         
                         <p className="text-sm text-gray-500">
                           <strong>Motif:</strong> {appointment.reason}
                         </p>
-                      </div>
-                    </div>
+              </div>
+            </div>
 
                     {/* Actions */}
                     <div className="flex items-center space-x-3">
@@ -426,7 +457,7 @@ const DoctorDemandes = () => {
             </div>
           )}
         </div>
-      </div>
+            </div>
 
       {/* Appointment Details Modal */}
       {showDetailsModal && selectedAppointment && (
@@ -448,7 +479,7 @@ const DoctorDemandes = () => {
               </div>
             </div>
 
-            {/* Modal Content */}
+                {/* Modal Content */}
             <div className="p-6 space-y-6">
               {/* Patient Information */}
               <div className="flex items-center space-x-4 p-4 bg-blue-50 rounded-xl">
@@ -464,7 +495,7 @@ const DoctorDemandes = () => {
                     <p className="text-sm text-gray-500">{selectedAppointment.patient?.phoneNumber}</p>
                   )}
                 </div>
-              </div>
+                        </div>
 
               {/* Appointment Details */}
               <div className="grid md:grid-cols-2 gap-6">
@@ -475,7 +506,7 @@ const DoctorDemandes = () => {
                       <p className="text-sm text-gray-500">Date</p>
                       <p className="font-semibold">{formatDate(selectedAppointment.startDateTime || selectedAppointment.date)}</p>
                     </div>
-                  </div>
+                        </div>
 
                   {selectedAppointment.startDateTime && (
                     <div className="flex items-center space-x-3">
@@ -496,13 +527,13 @@ const DoctorDemandes = () => {
                       </span>
                     </div>
                   </div>
-                </div>
+                        </div>
 
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm text-gray-500 mb-2">Motif de consultation</p>
                     <p className="font-semibold bg-gray-50 p-3 rounded-lg">{selectedAppointment.reason}</p>
-                  </div>
+                        </div>
 
                   {selectedAppointment.notes && selectedAppointment.notes.length > 0 && (
                     <div>
@@ -515,7 +546,7 @@ const DoctorDemandes = () => {
                     </div>
                   )}
                 </div>
-              </div>
+                        </div>
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
@@ -566,10 +597,10 @@ const DoctorDemandes = () => {
                 >
                   Fermer
                 </button>
-              </div>
-            </div>
-          </div>
-        </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
       )}
 
       {/* Action Confirmation Modal */}
@@ -605,9 +636,9 @@ const DoctorDemandes = () => {
                   (actionType === "approve" ? "Approuver" : "Rejeter")
                 }
               </LoadingButton>
-            </div>
           </div>
         </div>
+      </div>
       )}
     </section>
   );

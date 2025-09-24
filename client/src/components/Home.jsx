@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect } from "react";
 import Hero from "./Hero";
 import Services from "./Services";
 import About from "./About";
@@ -7,11 +7,15 @@ import Specialities from "./Specialities";
 import NewsLetter from "./NewsLetter";
 
 import AuthContext from "../context/AuthContext";
+import usePageSEO from "../hooks/usePageSEO";
 
 const Home = () => {
   const { aboutRef } = useContext(AuthContext);
+  
+  // Set page SEO
+  usePageSEO('home');
 
-  const effectRan = useRef(false);
+  // const effectRan = useRef(false);
 
   useEffect(() => {
     const handleHashChange = () => {

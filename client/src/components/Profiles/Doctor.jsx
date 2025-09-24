@@ -27,6 +27,7 @@ import StarRating from "./StarRating";
 import AvgRating from "./AvgRating";
 import AuthContext from "../../context/AuthContext";
 import MedicalLoader from "../MedicalLoader";
+import { useToast } from "../Notifications/ToastContainer";
 
 const Doctor = () => {
   const { doctorId } = useParams();
@@ -67,6 +68,7 @@ const Doctor = () => {
   const effectRan = useRef(false);
 
   const { accessToken, decodedToken } = useAccessToken();
+  const { showSuccess, showError } = useToast();
 
   const { API_URL } = useContext(AuthContext);
   const IMG_URL = `${API_URL}/uploads/`;
@@ -96,9 +98,9 @@ const Doctor = () => {
     setLoading(true);
     try {
       const response = await axios.get(`/doctors/${doctorId}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
+        // headers: {
+        //   Authorization: `Bearer ${accessToken}`
+        // }
       });
 
       if (response.status === 200) {
@@ -306,7 +308,27 @@ const Doctor = () => {
                 }
               );
               if (response.status === 201) {
-                window.alert("Votre demande à été envoyée avec succès");
+                // Create notification for doctor
+                try {
+                  await axios.post("/notifications", {
+                    userId: doctor._id,
+                    title: "Nouvelle demande de consultation",
+                    message: `${decodedToken.UserInfo.fullName} souhaite prendre rendez-vous avec vous.`,
+                    type: "appointment",
+                    priority: "high",
+                    actionUrl: "/dashboard/consultations"
+                  }, {
+                    headers: {
+                      Authorization: `Bearer ${accessToken}`
+                    }
+                  });
+                } catch (notifError) {
+                  console.error("Error creating notification:", notifError);
+                }
+
+                // Show success toast
+                showSuccess("Votre demande a été envoyée avec succès!");
+                
                 setDemandeStatus({
                   message: "Votre demande à été envoyée avec succès",
                   error: false
@@ -316,6 +338,7 @@ const Doctor = () => {
             } catch (err) {
               const msg = err?.response?.data?.message || "Une erreur s'est produite";
               setDemandeStatus({ message: msg, error: true });
+              showError("Erreur lors de l'envoi de la demande");
             }
           }
         }

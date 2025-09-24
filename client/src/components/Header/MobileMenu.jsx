@@ -1,17 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
-import { FaTimes, FaHome, FaUserMd, FaFlask, FaEnvelope, FaSignInAlt, FaTachometerAlt, FaSignOutAlt } from "react-icons/fa";
+import { FaTimes, FaHome, FaUserMd, FaFlask, FaEnvelope, FaSignInAlt, FaTachometerAlt, FaSignOutAlt, FaPills, FaFileAlt } from "react-icons/fa";
 import useAuth from "../../hooks/useAuth";
 import useLogout from "../../hooks/useLogout";
+import AuthContext from "../../context/AuthContext";
+import NotificationContext from "../../context/NotificationContext";
 
 const MobileMenu = ({ isOpen, onClose }) => {
   const { auth } = useAuth();
   const handleLogout = useLogout();
+  const { API_URL } = useContext(AuthContext);
+  const { unreadCount } = useContext(NotificationContext);
+  const IMG_URL = `${API_URL}/uploads/`;
 
   const menuItems = [
     { name: "Accueil", path: "/", icon: FaHome },
     { name: "Médecins", path: "/doctors", icon: FaUserMd },
+    { name: "Médicaments", path: "/medicines", icon: FaPills },
     { name: "Laboratoires", path: "/labs", icon: FaFlask },
+    { name: "Blog", path: "/blog", icon: FaFileAlt },
     { name: "Contact", path: "/contact", icon: FaEnvelope },
   ];
 
@@ -72,10 +79,31 @@ const MobileMenu = ({ isOpen, onClose }) => {
         {auth?.email && (
           <div className="p-6 bg-gradient-to-r from-primary-50 to-secondary-50 border-b border-gray-100">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center">
-                <span className="text-white font-medium text-lg">
-                  {auth.fullName?.charAt(0) || 'U'}
-                </span>
+              <div className="relative">
+                {auth.profileImage ? (
+                  <img
+                    src={`${IMG_URL}${auth.profileImage}`}
+                    alt={auth.fullName}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-primary-500"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div 
+                  className="w-12 h-12 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center"
+                  style={{ display: auth.profileImage ? 'none' : 'flex' }}
+                >
+                  <span className="text-white font-medium text-lg">
+                    {auth.fullName?.charAt(0) || 'U'}
+                  </span>
+                </div>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </div>
               <div>
                 <p className="font-semibold text-gray-900">{auth.fullName}</p>

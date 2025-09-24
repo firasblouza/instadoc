@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useContext } from "react";
 import PropTypes from 'prop-types';
 import {
@@ -18,20 +17,35 @@ const Sidebar = ({ appointment, isOpen, role, notes, setNotes, socket, handleSid
   const [selectedNoteIndex, setSelectedNoteIndex] = useState(null);
 
   const { accessToken } = useAccessToken();
-  const navigate = useNavigate();
   const { API_URL } = useContext(AuthContext);
   const IMG_URL = `${API_URL}/uploads/`;
   const IMG_Placeholder = `${API_URL}/imagePlaceholder.png`;
 
   const handleAddNote = async (e, id) => {
-    if (newNote) {
-      setNotes((prevNotes) => [...prevNotes, newNote]); // Add the newNote to the notes array
-      setNewNote(""); // Clear the input field
-      const updatedNotes = [...notes, newNote];
-      const update = await axios.put(`/appointments/modify/${id}`, {
-        notes: updatedNotes
-      });
-      socket.emit("add-note", updatedNotes, id);
+    e.preventDefault();
+    if (newNote.trim()) {
+      const updatedNotes = [...notes, newNote.trim()];
+      setNotes(updatedNotes);
+      setNewNote("");
+      
+      try {
+        const update = await axios.put(`/appointments/modify/${id}`, {
+          notes: updatedNotes
+        }, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+        
+        if (update.status === 200) {
+          socket.emit("add-note", updatedNotes, id);
+        }
+      } catch (error) {
+        console.error("Error adding note:", error);
+        // Revert the state if the API call fails
+        setNotes(notes);
+        setNewNote(newNote);
+      }
     }
   };
 
@@ -39,10 +53,24 @@ const Sidebar = ({ appointment, isOpen, role, notes, setNotes, socket, handleSid
     const updatedNotes = notes.filter((_, i) => i !== index);
     setNotes(updatedNotes);
     setSelectedNoteIndex(null);
-    const updateNotes = await axios.put(`/appointments/modify/${id}`, {
-      notes: updatedNotes
-    });
-    socket.emit("delete-note", updatedNotes, id);
+    
+    try {
+      const updateNotes = await axios.put(`/appointments/modify/${id}`, {
+        notes: updatedNotes
+      }, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      });
+      
+      if (updateNotes.status === 200) {
+        socket.emit("delete-note", updatedNotes, id);
+      }
+    } catch (error) {
+      console.error("Error deleting note:", error);
+      // Revert the state if the API call fails
+      setNotes(notes);
+    }
   };
 
   useEffect(() => {
@@ -142,7 +170,13 @@ const Sidebar = ({ appointment, isOpen, role, notes, setNotes, socket, handleSid
                     >
                       <span>{note}</span>
                       {selectedNoteIndex === index && role === 'doctor' && (
-                        <button onClick={() => handleNoteDelete(selectedNoteIndex, appointment._id)} className="text-red-400 hover:text-red-500">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleNoteDelete(selectedNoteIndex, appointment._id);
+                          }} 
+                          className="text-red-400 hover:text-red-500"
+                        >
                           <FaTrash />
                         </button>
                       )}
@@ -163,6 +197,11 @@ const Sidebar = ({ appointment, isOpen, role, notes, setNotes, socket, handleSid
                   placeholder="Ajouter une note..."
                   className="bg-neutral-700/50 p-3 rounded-xl w-full text-sm text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 pr-10"
                   onChange={(e) => setNewNote(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleAddNote(e, appointment._id);
+                    }
+                  }}
                 />
                 <button
                   className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-neutral-400 hover:text-white"

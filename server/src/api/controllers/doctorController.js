@@ -64,7 +64,18 @@ const modifyDoctorById = async (req, res) => {
       { new: true } // Return the updated doctor object
     ).exec();
     if (doctor) {
-      res.status(200).json({ message: "Doctor updated successfully" });
+      res.status(200).json({ 
+        message: "Doctor updated successfully",
+        profileImage: doctor.profileImage,
+        firstName: doctor.firstName,
+        lastName: doctor.lastName,
+        email: doctor.email,
+        phoneNumber: doctor.phoneNumber,
+        dateOfBirth: doctor.dateOfBirth,
+        cvImage: doctor.cvImage,
+        idImage: doctor.idImage,
+        licenseImage: doctor.licenseImage
+      });
     } else {
       res.status(404).json({ message: "Doctor not found" });
     }

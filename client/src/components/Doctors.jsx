@@ -9,6 +9,7 @@ import axios from "../api/axios";
 import AvgRating from "./Profiles/AvgRating";
 import AuthContext from "../context/AuthContext";
 import MedicalLoader from "./MedicalLoader";
+import usePageSEO from "../hooks/usePageSEO";
 
 const Doctors = () => {
   const [initialDoctors, setInitialDoctors] = useState([]);
@@ -17,6 +18,9 @@ const Doctors = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("all");
   const [sortBy, setSortBy] = useState("name");
+
+  // Set page SEO
+  usePageSEO('doctors');
 
   const { API_URL } = useContext(AuthContext);
   const IMG_URL = `${API_URL}/uploads/`;

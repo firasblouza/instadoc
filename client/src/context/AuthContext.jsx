@@ -25,6 +25,7 @@ export const AuthProvider = ({ children }) => {
     firstName: "",
     lastName: "",
     email: "",
+    phoneNumber: "",
     dateOfBirth: "",
     password: "",
     confirmPassword: "",
@@ -209,10 +210,10 @@ export const AuthProvider = ({ children }) => {
           setLoginMessage({ message: err.response.data.message, error: true });
           break;
         case 500:
-          setLoginMessage({ message: "Server Error", error: true });
+          setLoginMessage({ message: "Erreur du serveur", error: true });
           break;
         default:
-          setLoginMessage({ message: "Login Failed", error: true });
+          setLoginMessage({ message: "Échec de la connexion", error: true });
       }
     }
   };
@@ -227,9 +228,13 @@ export const AuthProvider = ({ children }) => {
       const formData = new FormData();
       formData.append("userData", JSON.stringify(userData));
 
-      // Append files only if the user is a doctor
-      if (userData.role === 'doctor') {
+      // Append files for both doctors and patients
+      if (userData.profileImage) {
         formData.append("profileImage", userData.profileImage);
+      }
+      
+      // Append additional files only if the user is a doctor
+      if (userData.role === 'doctor') {
         formData.append("idImage", userData.idImage);
         formData.append("licenseImage", userData.licenseImage);
         formData.append("cvImage", userData.cvImage);
@@ -245,13 +250,14 @@ export const AuthProvider = ({ children }) => {
       setSignupMessage({ message: response.data.message, error: false });
       setTimeout(() => {
         navigate("/login");
-        setLoginMessage({ message: "Please Login", error: false });
+        setLoginMessage({ message: "Veuillez vous connecter", error: false });
       }, 2000);
       // Empty the fields after successful signup
       setUserData({
         firstName: "",
         lastName: "",
         email: "",
+        phoneNumber: "",
         dateOfBirth: "",
         password: "",
         confirmPassword: "",
@@ -281,7 +287,7 @@ export const AuthProvider = ({ children }) => {
           setStep(1);
           break;
         case 500:
-          setSignupMessage({ message: "Server Error", error: true });
+          setSignupMessage({ message: "Erreur du serveur", error: true });
           break;
         case 400:
           setSignupMessage({
@@ -290,7 +296,7 @@ export const AuthProvider = ({ children }) => {
           });
           break;
         default:
-          setSignupMessage({ message: "Registration Failed", error: true });
+          setSignupMessage({ message: "Échec de l'inscription", error: true });
       }
     }
   };

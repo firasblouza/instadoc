@@ -7,7 +7,10 @@ import {
   FaStar,
   FaCog,
   FaSignOutAlt,
-  FaHome
+  FaHome,
+  FaPills,
+  FaFileAlt,
+  FaSearch
 } from "react-icons/fa";
 
 const getTabs = (role) => {
@@ -93,10 +96,28 @@ const getTabs = (role) => {
         icon: FaFlask
       },
       {
+        name: "Gestion des Médicaments",
+        id: "admin-medicines",
+        path: "admin/medicines",
+        icon: FaPills
+      },
+      {
         name: "Gestion des Avis",
         id: "admin-reviews",
         path: "admin/reviews",
         icon: FaStar
+      },
+      {
+        name: "Gestion du Blog",
+        id: "admin-blogs",
+        path: "admin/blogs",
+        icon: FaFileAlt
+      },
+      {
+        name: "Gestion SEO",
+        id: "admin-seo",
+        path: "admin/seo",
+        icon: FaSearch
       },
       ...commonBottomTabs
     ];

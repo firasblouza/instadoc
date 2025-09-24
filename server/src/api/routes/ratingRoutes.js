@@ -5,6 +5,7 @@ const verifyRole = require("../middleware/verifyRole");
 
 router.get("/", ratingController.getAllRatings);
 router.get("/:id", ratingController.getRatingById);
+router.put("/:id", verifyRole("admin"), ratingController.updateRatingById);
 router.delete("/:id", verifyRole("admin"), ratingController.deleteRatingById);
 router.post("/", ratingController.createRating);
 router.get("/doctor/:id", ratingController.getDoctorRatings);

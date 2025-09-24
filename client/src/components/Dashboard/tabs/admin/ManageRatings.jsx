@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { FaTrashAlt, FaEye, FaSync, FaStar, FaSearch, FaUserMd, FaUser, FaCalendarAlt } from "react-icons/fa";
+import { FaTrashAlt, FaEye, FaEdit, FaSync, FaStar, FaSearch, FaUserMd, FaUser, FaCalendarAlt } from "react-icons/fa";
 import axios from "../../../../api/axios";
 import useAccessToken from "../../../../hooks/useAccessToken";
 import MedicalLoader from "../../../MedicalLoader";
@@ -13,6 +13,7 @@ const ManageRatings = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRating, setSelectedRating] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -59,6 +60,40 @@ const ManageRatings = () => {
   const handleViewDetails = (rating) => {
     setSelectedRating(rating);
     setShowDetailsModal(true);
+  };
+
+  const handleEdit = (rating) => {
+    setSelectedRating({...rating});
+    setShowEditModal(true);
+  };
+
+  const handleEditSave = async () => {
+    if (!selectedRating) return;
+    
+    try {
+      setActionLoading(true);
+      
+      const ratingData = {
+        rating: selectedRating.rating,
+        review: selectedRating.review
+      };
+
+      await axios.put(`/ratings/${selectedRating._id}`, ratingData, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json"
+        }
+      });
+      
+      await fetchRatings();
+      setShowEditModal(false);
+      setSelectedRating(null);
+    } catch (error) {
+      console.error("Error updating rating:", error);
+      alert("Erreur lors de la modification de l&apos;avis");
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleDeleteClick = (rating) => {
@@ -231,6 +266,14 @@ const ManageRatings = () => {
                           </div>
                         </div>
                         
+                        {rating.review && (
+                          <div className="mb-3">
+                            <p className="text-sm text-neutral-700 bg-neutral-50 p-3 rounded-lg border-l-4 border-sky-200">
+                              <strong className="text-neutral-800">Avis:</strong> {rating.review}
+                            </p>
+                          </div>
+                        )}
+                        
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-neutral-600 mb-2">
                           <div className="flex items-center gap-2">
                             <FaUserMd className="text-sky-500 flex-shrink-0" />
@@ -264,6 +307,15 @@ const ManageRatings = () => {
                         <FaEye />
                         <span className="hidden sm:inline">Voir détails</span>
                         <span className="sm:hidden">Détails</span>
+                      </button>
+                      
+                      <button
+                        onClick={() => handleEdit(rating)}
+                        className="btn-primary px-4 py-2 font-medium flex items-center justify-center gap-2"
+                      >
+                        <FaEdit />
+                        <span className="hidden sm:inline">Modifier</span>
+                        <span className="sm:hidden">Modifier</span>
                       </button>
                       
                       <button
@@ -390,6 +442,91 @@ const ManageRatings = () => {
               >
                 {actionLoading ? "Suppression..." : "Supprimer"}
               </LoadingButton>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Rating Modal */}
+      {showEditModal && selectedRating && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+            <div className="bg-gradient-to-r from-sky-500 to-blue-600 text-white p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold">Modifier l&apos;Avis</h2>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedRating(null);
+                  }}
+                  className="text-white/80 hover:text-white text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-6 overflow-y-auto flex-1">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Note</label>
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => setSelectedRating({...selectedRating, rating: star})}
+                        className={`text-2xl transition-colors ${
+                          star <= selectedRating.rating 
+                            ? 'text-yellow-400' 
+                            : 'text-neutral-300 hover:text-yellow-200'
+                        }`}
+                      >
+                        <FaStar />
+                      </button>
+                    ))}
+                    <span className="ml-2 text-sm font-medium text-neutral-700">
+                      ({selectedRating.rating}/5)
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Avis</label>
+                  <textarea
+                    value={selectedRating.review || ''}
+                    onChange={(e) => setSelectedRating({...selectedRating, review: e.target.value})}
+                    rows={4}
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                    placeholder="Écrivez votre avis ici..."
+                  />
+                </div>
+
+                <div className="text-sm text-neutral-600 bg-neutral-50 p-4 rounded-lg">
+                  <p><strong>Médecin:</strong> Dr. {selectedRating.doctorName}</p>
+                  <p><strong>Patient:</strong> {selectedRating.patientName}</p>
+                  <p><strong>Date:</strong> {formatDate(selectedRating.createdAt)}</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-neutral-200">
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedRating(null);
+                  }}
+                  className="btn-secondary flex-1"
+                  disabled={actionLoading}
+                >
+                  Annuler
+                </button>
+                <LoadingButton
+                  onClick={handleEditSave}
+                  isLoading={actionLoading}
+                  className="btn-primary flex-1"
+                >
+                  {actionLoading ? "Enregistrement..." : "Enregistrer"}
+                </LoadingButton>
+              </div>
             </div>
           </div>
         </div>

@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback, useContext } from "react";
-import { FaTrashAlt, FaEye, FaEdit, FaSync, FaUserMd, FaSearch, FaFilter, FaEnvelope, FaPhone, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaHourglassHalf } from "react-icons/fa";
+import { FaTrashAlt, FaEye, FaEdit, FaSync, FaUserMd, FaSearch, FaFilter, FaEnvelope, FaPhone, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaHourglassHalf, FaUpload } from "react-icons/fa";
 import axios from "../../../../api/axios";
 import useAccessToken from "../../../../hooks/useAccessToken";
 import AuthContext from "../../../../context/AuthContext";
 import MedicalLoader from "../../../MedicalLoader";
 import LoadingButton from "../../../LoadingButton";
+import { useToast } from "../../../Notifications/ToastContainer";
 
 const ManageDoctors = () => {
   const effectRan = useRef(false);
@@ -15,11 +16,18 @@ const ManageDoctors = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showActionModal, setShowActionModal] = useState(false);
   const [actionType, setActionType] = useState(""); // "approve" or "reject"
   const [actionLoading, setActionLoading] = useState(false);
+  const [uploadedProfile, setUploadedProfile] = useState(null);
+  const [uploadedCV, setUploadedCV] = useState(null);
+  const [uploadedID, setUploadedID] = useState(null);
+  const [uploadedLicense, setUploadedLicense] = useState(null);
 
   const { accessToken } = useAccessToken();
+  const { showSuccess, showError } = useToast();
   const { API_URL } = useContext(AuthContext);
   const IMG_URL = `${API_URL}/uploads/`;
 
@@ -99,6 +107,125 @@ const ManageDoctors = () => {
     setShowDetailsModal(true);
   };
 
+  const handleEdit = (doctor) => {
+    setSelectedDoctor({...doctor});
+    setUploadedProfile(null);
+    setUploadedCV(null);
+    setUploadedID(null);
+    setUploadedLicense(null);
+    setShowEditModal(true);
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (e.target.name === "profileImage") {
+        setUploadedProfile(file);
+      } else if (e.target.name === "cvImage") {
+        setUploadedCV(file);
+      } else if (e.target.name === "idImage") {
+        setUploadedID(file);
+      } else if (e.target.name === "licenseImage") {
+        setUploadedLicense(file);
+      }
+    }
+  };
+
+  const handleDeleteClick = (doctor) => {
+    setSelectedDoctor(doctor);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedDoctor) return;
+    
+    try {
+      setActionLoading(true);
+      await axios.delete(`/admin/doctor/${selectedDoctor._id}`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`
+            }
+          });
+      
+      await fetchDoctors();
+      setShowDeleteModal(false);
+      setSelectedDoctor(null);
+      } catch (error) {
+      console.error("Error deleting doctor:", error);
+      alert("Erreur lors de la suppression du médecin");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleEditSave = async () => {
+    if (!selectedDoctor) return;
+    
+    try {
+      setActionLoading(true);
+      
+      // Format the data according to the expected structure
+      const doctorData = {
+        firstName: selectedDoctor.firstName,
+        lastName: selectedDoctor.lastName,
+        email: selectedDoctor.email,
+        phoneNumber: selectedDoctor.phoneNumber,
+        speciality: selectedDoctor.speciality,
+        licenseNumber: selectedDoctor.licenseNumber,
+        idType: selectedDoctor.idType,
+        idNumber: selectedDoctor.idNumber,
+        dateOfBirth: selectedDoctor.dateOfBirth
+      };
+
+      // Use FormData if there are files to upload
+      if (uploadedProfile || uploadedCV || uploadedID || uploadedLicense) {
+        const formData = new FormData();
+        formData.append("user", JSON.stringify(doctorData));
+        
+        if (uploadedProfile) {
+          formData.append("profileImage", uploadedProfile);
+        }
+        if (uploadedCV) {
+          formData.append("cvImage", uploadedCV);
+        }
+        if (uploadedID) {
+          formData.append("idImage", uploadedID);
+        }
+        if (uploadedLicense) {
+          formData.append("licenseImage", uploadedLicense);
+        }
+
+        await axios.put(`/admin/doctor/${selectedDoctor._id}`, formData, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "multipart/form-data"
+          }
+        });
+      } else {
+        // No files to upload, send JSON data
+        await axios.put(`/admin/doctor/${selectedDoctor._id}`, doctorData, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json"
+          }
+        });
+      }
+      
+      await fetchDoctors();
+      setShowEditModal(false);
+      setSelectedDoctor(null);
+      setUploadedProfile(null);
+      setUploadedCV(null);
+      setUploadedID(null);
+      setUploadedLicense(null);
+    } catch (error) {
+      console.error("Error updating doctor:", error);
+      alert("Erreur lors de la modification du médecin");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleActionClick = (doctor, action) => {
     setSelectedDoctor(doctor);
     setActionType(action);
@@ -122,6 +249,33 @@ const ManageDoctors = () => {
           }
         }
       );
+
+      // Create notification for doctor
+      try {
+        await axios.post("/notifications", {
+          userId: selectedDoctor._id,
+          title: actionType === "approve" ? "Profil approuvé" : "Profil rejeté",
+          message: actionType === "approve" 
+            ? "Félicitations! Votre profil médical a été approuvé par l'administration."
+            : "Votre profil médical nécessite des modifications. Veuillez consulter les commentaires.",
+          type: actionType === "approve" ? "approval" : "rejection",
+          priority: "high",
+          actionUrl: "/dashboard/profile"
+        }, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+      } catch (notifError) {
+        console.error("Error creating notification:", notifError);
+      }
+
+      // Show toast notification
+      if (actionType === "approve") {
+        showSuccess(`Dr. ${selectedDoctor.firstName} ${selectedDoctor.lastName} a été approuvé!`);
+      } else {
+        showSuccess(`Dr. ${selectedDoctor.firstName} ${selectedDoctor.lastName} a été rejeté.`);
+      }
       
       await fetchDoctors();
       setShowActionModal(false);
@@ -129,6 +283,7 @@ const ManageDoctors = () => {
       setActionType("");
     } catch (error) {
       console.error(`Error ${actionType}ing doctor:`, error);
+      showError(`Erreur lors de l'${actionType === "approve" ? "approbation" : "rejet"} du médecin`);
     } finally {
       setActionLoading(false);
     }
@@ -164,11 +319,11 @@ const ManageDoctors = () => {
             <span className="bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
               médecins
             </span>
-          </h1>
+        </h1>
           <p className="body-large text-neutral-600 max-w-2xl mx-auto">
             Approuvez et gérez les médecins de la plateforme
-          </p>
-        </div>
+            </p>
+          </div>
 
         {/* Statistics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -204,9 +359,9 @@ const ManageDoctors = () => {
                   <p className="text-2xl font-bold text-neutral-900">{statistics.approved}</p>
                 </div>
                 <FaCheckCircle className="text-green-500 text-2xl" />
-              </div>
-            </div>
           </div>
+        </div>
+      </div>
 
           <div className="card-hover border-l-4 border-red-500">
             <div className="card-body">
@@ -227,8 +382,8 @@ const ManageDoctors = () => {
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
               <div className="relative flex-1 max-w-md">
                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" />
-                <input
-                  type="text"
+              <input
+                type="text"
                   placeholder="Rechercher un médecin..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -256,10 +411,10 @@ const ManageDoctors = () => {
                   <FaSync />
                   Actualiser
                 </button>
-              </div>
-            </div>
-          </div>
-        </div>
+                        </div>
+                        </div>
+                      </div>
+                    </div>
 
         {/* Doctors List */}
         <div className="card overflow-hidden">
@@ -321,9 +476,9 @@ const ManageDoctors = () => {
                           <p className="text-sm text-neutral-600 bg-neutral-50 p-3 rounded-lg">
                             <strong className="text-neutral-800">Licence:</strong> {doctor.licenseNumber}
                           </p>
-                        )}
-                      </div>
-                    </div>
+                  )}
+                </div>
+              </div>
 
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                       <button
@@ -331,7 +486,7 @@ const ManageDoctors = () => {
                         className="btn-secondary px-4 py-2 font-medium flex items-center justify-center gap-2"
                       >
                         <FaEye />
-                        <span className="hidden sm:inline">Voir détails</span>
+                        <span className="hidden sm:inline">Voir</span>
                         <span className="sm:hidden">Détails</span>
                       </button>
 
@@ -355,6 +510,24 @@ const ManageDoctors = () => {
                           </button>
                         </>
                       )}
+
+                      <button
+                        onClick={() => handleEdit(doctor)}
+                        className="btn-primary px-4 py-2 font-medium flex items-center justify-center gap-2"
+                      >
+                        <FaEdit />
+                        <span className="hidden sm:inline">Modifier</span>
+                        <span className="sm:hidden">Modifier</span>
+                      </button>
+                      
+                      <button
+                        onClick={() => handleDeleteClick(doctor)}
+                        className="btn bg-red-500 text-white hover:bg-red-600 focus:ring-red-500 px-4 py-2 font-medium flex items-center justify-center gap-2"
+                      >
+                        <FaTrashAlt />
+                        <span className="hidden sm:inline">Supprimer</span>
+                        <span className="sm:hidden">Supprimer</span>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -362,7 +535,7 @@ const ManageDoctors = () => {
             </div>
           )}
         </div>
-      </div>
+                        </div>
 
       {/* Doctor Details Modal */}
       {showDetailsModal && selectedDoctor && (
@@ -402,7 +575,7 @@ const ManageDoctors = () => {
                     {getStatusText(selectedDoctor.verifiedStatus)}
                   </span>
                 </div>
-              </div>
+                  </div>
 
               {/* Details Grid */}
               <div className="grid md:grid-cols-2 gap-6">
@@ -420,17 +593,17 @@ const ManageDoctors = () => {
                     <div>
                       <p className="text-sm text-neutral-500">Téléphone</p>
                       <p className="font-semibold">{selectedDoctor.phoneNumber || "Non renseigné"}</p>
-                    </div>
-                  </div>
+                        </div>
+                        </div>
 
                   <div className="flex items-center space-x-3">
                     <FaCalendarAlt className="text-sky-600" />
                     <div>
                       <p className="text-sm text-neutral-500">Date d&apos;inscription</p>
                       <p className="font-semibold">{formatDate(selectedDoctor.createdAt)}</p>
-                    </div>
-                  </div>
-                </div>
+                        </div>
+                      </div>
+                        </div>
 
                 <div className="space-y-4">
                   {selectedDoctor.licenseNumber && (
@@ -447,7 +620,7 @@ const ManageDoctors = () => {
                     </div>
                   )}
                 </div>
-              </div>
+                      </div>
 
               {/* Documents */}
               {(selectedDoctor.idImage || selectedDoctor.licenseImage || selectedDoctor.cvImage) && (
@@ -486,8 +659,8 @@ const ManageDoctors = () => {
                         <p className="text-sm text-neutral-600">Curriculum Vitae</p>
                       </div>
                     )}
-                  </div>
-                </div>
+              </div>
+            </div>
               )}
 
               {/* Action Buttons */}
@@ -526,10 +699,10 @@ const ManageDoctors = () => {
                 >
                   Fermer
                 </button>
-              </div>
-            </div>
-          </div>
-        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
       )}
 
       {/* Action Confirmation Modal */}
@@ -565,9 +738,363 @@ const ManageDoctors = () => {
                   (actionType === "approve" ? "Approuver" : "Rejeter")
                 }
               </LoadingButton>
-            </div>
           </div>
         </div>
+            </div>
+      )}
+
+      {/* Edit Doctor Modal */}
+      {showEditModal && selectedDoctor && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+            <div className="bg-gradient-to-r from-sky-500 to-blue-600 text-white p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold">Modifier le Médecin</h2>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedDoctor(null);
+                  }}
+                  className="text-white/80 hover:text-white text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-6 overflow-y-auto flex-1">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Prénom</label>
+                  <input
+                    type="text"
+                    value={selectedDoctor.firstName || ''}
+                    onChange={(e) => setSelectedDoctor({...selectedDoctor, firstName: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                    />
+                  </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Nom</label>
+                  <input
+                    type="text"
+                    value={selectedDoctor.lastName || ''}
+                    onChange={(e) => setSelectedDoctor({...selectedDoctor, lastName: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Email</label>
+                  <input
+                    type="email"
+                    value={selectedDoctor.email || ''}
+                    onChange={(e) => setSelectedDoctor({...selectedDoctor, email: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Téléphone</label>
+                  <input
+                    type="tel"
+                    value={selectedDoctor.phoneNumber || ''}
+                    onChange={(e) => setSelectedDoctor({...selectedDoctor, phoneNumber: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Spécialité</label>
+                  <input
+                    type="text"
+                    value={selectedDoctor.speciality || ''}
+                    onChange={(e) => setSelectedDoctor({...selectedDoctor, speciality: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                          />
+                        </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Numéro de licence</label>
+                  <input
+                    type="text"
+                    value={selectedDoctor.licenseNumber || ''}
+                    onChange={(e) => setSelectedDoctor({...selectedDoctor, licenseNumber: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                  />
+                      </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Type de pièce d&apos;identité</label>
+                  <input
+                    type="text"
+                    value={selectedDoctor.idType || ''}
+                    onChange={(e) => setSelectedDoctor({...selectedDoctor, idType: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                          />
+                        </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Numéro de pièce d&apos;identité</label>
+                  <input
+                    type="text"
+                    value={selectedDoctor.idNumber || ''}
+                    onChange={(e) => setSelectedDoctor({...selectedDoctor, idNumber: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Document Upload Sections */}
+              <div className="space-y-6 pt-6 border-t border-neutral-200">
+                <h3 className="text-lg font-semibold text-neutral-800">Documents</h3>
+                
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Profile Image */}
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">Photo de profil</label>
+                    <div className="border-2 border-dashed border-neutral-300 rounded-xl p-4 text-center hover:border-sky-400 transition-colors">
+                      {selectedDoctor.profileImage || uploadedProfile ? (
+                        <div className="space-y-3">
+                          <img
+                            src={
+                              uploadedProfile
+                                ? URL.createObjectURL(uploadedProfile)
+                                : selectedDoctor.profileImage
+                                ? `${IMG_URL}${selectedDoctor.profileImage}`
+                                : `${IMG_URL}imagePlaceholder.png`
+                            }
+                            alt="Photo de profil"
+                            className="mx-auto max-h-32 rounded-lg shadow-md"
+                          />
+                          <label className="inline-flex items-center px-3 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 cursor-pointer transition-colors text-sm">
+                            <FaUpload className="mr-2" />
+                            Changer
+                            <input
+                              type="file"
+                              accept="image/*"
+                              name="profileImage"
+                              className="hidden"
+                              onChange={handleFileUpload}
+                            />
+                          </label>
+                        </div>
+                      ) : (
+                        <label className="cursor-pointer">
+                          <div className="space-y-2">
+                            <FaUpload className="mx-auto text-2xl text-neutral-400" />
+                            <p className="text-neutral-600 text-sm">Télécharger photo</p>
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            name="profileImage"
+                            className="hidden"
+                            onChange={handleFileUpload}
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* CV */}
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">Curriculum Vitae</label>
+                    <div className="border-2 border-dashed border-neutral-300 rounded-xl p-4 text-center hover:border-sky-400 transition-colors">
+                      {selectedDoctor.cvImage || uploadedCV ? (
+                        <div className="space-y-3">
+                          <img
+                            src={
+                              uploadedCV
+                                ? URL.createObjectURL(uploadedCV)
+                                : selectedDoctor.cvImage
+                                ? `${IMG_URL}${selectedDoctor.cvImage}`
+                                : `${IMG_URL}imagePlaceholder.png`
+                            }
+                            alt="CV"
+                            className="mx-auto max-h-32 rounded-lg shadow-md"
+                          />
+                          <label className="inline-flex items-center px-3 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 cursor-pointer transition-colors text-sm">
+                            <FaUpload className="mr-2" />
+                            Changer
+                            <input
+                              type="file"
+                              accept="image/*"
+                              name="cvImage"
+                              className="hidden"
+                              onChange={handleFileUpload}
+                            />
+                          </label>
+                        </div>
+                      ) : (
+                        <label className="cursor-pointer">
+                          <div className="space-y-2">
+                            <FaUpload className="mx-auto text-2xl text-neutral-400" />
+                            <p className="text-neutral-600 text-sm">Télécharger CV</p>
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            name="cvImage"
+                            className="hidden"
+                            onChange={handleFileUpload}
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* ID Image */}
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">Pièce d&apos;identité</label>
+                    <div className="border-2 border-dashed border-neutral-300 rounded-xl p-4 text-center hover:border-sky-400 transition-colors">
+                      {selectedDoctor.idImage || uploadedID ? (
+                        <div className="space-y-3">
+                          <img
+                            src={
+                              uploadedID
+                                ? URL.createObjectURL(uploadedID)
+                                : selectedDoctor.idImage
+                                ? `${IMG_URL}${selectedDoctor.idImage}`
+                                : `${IMG_URL}imagePlaceholder.png`
+                            }
+                            alt="Pièce d'identité"
+                            className="mx-auto max-h-32 rounded-lg shadow-md"
+                          />
+                          <label className="inline-flex items-center px-3 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 cursor-pointer transition-colors text-sm">
+                            <FaUpload className="mr-2" />
+                            Changer
+                            <input
+                              type="file"
+                              accept="image/*"
+                              name="idImage"
+                              className="hidden"
+                              onChange={handleFileUpload}
+                            />
+                          </label>
+                        </div>
+                      ) : (
+                        <label className="cursor-pointer">
+                          <div className="space-y-2">
+                            <FaUpload className="mx-auto text-2xl text-neutral-400" />
+                            <p className="text-neutral-600 text-sm">Télécharger ID</p>
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            name="idImage"
+                            className="hidden"
+                            onChange={handleFileUpload}
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* License Image */}
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">Licence médicale</label>
+                    <div className="border-2 border-dashed border-neutral-300 rounded-xl p-4 text-center hover:border-sky-400 transition-colors">
+                      {selectedDoctor.licenseImage || uploadedLicense ? (
+                        <div className="space-y-3">
+                          <img
+                            src={
+                              uploadedLicense
+                                ? URL.createObjectURL(uploadedLicense)
+                                : selectedDoctor.licenseImage
+                                ? `${IMG_URL}${selectedDoctor.licenseImage}`
+                                : `${IMG_URL}imagePlaceholder.png`
+                            }
+                            alt="Licence médicale"
+                            className="mx-auto max-h-32 rounded-lg shadow-md"
+                          />
+                          <label className="inline-flex items-center px-3 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 cursor-pointer transition-colors text-sm">
+                            <FaUpload className="mr-2" />
+                            Changer
+                            <input
+                              type="file"
+                              accept="image/*"
+                              name="licenseImage"
+                              className="hidden"
+                              onChange={handleFileUpload}
+                            />
+                          </label>
+                        </div>
+                      ) : (
+                        <label className="cursor-pointer">
+                          <div className="space-y-2">
+                            <FaUpload className="mx-auto text-2xl text-neutral-400" />
+                            <p className="text-neutral-600 text-sm">Télécharger licence</p>
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            name="licenseImage"
+                            className="hidden"
+                            onChange={handleFileUpload}
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-neutral-200">
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedDoctor(null);
+                  }}
+                  className="btn-secondary flex-1"
+                  disabled={actionLoading}
+                >
+                  Annuler
+                </button>
+                <LoadingButton
+                  onClick={handleEditSave}
+                  isLoading={actionLoading}
+                  className="btn-primary flex-1"
+                >
+                  {actionLoading ? "Enregistrement..." : "Enregistrer"}
+                </LoadingButton>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && selectedDoctor && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold text-neutral-900 mb-4">Confirmer la suppression</h3>
+            <p className="text-neutral-600 mb-6">
+              Êtes-vous sûr de vouloir supprimer le médecin{' '}
+              <strong>Dr. {selectedDoctor.firstName} {selectedDoctor.lastName}</strong> ?
+              Cette action est irréversible.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setSelectedDoctor(null);
+                }}
+                className="flex-1 btn-secondary"
+                disabled={actionLoading}
+              >
+                Annuler
+              </button>
+              <LoadingButton
+                onClick={handleDeleteConfirm}
+                isLoading={actionLoading}
+                className="flex-1 btn bg-red-500 text-white hover:bg-red-600 focus:ring-red-500"
+              >
+                {actionLoading ? "Suppression..." : "Supprimer"}
+              </LoadingButton>
+          </div>
+        </div>
+      </div>
       )}
     </section>
   );

@@ -230,7 +230,7 @@ const PatientHome = () => {
           <h1 className="heading-1 text-neutral-900 mb-2">
             Bonjour{' '}
             <span className="bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
-              {decodedToken?.UserInfo?.firstName || 'Patient'}
+              {decodedToken?.UserInfo?.lastName || 'Patient'}
             </span>{' '}
             👋
           </h1>

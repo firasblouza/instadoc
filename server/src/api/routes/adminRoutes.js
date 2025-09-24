@@ -4,6 +4,7 @@ const adminController = require("../controllers/adminController");
 const userController = require("../controllers/userController");
 const doctorController = require("../controllers/doctorController");
 const verifyRole = require("../middleware/verifyRole");
+const upload = require("../middleware/multer");
 
 router.delete(
   "/patient/:id",
@@ -19,11 +20,17 @@ router.delete(
 router.get("/statistics", adminController.fetchStatistics);
 router.get("/patients", verifyRole("admin"), userController.getAllUsers);
 router.get("/doctors", verifyRole("admin"), doctorController.getAllDoctors);
-router.put("/patient/:id", verifyRole("admin"), userController.modifyUserById);
+router.put("/patient/:id", upload.fields([{ name: "profileImage" }]), verifyRole("admin"), userController.modifyUserById);
 
 // Modify Doctor Route
 router.put(
   "/doctor/:id",
+  upload.fields([
+    { name: "profileImage" },
+    { name: "cvImage" },
+    { name: "idImage" },
+    { name: "licenseImage" }
+  ]),
   verifyRole("admin"),
   doctorController.modifyDoctorById
 );

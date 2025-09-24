@@ -6,7 +6,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import useLogout from "../../hooks/useLogout";
 import AuthContext from "../../context/AuthContext";
+import NotificationContext from "../../context/NotificationContext";
 import MobileMenu from "./MobileMenu";
+import NotificationBell from "../Notifications/NotificationBell";
 
 const linkClassName = `text-base font-medium text-neutral-700 hover:text-primary-600 transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary-500 after:transition-all after:duration-300 hover:after:w-full`;
 
@@ -19,13 +21,17 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
-  const { aboutRef } = useContext(AuthContext);
+  const { aboutRef, API_URL } = useContext(AuthContext);
+  const { unreadCount } = useContext(NotificationContext);
+  const IMG_URL = `${API_URL}/uploads/`;
 
   const getActiveTab = () => {
     const path = location.pathname;
     if (path === '/') return 'accueil';
     if (path.startsWith('/doctors')) return 'doctors';
+    if (path.startsWith('/medicines')) return 'medicines';
     if (path.startsWith('/labs')) return 'labs';
+    if (path.startsWith('/blog')) return 'blog';
     if (path.startsWith('/contact')) return 'contact';
     if (location.hash === '#about') return 'apropos';
     return '';
@@ -48,7 +54,9 @@ const Navbar = () => {
     { name: "Accueil", path: "/", key: "accueil" },
     { name: "À propos", href: "#about", key: "apropos", onClick: scrollToAbout },
     { name: "Médecins", path: "/doctors", key: "doctors" },
+    { name: "Médicaments", path: "/medicines", key: "medicines" },
     { name: "Laboratoires", path: "/labs", key: "labs" },
+    { name: "Blog", path: "/blog", key: "blog" },
     { name: "Contact", path: "/contact", key: "contact" },
   ];
 
@@ -66,7 +74,7 @@ const Navbar = () => {
               <span className="text-xl font-bold text-neutral-800 hidden sm:block">
                 InstaDoc
               </span>
-            </Link>
+              </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-8">
@@ -83,7 +91,7 @@ const Navbar = () => {
                     {item.name}
                   </a>
                 ) : (
-                  <Link
+              <Link
                     key={item.key}
                     to={item.path}
                     className={`${linkClassName} ${
@@ -91,23 +99,47 @@ const Navbar = () => {
                     }`}
                   >
                     {item.name}
-                  </Link>
+              </Link>
                 )
               ))}
             </div>
 
             {/* Desktop Auth Section */}
             <div className="hidden lg:flex items-center gap-4">
+              {auth?.email && (
+                <NotificationBell variant="navbar" />
+              )}
               {auth?.email ? (
                 <div className="relative">
                   <button
                     onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                     className="flex items-center gap-3 px-4 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 transition-colors duration-200"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">
-                        {auth.fullName?.charAt(0) || 'U'}
-                      </span>
+                    <div className="relative">
+                      {auth.profileImage ? (
+                        <img
+                          src={`${IMG_URL}${auth.profileImage}`}
+                          alt={auth.fullName}
+                          className="w-8 h-8 rounded-full object-cover border-2 border-primary-500"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div 
+                        className="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center"
+                        style={{ display: auth.profileImage ? 'none' : 'flex' }}
+                      >
+                        <span className="text-white text-sm font-medium">
+                          {auth.fullName?.charAt(0) || 'U'}
+                        </span>
+                      </div>
+                      {unreadCount > 0 && !location.pathname.startsWith('/dashboard') && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
                     </div>
                     <span className="text-sm font-medium text-neutral-700">
                       {auth.fullName}
@@ -149,14 +181,14 @@ const Navbar = () => {
                     className="text-sm font-medium text-neutral-700 hover:text-primary-600 transition-colors duration-200"
                   >
                     Connexion
-                  </Link>
-                  <Link
+                      </Link>
+                      <Link
                     to="/signup"
                     className="btn-primary btn text-sm"
-                  >
+                      >
                     S'inscrire
-                  </Link>
-                </div>
+                      </Link>
+                    </div>
               )}
             </div>
 
@@ -176,8 +208,8 @@ const Navbar = () => {
             className="fixed inset-0 z-30"
             onClick={() => setIsProfileDropdownOpen(false)}
           />
-        )}
-      </nav>
+          )}
+        </nav>
 
       {/* Mobile Menu */}
       <MobileMenu 

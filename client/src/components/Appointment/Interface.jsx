@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState, useContext } from "react";
+import { useEffect, useRef, useState, useContext, useCallback } from "react";
+import PropTypes from "prop-types";
 import {
   FaPaperPlane,
   FaArrowLeft,
   FaPaperclip,
-  FaFileImage,
   FaFilePdf,
   FaFileWord,
   FaFileAlt,
@@ -25,13 +25,13 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
-  const { accessToken, decodedToken } = useAccessToken();
+  const { accessToken } = useAccessToken();
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
   };
 
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     if (appointment && appointment._id) {
       try {
         const response = await axios.get(`/appointments/${appointment._id}`, {
@@ -53,7 +53,7 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
         console.log(err);
       }
     }
-  };
+  }, [appointment, accessToken]);
 
   useEffect(() => {
     socket.on("send-message", (messageObj) => {
@@ -65,7 +65,7 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
     return () => {
       socket.off("send-message");
     };
-  }, []);
+  }, [socket, fetchMessages]);
 
   useEffect(() => {
     // Check if appointment.messages is defined
@@ -103,7 +103,12 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
 
         const send = await axios.put(
           `/appointments/message/${appointment._id}`,
-          messageObj
+          messageObj,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`
+            }
+          }
         );
         if (send.status === 200) {
           console.log("Message Sent");
@@ -199,6 +204,21 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
       </div>
     );
   };
+
+  MessageBubble.propTypes = {
+    msg: PropTypes.shape({
+      fileType: PropTypes.string,
+      fileUrl: PropTypes.string,
+      fileName: PropTypes.string,
+      content: PropTypes.string,
+      createdAt: PropTypes.string.isRequired
+    }).isRequired,
+    isMine: PropTypes.bool.isRequired,
+    party: PropTypes.shape({
+      profileImage: PropTypes.string,
+      firstName: PropTypes.string
+    })
+  };
   
   const otherParty = client.role === 'doctor' ? appointment.patient : appointment.doctor;
 
@@ -279,6 +299,25 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
       </div>
     </div>
   );
+};
+
+Interface.propTypes = {
+  appointment: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    messages: PropTypes.array,
+    patient: PropTypes.object,
+    doctor: PropTypes.object,
+    status: PropTypes.string,
+    reason: PropTypes.string
+  }).isRequired,
+  client: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    fullName: PropTypes.string.isRequired,
+    role: PropTypes.string.isRequired
+  }).isRequired,
+  socket: PropTypes.object.isRequired,
+  handleSidebarToggle: PropTypes.func.isRequired,
+  endConsultation: PropTypes.func.isRequired
 };
 
 export default Interface;

@@ -14,10 +14,10 @@ const getAllAppointments = async (req, res) => {
     if (appointments) {
       res.status(200).json(appointments);
     } else {
-      res.status(404).json({ message: "No appointments found" });
+      res.status(404).json({ message: "Aucun rendez-vous trouvé" });
     }
   } catch (err) {
-    res.status(500).json({ message: "Error while fetching appointments" });
+    res.status(500).json({ message: "Erreur lors de la récupération des rendez-vous" });
   }
 };
 
@@ -25,7 +25,7 @@ const getAppointmentById = async (req, res) => {
   const appointmentId = req.params.id;
   let id;
   const token = req.headers["authorization"].split(" ")[1];
-  if (!token) return res.status(401).json({ message: "Unauthorized" });
+  if (!token) return res.status(401).json({ message: "Non autorisé" });
   const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
   if (decoded) {
     id = decoded.UserInfo.id;
@@ -35,10 +35,10 @@ const getAppointmentById = async (req, res) => {
     if (appointment) {
       res.status(200).json(appointment);
     } else {
-      res.status(404).json({ message: "Appointment not found" });
+      res.status(404).json({ message: "Rendez-vous non trouvé" });
     }
   } catch (err) {
-    res.status(500).json({ message: "Error while fetching appointment" });
+    res.status(500).json({ message: "Erreur lors de la récupération du rendez-vous" });
   }
 };
 
@@ -49,10 +49,20 @@ const getDoctorAppointments = async (req, res) => {
     if (appointments) {
       res.status(200).json(appointments);
     } else {
-      res.status(404).json({ message: "No appointments found" });
+      res.status(404).json({ message: "Aucun rendez-vous trouvé" });
     }
   } catch (err) {
-    res.status(500).json({ message: "Error while fetching appointments" });
+    res.status(500).json({ message: "Erreur lors de la récupération des rendez-vous" });
+  }
+};
+
+const getDoctorProfileAppointments = async (req, res) => {
+  const doctorId = req.params.id;
+  try {
+    const appointments = await Appointment.find({ doctorId }).exec();
+    res.status(200).json(appointments);
+  } catch (err) {
+    res.status(500).json({ message: "Erreur lors de la récupération des rendez-vous" });
   }
 };
 
@@ -63,17 +73,17 @@ const getUserAppointments = async (req, res) => {
     if (appointments) {
       res.status(200).json(appointments);
     } else {
-      res.status(404).json({ message: "No appointments found" });
+      res.status(404).json({ message: "Aucun rendez-vous trouvé" });
     }
   } catch (err) {
-    res.status(500).json({ message: "Error while fetching appointments" });
+    res.status(500).json({ message: "Erreur lors de la récupération des rendez-vous" });
   }
 };
 
 const scheduleAppointment = async (req, res) => {
   const { userId, doctorId, reason, date, startDateTime, durationMin } = req.body;
   if (!userId || !doctorId || !reason) {
-    return res.status(400).json({ message: "Missing required fields" });
+    return res.status(400).json({ message: "Champs requis manquants" });
   }
 
   try {
@@ -83,12 +93,12 @@ const scheduleAppointment = async (req, res) => {
     if (startDateTime) {
       start = new Date(startDateTime);
       if (Number.isNaN(start.getTime())) {
-        return res.status(400).json({ message: "Invalid startDateTime" });
+        return res.status(400).json({ message: "Date de début invalide" });
       }
       // Prevent past bookings
       const now = new Date();
       if (start < now) {
-        return res.status(400).json({ message: "Start time must be in the future" });
+        return res.status(400).json({ message: "L'heure de début doit être dans le futur" });
       }
       const duration = typeof durationMin === "number" && durationMin > 0 ? durationMin : 30; // default 30 minutes
       end = new Date(start.getTime() + duration * 60 * 1000);
@@ -102,7 +112,7 @@ const scheduleAppointment = async (req, res) => {
       }).exec();
 
       if (overlapping) {
-        return res.status(409).json({ message: "Selected time slot is not available" });
+        return res.status(409).json({ message: "Le créneau sélectionné n'est pas disponible" });
       }
     }
 
@@ -115,9 +125,9 @@ const scheduleAppointment = async (req, res) => {
       endDateTime: end || undefined
     });
 
-    res.status(201).json({ message: "Appointment created successfully", appointmentId: newAppointment._id });
+    res.status(201).json({ message: "Rendez-vous créé avec succès", appointmentId: newAppointment._id });
   } catch (err) {
-    res.status(500).json({ message: "Error while creating appointment" });
+    res.status(500).json({ message: "Erreur lors de la création du rendez-vous" });
   }
 };
 
@@ -129,12 +139,12 @@ const cancelAppointment = async (req, res) => {
       { status: "cancelled" }
     ).exec();
     if (cancelledAppointment) {
-      res.status(200).json({ message: "Appointment cancelled successfully" });
+      res.status(200).json({ message: "Rendez-vous annulé avec succès" });
     } else {
-      res.status(404).json({ message: "Appointment not found" });
+      res.status(404).json({ message: "Rendez-vous non trouvé" });
     }
   } catch (err) {
-    res.status(500).json({ message: "Error while cancelling appointment" });
+    res.status(500).json({ message: "Erreur lors de l'annulation du rendez-vous" });
   }
 };
 const rejectAppointment = async (req, res) => {
@@ -145,12 +155,12 @@ const rejectAppointment = async (req, res) => {
       { status: "rejected" }
     ).exec();
     if (rejectedAppointment) {
-      res.status(200).json({ message: "Appointment rejected successfully" });
+      res.status(200).json({ message: "Rendez-vous rejeté avec succès" });
     } else {
-      res.status(404).json({ message: "Appointment not found" });
+      res.status(404).json({ message: "Rendez-vous non trouvé" });
     }
   } catch (err) {
-    res.status(500).json({ message: "Error while rejecting appointment" });
+    res.status(500).json({ message: "Erreur lors du rejet du rendez-vous" });
   }
 };
 
@@ -164,12 +174,12 @@ const modifyAppointmentById = async (req, res) => {
       { new: true }
     ).exec();
     if (updatedAppointment) {
-      res.status(200).json({ message: "Appointment updated successfully" });
+      res.status(200).json({ message: "Rendez-vous mis à jour avec succès" });
     } else {
-      res.status(404).json({ message: "Appointment not found" });
+      res.status(404).json({ message: "Rendez-vous non trouvé" });
     }
   } catch (err) {
-    res.status(500).json({ message: "Error while updating appointment" });
+    res.status(500).json({ message: "Erreur lors de la mise à jour du rendez-vous" });
   }
 };
 
@@ -180,12 +190,12 @@ const deleteAppointmentById = async (req, res) => {
       appointmentId
     ).exec();
     if (deletedAppointment) {
-      res.status(200).json({ message: "Appointment deleted successfully" });
+      res.status(200).json({ message: "Rendez-vous supprimé avec succès" });
     } else {
-      res.status(404).json({ message: "Appointment not found" });
+      res.status(404).json({ message: "Rendez-vous non trouvé" });
     }
   } catch (err) {
-    res.status(500).json({ message: "Error while deleting appointment" });
+    res.status(500).json({ message: "Erreur lors de la suppression du rendez-vous" });
   }
 };
 
@@ -194,11 +204,11 @@ const createMessage = async (req, res) => {
   const { senderId, role, content, senderName, fileUrl, fileName, fileType } = req.body;
 
   if (!apptId) {
-    return res.status(400).json({ message: "Bad Request" });
+    return res.status(400).json({ message: "Mauvaise requête" });
   }
 
   if (!senderId || !role || !content || !senderName) {
-    return res.status(400).json({ message: "Bad Request, Missing payload" });
+    return res.status(400).json({ message: "Mauvaise requête, données manquantes" });
   }
 
   const messageObj = {
@@ -219,15 +229,15 @@ const createMessage = async (req, res) => {
     );
 
     if (!updatedAppointment) {
-      return res.status(404).json({ message: "Appointment not found" });
+      return res.status(404).json({ message: "Rendez-vous non trouvé" });
     }
 
     res
       .status(200)
-      .json({ message: "Message sent successfully", updatedAppointment });
+      .json({ message: "Message envoyé avec succès", updatedAppointment });
   } catch (error) {
     console.error("Error adding message:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: "Erreur interne du serveur" });
   }
 };
 

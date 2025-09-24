@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import axios from "../../../../api/axios";
 import useAccessToken from "../../../../hooks/useAccessToken";
-import { FaUserFriends, FaClock, FaCheckCircle, FaStar, FaCalendarAlt, FaEdit, FaUserMd } from "react-icons/fa";
+import { FaUserFriends, FaClock, FaCheckCircle, FaStar, FaCalendarAlt, FaEdit, FaUserMd, FaClipboardList, FaUser } from "react-icons/fa";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import MedicalLoader from "../../../MedicalLoader";
 import Modal from "../../UI/Modal";
@@ -397,6 +397,20 @@ const DoctorHome = () => {
           >
             <FaClock className="text-2xl mb-2" />
             <span>Voir les demandes ({stats.pending})</span>
+          </button>
+          <button 
+            onClick={() => navigate('/dashboard/profile')}
+            className="btn-secondary p-4 flex flex-col items-center justify-center h-24"
+          >
+            <FaUser className="text-2xl mb-2" />
+            <span>Mon Profil</span>
+          </button>
+          <button 
+            onClick={() => navigate('/dashboard/consultations')}
+            className="btn-secondary p-4 flex flex-col items-center justify-center h-24"
+          >
+            <FaClipboardList className="text-2xl mb-2" />
+            <span>Historique ({stats.completed})</span>
           </button>
           </div>
         </div>

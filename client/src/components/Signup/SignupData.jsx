@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaLock, FaCalendarAlt, FaEye, FaEyeSlash, FaArrowRight, FaArrowLeft, FaUserMd } from "react-icons/fa";
+import { FaLock, FaCalendarAlt, FaEye, FaEyeSlash, FaArrowRight, FaArrowLeft, FaUserMd, FaPhone, FaUpload, FaImage } from "react-icons/fa";
 import { doctorSpecialties } from "../../data/data";
 import LoadingButton from "../LoadingButton";
 
@@ -12,6 +12,13 @@ const SignupData = ({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setUserData({ ...userData, profileImage: file });
+    }
+  };
 
   const handleSubmit = async (e) => {
     setIsLoading(true);
@@ -82,20 +89,72 @@ const SignupData = ({
         </div>
       </div>
 
-      {/* Date of Birth */}
-      <div>
-        <label className="flex items-center gap-2 text-sm font-medium text-neutral-700 mb-2">
-          <FaCalendarAlt className="text-primary-500" />
-          Date de naissance
-        </label>
-        <input
-          type="date"
-          value={userData.dateOfBirth}
-          onChange={(e) => setUserData({ ...userData, dateOfBirth: e.target.value })}
-          required
-          className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
-        />
+      {/* Phone Number and Date of Birth - 50/50 Grid */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="flex items-center gap-2 text-sm font-medium text-neutral-700 mb-2">
+            <FaPhone className="text-primary-500" />
+            Numéro de téléphone
+          </label>
+          <input
+            type="tel"
+            value={userData.phoneNumber}
+            onChange={(e) => setUserData({ ...userData, phoneNumber: e.target.value })}
+            placeholder="+216 XX XXX XXX"
+            required
+            className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+          />
+        </div>
+        
+        <div>
+          <label className="flex items-center gap-2 text-sm font-medium text-neutral-700 mb-2">
+            <FaCalendarAlt className="text-primary-500" />
+            Date de naissance
+          </label>
+          <input
+            type="date"
+            value={userData.dateOfBirth}
+            onChange={(e) => setUserData({ ...userData, dateOfBirth: e.target.value })}
+            required
+            className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+          />
+        </div>
       </div>
+
+      {/* Profile Photo Upload for Patients */}
+      {userData.role === "patient" && (
+        <div>
+          <label className="flex items-center gap-2 text-sm font-medium text-neutral-700 mb-2">
+            <FaImage className="text-primary-500" />
+            Photo de profil
+          </label>
+          <div className="border-2 border-dashed border-neutral-300 rounded-xl p-4 hover:border-primary-500 transition-colors duration-200">
+            <div className="text-center">
+              <div className="relative inline-block">
+                <button
+                  type="button"
+                  className="btn-secondary group"
+                >
+                  <FaUpload className="mr-2 group-hover:scale-110 transition-transform duration-200" />
+                  Choisir une photo
+                </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+              </div>
+              <p className="text-xs text-neutral-500 mt-2">Format: JPG, PNG (Max: 5MB)</p>
+              {userData.profileImage && (
+                <p className="text-xs text-green-600 mt-1 font-medium">
+                  ✓ {userData.profileImage.name}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Specialty for Doctors */}
       {userData.role === "doctor" && (

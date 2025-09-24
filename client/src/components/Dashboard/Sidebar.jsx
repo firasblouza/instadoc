@@ -9,7 +9,7 @@ import AuthContext from "../../context/AuthContext";
 
 /* eslint-disable react/prop-types */
 const Sidebar = ({ isSidebarOpen, setSidebarOpen }) => {
-  const { auth } = useContext(AuthContext);
+  const { auth, API_URL } = useContext(AuthContext);
   const location = useLocation();
   const [demandes, setDemandes] = useState(0);
   const { accessToken, decodedToken } = useAccessToken();
@@ -117,12 +117,26 @@ const Sidebar = ({ isSidebarOpen, setSidebarOpen }) => {
         {/* User Profile */}
         <div className="p-4 space-y-3">
           <div className={`flex items-center gap-3 ${!isSidebarOpen && "justify-center"}`}>
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center font-bold text-lg">
+            {auth.profileImage ? (
+              <img
+                src={`${API_URL}/uploads/${auth.profileImage}`}
+                alt={auth.fullName}
+                className="w-10 h-10 rounded-full object-cover border-2 border-primary-500"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+            ) : null}
+            <div 
+              className="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center font-bold text-lg"
+              style={{ display: auth.profileImage ? 'none' : 'flex' }}
+            >
               {auth.fullName?.charAt(0) || 'U'}
             </div>
             <div className={`${!isSidebarOpen && "hidden"}`}>
               <h4 className="font-semibold">{auth.fullName}</h4>
-              <p className="text-xs text-neutral-400">{auth.role}</p>
+              <p className="text-xs text-neutral-400 capitalize">{auth.role}</p>
             </div>
           </div>
         </div>

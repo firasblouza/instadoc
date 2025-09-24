@@ -47,9 +47,16 @@ const modifyUserById = async (req, res) => {
   const contentType = req.headers["content-type"];
   let userData = {};
 
+  console.log("=== Patient Update Request ===");
+  console.log("ID:", id);
+  console.log("Content-Type:", contentType);
+  console.log("Body:", req.body);
+  console.log("Files:", req.files);
+
   if (contentType.includes("multipart/form-data")) {
     if (req.body && req.body.user) {
       userData = JSON.parse(req.body.user);
+      console.log("Parsed user data:", userData);
     }
   }
 
@@ -59,7 +66,10 @@ const modifyUserById = async (req, res) => {
 
   if (req.files && req.files["profileImage"]) {
     userData.profileImage = req.files["profileImage"][0].filename;
+    console.log("Profile image filename:", userData.profileImage);
   }
+
+  console.log("Final userData to update:", userData);
 
   try {
     const user = await User.findByIdAndUpdate(
@@ -68,11 +78,22 @@ const modifyUserById = async (req, res) => {
       { new: true }
     );
     if (user) {
-      res.status(200).json({ message: "User updated successfully" });
+      console.log("User updated successfully:", user);
+      res.status(200).json({ 
+        message: "User updated successfully",
+        profileImage: user.profileImage,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        dateOfBirth: user.dateOfBirth
+      });
     } else {
+      console.log("User not found");
       res.status(404).json({ message: "User not found" });
     }
   } catch (err) {
+    console.error("Error updating user:", err);
     res.status(500).json({ message: "Error while updating user" });
   }
 };

@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { FaEye, FaSync, FaFlask, FaSearch, FaPlus, FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
+import { useState, useEffect, useRef, useCallback, useContext } from "react";
+import { FaTrashAlt, FaEye, FaEdit, FaSync, FaFlask, FaSearch, FaPlus, FaEnvelope, FaPhone, FaMapMarkerAlt, FaUpload } from "react-icons/fa";
 import axios from "../../../../api/axios";
 import useAccessToken from "../../../../hooks/useAccessToken";
+import AuthContext from "../../../../context/AuthContext";
 import MedicalLoader from "../../../MedicalLoader";
 import LoadingButton from "../../../LoadingButton";
 
@@ -13,16 +14,25 @@ const ManageLabs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLab, setSelectedLab] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [newLab, setNewLab] = useState({
     name: "",
-    email: "",
+      email: "",
     phoneNumber: "",
     address: "",
     description: ""
   });
+  const [newLabImage, setNewLabImage] = useState(null);
+  const [newLabImagePreview, setNewLabImagePreview] = useState(null);
 
   const { accessToken } = useAccessToken();
+  const { API_URL } = useContext(AuthContext);
+  const IMG_URL = `${API_URL}/uploads/`;
 
   const fetchLabs = useCallback(async () => {
     try {
@@ -33,7 +43,7 @@ const ManageLabs = () => {
             Authorization: `Bearer ${accessToken}`
           }
         });
-        setLabs(response.data);
+          setLabs(response.data);
         setFilteredLabs(response.data);
       }
     } catch (error) {
@@ -71,13 +81,145 @@ const ManageLabs = () => {
     setShowDetailsModal(true);
   };
 
+  const handleEdit = (lab) => {
+    setSelectedLab({...lab});
+    setSelectedImage(null);
+    setImagePreview(null);
+    setShowEditModal(true);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleNewLabImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewLabImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewLabImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDeleteClick = (lab) => {
+    setSelectedLab(lab);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedLab) return;
+    
+    try {
+      setActionLoading(true);
+      await axios.delete(`/labs/delete/${selectedLab._id}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+      
+      await fetchLabs();
+      setShowDeleteModal(false);
+      setSelectedLab(null);
+    } catch (error) {
+      console.error("Error deleting lab:", error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleEditSave = async () => {
+    if (!selectedLab) return;
+    
+    try {
+      setActionLoading(true);
+      
+      // Format the data according to the expected structure
+      const labData = {
+        name: selectedLab.name,
+        address: {
+          location: typeof selectedLab.address === 'string' 
+            ? selectedLab.address 
+            : selectedLab.address?.location || '',
+          city: typeof selectedLab.address === 'string' 
+            ? selectedLab.address 
+            : selectedLab.address?.city || ''
+        },
+        contact: {
+          email: selectedLab.contact?.email || selectedLab.email || '',
+          phoneNumber: selectedLab.contact?.phoneNumber || selectedLab.phoneNumber || ''
+        }
+      };
+
+      // Always use FormData to match backend expectations
+      const formData = new FormData();
+      formData.append('lab', JSON.stringify(labData));
+      
+      if (selectedImage) {
+        formData.append('labImage', selectedImage);
+      }
+
+      await axios.put(`/labs/edit/${selectedLab._id}`, formData, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "multipart/form-data"
+            }
+      });
+      
+      await fetchLabs();
+      setShowEditModal(false);
+      setSelectedLab(null);
+      setSelectedImage(null);
+      setImagePreview(null);
+    } catch (error) {
+      console.error("Error updating lab:", error);
+      alert("Erreur lors de la modification du laboratoire");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleAddLab = async () => {
     try {
-      await axios.post("/admin/labs", newLab, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json"
-        }
+      setActionLoading(true);
+      
+      // Format the data according to the expected structure
+      const labData = {
+        name: newLab.name,
+        address: {
+          location: newLab.address,
+          city: newLab.address // You might want to separate city and location
+        },
+        contact: {
+          email: newLab.email,
+          phoneNumber: newLab.phoneNumber
+        },
+        description: newLab.description
+      };
+
+      // Use FormData to handle both JSON data and image
+      const formData = new FormData();
+      formData.append('lab', JSON.stringify(labData));
+      
+      if (newLabImage) {
+        formData.append('labImage', newLabImage);
+      }
+
+      await axios.post("/labs/add", formData, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "multipart/form-data"
+            }
       });
       
       await fetchLabs();
@@ -89,8 +231,13 @@ const ManageLabs = () => {
         address: "",
         description: ""
       });
+      setNewLabImage(null);
+      setNewLabImagePreview(null);
     } catch (error) {
       console.error("Error adding lab:", error);
+      alert("Erreur lors de l'ajout du laboratoire");
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -144,10 +291,10 @@ const ManageLabs = () => {
                   <p className="text-2xl font-bold text-neutral-900">{labs.length}</p>
                 </div>
                 <FaFlask className="text-green-500 text-2xl" />
-              </div>
-            </div>
           </div>
-          
+        </div>
+      </div>
+
           <div className="card-hover border-l-4 border-orange-500">
             <div className="card-body">
               <div className="flex items-center justify-between">
@@ -167,8 +314,8 @@ const ManageLabs = () => {
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
               <div className="relative flex-1 max-w-md">
                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" />
-                <input
-                  type="text"
+              <input
+                type="text"
                   placeholder="Rechercher un laboratoire..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -194,8 +341,8 @@ const ManageLabs = () => {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
+                          </div>
+                        </div>
 
         {/* Labs List */}
         <div className="card overflow-hidden">
@@ -218,10 +365,26 @@ const ManageLabs = () => {
                 <div key={lab._id} className="p-6 hover:bg-neutral-50 transition-all duration-200">
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <div className="flex items-start space-x-4">
-                      <div className="w-14 h-14 bg-gradient-to-br from-sky-100 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <FaFlask className="text-sky-600 text-xl" />
-                      </div>
-                      
+                      <div className="w-14 h-14 rounded-xl overflow-hidden border border-neutral-200 flex-shrink-0">
+                        {lab.labImage ? (
+                          <img
+                            src={`${IMG_URL}${lab.labImage}`}
+                            alt={lab.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          className="w-full h-full bg-gradient-to-br from-sky-100 to-blue-100 flex items-center justify-center"
+                          style={{ display: lab.labImage ? 'none' : 'flex' }}
+                        >
+                          <FaFlask className="text-sky-600 text-xl" />
+                          </div>
+                        </div>
+
                       <div className="flex-1 min-w-0">
                         <h3 className="text-lg font-semibold text-neutral-900 truncate">
                           {lab.name}
@@ -262,14 +425,32 @@ const ManageLabs = () => {
                         <span className="hidden sm:inline">Voir détails</span>
                         <span className="sm:hidden">Détails</span>
                       </button>
+                      
+                            <button
+                        onClick={() => handleEdit(lab)}
+                        className="btn-primary px-4 py-2 font-medium flex items-center justify-center gap-2"
+                      >
+                        <FaEdit />
+                        <span className="hidden sm:inline">Modifier</span>
+                        <span className="sm:hidden">Modifier</span>
+                            </button>
+
+                      <button
+                        onClick={() => handleDeleteClick(lab)}
+                        className="btn bg-red-500 text-white hover:bg-red-600 focus:ring-red-500 px-4 py-2 font-medium flex items-center justify-center gap-2"
+                      >
+                        <FaTrashAlt />
+                        <span className="hidden sm:inline">Supprimer</span>
+                        <span className="sm:hidden">Supprimer</span>
+                      </button>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </div>
-      </div>
+                          </div>
+                        </div>
 
       {/* Lab Details Modal */}
       {showDetailsModal && selectedLab && (
@@ -292,8 +473,24 @@ const ManageLabs = () => {
 
             <div className="p-6 space-y-6">
               <div className="flex items-center space-x-4 p-4 bg-sky-50 rounded-xl">
-                <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center">
-                  <FaFlask className="text-sky-600 text-2xl" />
+                <div className="w-16 h-16 rounded-full overflow-hidden border border-neutral-200">
+                  {selectedLab.labImage ? (
+                    <img
+                      src={`${IMG_URL}${selectedLab.labImage}`}
+                      alt={selectedLab.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div 
+                    className="w-full h-full bg-sky-100 flex items-center justify-center"
+                    style={{ display: selectedLab.labImage ? 'none' : 'flex' }}
+                  >
+                    <FaFlask className="text-sky-600 text-2xl" />
+                  </div>
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-neutral-900">{selectedLab.name || "Laboratoire"}</h3>
@@ -320,10 +517,10 @@ const ManageLabs = () => {
                           ? selectedLab.address 
                           : selectedLab.address?.location || selectedLab.address?.city || "Non renseignée"
                         }
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
 
                 <div className="space-y-4">
                   {selectedLab.description && (
@@ -331,9 +528,9 @@ const ManageLabs = () => {
                       <p className="text-sm text-neutral-500 mb-2">Description</p>
                       <p className="font-semibold bg-neutral-50 p-3 rounded-lg">{selectedLab.description}</p>
                     </div>
-                  )}
-                </div>
+                )}
               </div>
+            </div>
 
               <div className="flex gap-3 pt-4 border-t border-neutral-200">
                 <button
@@ -368,20 +565,22 @@ const ManageLabs = () => {
                       address: "",
                       description: ""
                     });
+                    setNewLabImage(null);
+                    setNewLabImagePreview(null);
                   }}
                   className="text-white/80 hover:text-white text-2xl"
                 >
                   ×
                 </button>
-              </div>
-            </div>
+                        </div>
+                  </div>
 
             <div className="p-6 space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Nom du laboratoire</label>
                   <input
-                    type="text"
+                        type="text"
                     value={newLab.name}
                     onChange={(e) => setNewLab({...newLab, name: e.target.value})}
                     className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
@@ -391,12 +590,12 @@ const ManageLabs = () => {
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Email</label>
                   <input
-                    type="email"
+                        type="email"
                     value={newLab.email}
                     onChange={(e) => setNewLab({...newLab, email: e.target.value})}
                     className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
-                  />
-                </div>
+                      />
+                    </div>
 
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Téléphone</label>
@@ -410,7 +609,7 @@ const ManageLabs = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Adresse</label>
-                  <input
+                          <input
                     type="text"
                     value={newLab.address}
                     onChange={(e) => setNewLab({...newLab, address: e.target.value})}
@@ -425,7 +624,46 @@ const ManageLabs = () => {
                     onChange={(e) => setNewLab({...newLab, description: e.target.value})}
                     rows="3"
                     className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
-                  />
+                          />
+                        </div>
+                    </div>
+
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">Image du laboratoire</label>
+                <div className="border-2 border-dashed border-neutral-300 rounded-xl p-6 text-center hover:border-sky-400 transition-colors">
+                  {newLabImagePreview ? (
+                    <div className="space-y-3">
+                      <img
+                        src={newLabImagePreview}
+                        alt="Image du laboratoire"
+                        className="mx-auto max-h-40 rounded-lg shadow-md"
+                      />
+                      <label className="inline-flex items-center px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 cursor-pointer transition-colors">
+                        <FaUpload className="mr-2" />
+                        Changer l&apos;image
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleNewLabImageChange}
+                        />
+                      </label>
+                    </div>
+                  ) : (
+                    <label className="cursor-pointer">
+                      <div className="space-y-2">
+                        <FaUpload className="mx-auto text-3xl text-neutral-400" />
+                        <p className="text-neutral-600">Cliquez pour télécharger une image</p>
+                        <p className="text-sm text-neutral-400">PNG, JPG jusqu&apos;à 10MB</p>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleNewLabImageChange}
+                      />
+                    </label>
+                  )}
                 </div>
               </div>
 
@@ -440,18 +678,218 @@ const ManageLabs = () => {
                       address: "",
                       description: ""
                     });
+                    setNewLabImage(null);
+                    setNewLabImagePreview(null);
                   }}
                   className="btn-secondary flex-1"
+                  disabled={actionLoading}
                 >
                   Annuler
                 </button>
                 <LoadingButton
                   onClick={handleAddLab}
+                  isLoading={actionLoading}
                   className="btn-primary flex-1"
                 >
-                  Ajouter le laboratoire
+                  {actionLoading ? "Ajout en cours..." : "Ajouter le laboratoire"}
+                </LoadingButton>
+            </div>
+          </div>
+        </div>
+      </div>
+      )}
+
+              {/* Edit Lab Modal */}
+      {showEditModal && selectedLab && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+            <div className="bg-gradient-to-r from-sky-500 to-blue-600 text-white p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold">Modifier le Laboratoire</h2>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedLab(null);
+                  }}
+                  className="text-white/80 hover:text-white text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+                  </div>
+
+            <div className="p-6 space-y-6 overflow-y-auto flex-1">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Nom du laboratoire</label>
+                  <input
+                        type="text"
+                    value={selectedLab.name || ''}
+                    onChange={(e) => setSelectedLab({...selectedLab, name: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Email</label>
+                  <input
+                        type="email"
+                    value={selectedLab.contact?.email || selectedLab.email || ''}
+                    onChange={(e) => setSelectedLab({
+                            ...selectedLab,
+                      contact: {...selectedLab.contact, email: e.target.value}
+                    })}
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Téléphone</label>
+                  <input
+                    type="tel"
+                    value={selectedLab.contact?.phoneNumber || selectedLab.phoneNumber || ''}
+                    onChange={(e) => setSelectedLab({
+                            ...selectedLab,
+                      contact: {...selectedLab.contact, phoneNumber: e.target.value}
+                    })}
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Ville</label>
+                  <input
+                        type="text"
+                    value={selectedLab.address?.city || ''}
+                    onChange={(e) => setSelectedLab({
+                            ...selectedLab,
+                      address: {...selectedLab.address, city: e.target.value}
+                    })}
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                      />
+                    </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Adresse</label>
+                  <input
+                        type="text"
+                    value={selectedLab.address?.location || ''}
+                    onChange={(e) => setSelectedLab({
+                            ...selectedLab,
+                      address: {...selectedLab.address, location: e.target.value}
+                    })}
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">Image du laboratoire</label>
+                <div className="border-2 border-dashed border-neutral-300 rounded-xl p-6 text-center hover:border-sky-400 transition-colors">
+                  {selectedLab.labImage || imagePreview ? (
+                    <div className="space-y-3">
+                      <img
+                        src={
+                          imagePreview
+                            ? imagePreview
+                            : selectedLab.labImage
+                            ? `${IMG_URL}${selectedLab.labImage}`
+                            : `${IMG_URL}imagePlaceholder.png`
+                        }
+                        alt="Image du laboratoire"
+                        className="mx-auto max-h-40 rounded-lg shadow-md"
+                      />
+                      <label className="inline-flex items-center px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 cursor-pointer transition-colors">
+                        <FaUpload className="mr-2" />
+                        Changer l&apos;image
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageChange}
+                        />
+                      </label>
+                    </div>
+                  ) : (
+                    <label className="cursor-pointer">
+                      <div className="space-y-2">
+                        <FaUpload className="mx-auto text-3xl text-neutral-400" />
+                        <p className="text-neutral-600">Cliquez pour télécharger une image</p>
+                        <p className="text-sm text-neutral-400">PNG, JPG jusqu&apos;à 10MB</p>
+                      </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                        className="hidden"
+                        onChange={handleImageChange}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">Description</label>
+                <textarea
+                  value={selectedLab.description || ''}
+                  onChange={(e) => setSelectedLab({...selectedLab, description: e.target.value})}
+                  rows={4}
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                      />
+                    </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-neutral-200">
+                        <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedLab(null);
+                  }}
+                  className="btn-secondary flex-1"
+                  disabled={actionLoading}
+                >
+                  Annuler
+                        </button>
+                <LoadingButton
+                  onClick={handleEditSave}
+                  isLoading={actionLoading}
+                  className="btn-primary flex-1"
+                >
+                  {actionLoading ? "Enregistrement..." : "Enregistrer"}
                 </LoadingButton>
               </div>
+                      </div>
+                    </div>
+                  </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && selectedLab && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-neutral-900 mb-4">Confirmer la suppression</h3>
+            <p className="text-neutral-600 mb-6">
+              Êtes-vous sûr de vouloir supprimer le laboratoire{' '}
+              <strong>{selectedLab.name}</strong> ?
+              Cette action est irréversible.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setSelectedLab(null);
+                }}
+                className="flex-1 btn-secondary"
+                disabled={actionLoading}
+              >
+                Annuler
+              </button>
+              <LoadingButton
+                onClick={handleDeleteConfirm}
+                isLoading={actionLoading}
+                className="flex-1 btn bg-red-500 text-white hover:bg-red-600 focus:ring-red-500"
+              >
+                {actionLoading ? "Suppression..." : "Supprimer"}
+              </LoadingButton>
             </div>
           </div>
         </div>

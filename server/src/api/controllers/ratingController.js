@@ -69,11 +69,31 @@ const createRating = async (req, res) => {
   }
 };
 
+const updateRatingById = async (req, res) => {
+  const id = req.params.id;
+  const updateData = req.body;
+  try {
+    const updatedRating = await Rating.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true }
+    );
+    if (updatedRating) {
+      res.status(200).json({ message: "Rating updated successfully", rating: updatedRating });
+    } else {
+      res.status(404).json({ message: "Rating not found" });
+    }
+  } catch (err) {
+    res.status(500).json({ message: "Error while updating rating" });
+  }
+};
+
 module.exports = {
   getAllRatings,
   getRatingById,
   deleteRatingById,
   createRating,
+  updateRatingById,
   getDoctorRatings,
   getUserRatings
 };

@@ -22,17 +22,29 @@ const io = require("socket.io")(http, {
 
 io.use((socket, next) => {
   const apptId = socket.handshake.auth.apptId;
-  if (!apptId) {
-    return next(new Error("Invalid appointment"));
+  const userId = socket.handshake.auth.userId;
+  const token = socket.handshake.auth.token;
+  
+  if (apptId) {
+    socket.apptId = apptId;
   }
-  socket.apptId = apptId;
+  
+  if (userId) {
+    socket.userId = userId;
+    socket.join(`user_${userId}`); // Join user-specific room for notifications
+  }
+  
   next();
 });
 
 // IO Connection
 io.on("connection", (socket) => {
   console.log(`Client ${socket.id} connected to room ${socket.apptId}`);
-  socket.join(socket.apptId);
+  
+  if (socket.apptId) {
+    socket.join(socket.apptId);
+  }
+  
   socket.on("add-note", (updatedNotes, id) => {
     if (id) {
       socket.to(id).emit("add-note", updatedNotes);
@@ -47,6 +59,14 @@ io.on("connection", (socket) => {
     if (id) {
       socket.to(id).emit("send-message", messageObj);
     }
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`Client ${socket.id} disconnected`);
+  });
+
+  socket.on("error", (error) => {
+    console.error(`Socket error for client ${socket.id}:`, error);
   });
 });
 
@@ -73,6 +93,9 @@ app.use(cookieParser());
 // Connect to DB
 dbConnect();
 
+// Make io available to controllers
+app.set('io', io);
+
 // Routes
 
 app.get("/", (req, res) => {
@@ -86,12 +109,16 @@ app.use("/logout", require("./api/routes/logout"));
 
 app.use("/admin", require("./api/routes/adminRoutes"));
 app.use("/doctors", require("./api/routes/doctorRoutes"));
+app.use("/medicines", require("./api/routes/medicineRoutes"));
 
 app.use("/users", require("./api/routes/userRoutes"));
 app.use("/appointments", require("./api/routes/appointmentRoutes"));
 app.use("/labs", require("./api/routes/labRoutes"));
 
 app.use("/ratings", require("./api/routes/ratingRoutes"));
+app.use("/notifications", require("./api/routes/notificationRoutes"));
+app.use("/blogs", require("./api/routes/blogRoutes"));
+app.use("/seo", require("./api/routes/seoRoutes"));
 
 app.use((req, res) => {
   res.status(404).send("404 Not Found");
@@ -99,9 +126,9 @@ app.use((req, res) => {
 
 mongoose.connection.once("open", () => {
   console.log("Connected to MongoDB");
-  http.listen(process.env.PORT || 3000, function () {
-    var host = http.address().address;
-    var port = http.address().port;
+  http.listen(PORT, "0.0.0.0", () => {   // <-- bind to 0.0.0.0
+    const host = http.address().address;
+    const port = http.address().port;
     console.log("App listening at http://%s:%s", host, port);
   });
 });

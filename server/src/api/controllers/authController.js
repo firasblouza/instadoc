@@ -12,7 +12,7 @@ const handleAuth = async (req, res) => {
 
   // If the email or password is missing, return 400
   if (!email || !password)
-    return res.status(400).json({ message: "Missing email or password" });
+    return res.status(400).json({ message: "Email ou mot de passe manquant" });
 
   if (rememberMe) {
     accessTokenDuration = "5h";
@@ -27,13 +27,13 @@ const handleAuth = async (req, res) => {
     const doctor = await Doctor.findOne({ email }).exec();
     // If it's not for a doctor, return 404
     if (!doctor) {
-      return res.status(404).json({ message: "Email does not exist" });
+      return res.status(404).json({ message: "Cette adresse email n'existe pas" });
     } else {
       // If it's for a doctor, check if the password is correct
       const validatePassword = await bcrypt.compare(password, doctor.password);
       // If it's not correct, return 401
       if (!validatePassword) {
-        return res.status(401).json({ message: "Invalid password" });
+        return res.status(401).json({ message: "Mot de passe incorrect" });
       } else {
         // If it's correct, assign a JWT token to the doctor
 
@@ -80,7 +80,7 @@ const handleAuth = async (req, res) => {
         });
 
         res.status(200).json({
-          message: "Logged in successfully",
+          message: "Connexion réussie",
           role: doctor.role,
           accessToken
         });
@@ -95,7 +95,7 @@ const handleAuth = async (req, res) => {
     const validatePassword = await bcrypt.compare(password, user.password);
     // If it's not correct, return 401
     if (!validatePassword) {
-      return res.status(401).json({ message: "Invalid password" });
+      return res.status(401).json({ message: "Mot de passe incorrect" });
     } else {
       // If it's correct, assign a JWT token to the user
       const accessToken = jwt.sign(
@@ -141,7 +141,7 @@ const handleAuth = async (req, res) => {
         maxAge: 24 * 60 * 60 * 1000
       });
       res.status(200).json({
-        message: "Logged in successfully",
+        message: "Connexion réussie",
         role: user.role,
         accessToken
       });

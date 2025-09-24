@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
-import { FaBars, FaBell, FaUserCircle } from "react-icons/fa";
+import { FaBars, FaUserCircle } from "react-icons/fa";
 import useAuth from "../../hooks/useAuth";
+import AuthContext from "../../context/AuthContext";
+import NotificationBell from "../Notifications/NotificationBell";
 
 const Dashboard = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const { auth } = useAuth();
+  const { API_URL } = useContext(AuthContext);
+  const IMG_URL = `${API_URL}/uploads/`;
 
   return (
     <div className="flex h-screen bg-neutral-100">
@@ -27,16 +31,27 @@ const Dashboard = () => {
           <div className="hidden lg:block w-8"></div>
 
           <div className="flex items-center gap-4">
-            <button className="p-2 rounded-full hover:bg-neutral-200 relative">
-              <FaBell className="text-neutral-600" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
+            <NotificationBell variant="dashboard" />
             <div className="w-px h-6 bg-neutral-300"></div>
             <div className="flex items-center gap-2">
-              <FaUserCircle className="text-2xl text-neutral-500" />
+              {auth.profileImage ? (
+                <img
+                  src={`${IMG_URL}${auth.profileImage}`}
+                  alt={auth.fullName}
+                  className="w-8 h-8 rounded-full object-cover border border-neutral-200"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'block';
+                  }}
+                />
+              ) : null}
+              <FaUserCircle 
+                className="text-2xl text-neutral-500" 
+                style={{ display: auth.profileImage ? 'none' : 'block' }}
+              />
               <div>
                 <h4 className="font-semibold text-sm text-neutral-800">{auth.fullName}</h4>
-                <p className="text-xs text-neutral-500">{auth.role}</p>
+                <p className="text-xs text-neutral-500 capitalize">{auth.role}</p>
               </div>
             </div>
           </div>

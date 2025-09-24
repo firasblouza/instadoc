@@ -103,7 +103,7 @@ const Contact = () => {
               </span>
             </h1>
             <p className="body-large text-white/90 max-w-3xl mx-auto">
-              Une question, un problème technique ou besoin d'assistance ? 
+              Une question, un problème technique ou besoin d&apos;assistance ? 
               Notre équipe est disponible pour vous accompagner.
             </p>
             <div className="flex justify-center gap-4 pt-4">

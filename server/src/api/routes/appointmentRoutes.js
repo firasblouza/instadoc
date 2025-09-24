@@ -5,7 +5,7 @@ const verifyRole = require("../middleware/verifyRole");
 const verifyJWT = require("../middleware/verifyJWT");
 const upload = require("../middleware/multer");
 
-router.use(verifyJWT);
+// router.use(verifyJWT);
 
 router
   .route("/")

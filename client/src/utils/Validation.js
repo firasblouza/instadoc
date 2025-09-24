@@ -1,23 +1,25 @@
 const errorMessages = {
-  firstName: "Please enter your first name",
-  lastName: "Please enter your last name",
-  email: "Please enter your email",
-  password: "Please enter your password",
-  confirmPassword: "Please confirm your password",
-  role: "Please select your role",
-  idType: "Please select your ID type",
-  idNumber: "Please enter your ID number",
-  idImage: "Please upload your ID image",
-  licenseNumber: "Please enter your license number",
-  licenseImage: "Please upload your license image",
-  speciality: "Please select your speciality",
-  invalidEmail: "Please enter a valid email",
-  shortPassword: "Password must be at least 8 characters long",
-  noNumber: "Password must contain at least one number",
-  noUppercase: "Password must contain at least one uppercase letter",
-  noSpecial: "Password must contain at least one special character",
-  noMatch: "Passwords do not match",
-  noProfileImage: "Please upload your profile image"
+  firstName: "Veuillez saisir votre prénom",
+  lastName: "Veuillez saisir votre nom",
+  email: "Veuillez saisir votre adresse email",
+  phoneNumber: "Veuillez saisir votre numéro de téléphone",
+  password: "Veuillez saisir votre mot de passe",
+  confirmPassword: "Veuillez confirmer votre mot de passe",
+  role: "Veuillez sélectionner votre rôle",
+  idType: "Veuillez sélectionner un type de pièce d'identité",
+  idNumber: "Veuillez saisir votre numéro de pièce d'identité",
+  idImage: "Veuillez télécharger l'image de votre pièce d'identité",
+  licenseNumber: "Veuillez saisir votre numéro de licence",
+  licenseImage: "Veuillez télécharger l'image de votre licence",
+  speciality: "Veuillez sélectionner votre spécialité",
+  invalidEmail: "Veuillez saisir une adresse email valide",
+  invalidPhone: "Veuillez saisir un numéro de téléphone valide",
+  shortPassword: "Le mot de passe doit contenir au moins 8 caractères",
+  noNumber: "Le mot de passe doit contenir au moins un chiffre",
+  noUppercase: "Le mot de passe doit contenir au moins une majuscule",
+  noSpecial: "Le mot de passe doit contenir au moins un caractère spécial",
+  noMatch: "Les mots de passe ne correspondent pas",
+  noProfileImage: "Veuillez télécharger votre photo de profil"
 };
 
 const isValidEmail = (email, setSignupMessage) => {
@@ -32,6 +34,29 @@ const isValidEmail = (email, setSignupMessage) => {
   if (!emailRegex.test(email)) {
     setSignupMessage({
       message: errorMessages.invalidEmail,
+      error: true
+    });
+    return false;
+  }
+  setSignupMessage({
+    message: "",
+    error: false
+  });
+  return true;
+};
+
+const isValidPhoneNumber = (phoneNumber, setSignupMessage) => {
+  const phoneRegex = /^(\+216|0)?[0-9]{8}$/;
+  if (phoneNumber.length === 0) {
+    setSignupMessage({
+      message: errorMessages.phoneNumber,
+      error: true
+    });
+    return false;
+  }
+  if (!phoneRegex.test(phoneNumber.replace(/\s/g, ''))) {
+    setSignupMessage({
+      message: errorMessages.invalidPhone,
       error: true
     });
     return false;
@@ -135,7 +160,7 @@ const isValidData = (data, setSignupMessage, step) => {
     });
     return true;
   } else if (step === 2) {
-    // Step 2: Security & Profile (Password, Date of Birth, Specialty)
+    // Step 2: Security & Profile (Password, Phone Number, Date of Birth, Specialty)
     if (!isValidPassword({
       from: "signup",
       password: data.password,
@@ -144,16 +169,19 @@ const isValidData = (data, setSignupMessage, step) => {
     })) {
       return false;
     }
+    if (!isValidPhoneNumber(data.phoneNumber, setSignupMessage)) {
+      return false;
+    }
     if (!data.dateOfBirth) {
       setSignupMessage({
-        message: "Please select your date of birth",
+        message: "Veuillez sélectionner votre date de naissance",
         error: true
       });
       return false;
     }
     if (data.role === "doctor" && !data.speciality) {
       setSignupMessage({
-        message: "Please select your speciality",
+        message: "Veuillez sélectionner votre spécialité",
         error: true
       });
       return false;
@@ -167,49 +195,49 @@ const isValidData = (data, setSignupMessage, step) => {
     // Step 3: Professional Documents (Doctor only)
     if (!data.idType) {
       setSignupMessage({
-        message: "Please select an ID type",
+        message: "Veuillez sélectionner un type de pièce d'identité",
         error: true
       });
       return false;
     }
     if (!data.idNumber) {
       setSignupMessage({
-        message: "Please enter your ID number",
+        message: "Veuillez saisir votre numéro de pièce d'identité",
         error: true
       });
       return false;
     }
     if (!data.licenseNumber) {
       setSignupMessage({
-        message: "Please enter your license number",
+        message: "Veuillez saisir votre numéro de licence",
         error: true
       });
       return false;
     }
     if (!data.profileImage) {
       setSignupMessage({
-        message: "Please upload your profile image",
+        message: "Veuillez télécharger votre photo de profil",
         error: true
       });
       return false;
     }
     if (!data.idImage) {
       setSignupMessage({
-        message: "Please upload your ID image",
+        message: "Veuillez télécharger l'image de votre pièce d'identité",
         error: true,
       });
       return false;
     }
     if (!data.licenseImage) {
       setSignupMessage({
-        message: "Please upload your license image",
+        message: "Veuillez télécharger l'image de votre licence",
         error: true,
       });
       return false;
     }
     if (!data.cvImage) {
       setSignupMessage({
-        message: "Please upload your CV image",
+        message: "Veuillez télécharger votre CV",
         error: true,
       });
       return false;
@@ -227,4 +255,4 @@ const isValidData = (data, setSignupMessage, step) => {
   return true;
 };
 
-export { isValidData, isValidEmail, isValidPassword };
+export { isValidData, isValidEmail, isValidPassword, isValidPhoneNumber };

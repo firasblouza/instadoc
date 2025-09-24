@@ -20,6 +20,7 @@ const Appointment = () => {
   const effectRan = useRef(false);
 
   const { apptId } = useParams();
+  const navigate = useNavigate();
   const { accessToken, decodedToken } = useAccessToken();
 
   const { auth } = useAuth();

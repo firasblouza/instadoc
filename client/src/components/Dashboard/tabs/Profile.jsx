@@ -5,6 +5,7 @@ import useAccessToken from "../../../hooks/useAccessToken";
 import AuthContext from "../../../context/AuthContext";
 import LoadingButton from "../../LoadingButton";
 import MedicalLoader from "../../MedicalLoader";
+import { useToast } from "../../Notifications/ToastContainer";
 
 const Profile = () => {
   const effectRan = useRef(false);
@@ -26,7 +27,8 @@ const Profile = () => {
     role: ""
   });
 
-  const { API_URL } = useContext(AuthContext);
+  const { API_URL, setAuth } = useContext(AuthContext);
+  const { showSuccess, showError } = useToast();
   const IMG_URL = `${API_URL}/uploads/`;
   const imgPlaceholder = `${IMG_URL}imagePlaceholder.png`;
 
@@ -60,35 +62,36 @@ const Profile = () => {
         );
         if (response.status === 200) {
           // Update user data with the response to get the new file paths
-          setUser(prevUser => ({
-            ...prevUser,
+          const updatedUser = {
+            ...user,
             ...response.data,
-            role: prevUser.role // Preserve the role
+            role: user.role // Preserve the role
+          };
+          setUser(updatedUser);
+          
+          // Update the global auth context with the new profile image
+          setAuth(prevAuth => ({
+            ...prevAuth,
+            profileImage: response.data.profileImage || prevAuth.profileImage,
+            fullName: `${updatedUser.firstName} ${updatedUser.lastName}`.trim()
           }));
+          
           setIsModifying(false);
           // DON'T clear uploaded files - keep the preview showing until page refresh
           // This prevents the broken image issue and provides better UX
           // setUploadedProfile(null);
           // setUploadedCV(null);
           
-          // Show success message with modern styling
-          const successDiv = document.createElement('div');
-          successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-pulse';
-          successDiv.textContent = 'Profil mis à jour avec succès!';
-          document.body.appendChild(successDiv);
-          setTimeout(() => document.body.removeChild(successDiv), 3000);
+          // Show success toast
+          showSuccess('Profil mis à jour avec succès!');
         }
       } else {
         console.log("No access token found");
       }
     } catch (error) {
       console.log("An error occurred while updating the user:", error);
-      // Show error message
-      const errorDiv = document.createElement('div');
-      errorDiv.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-      errorDiv.textContent = 'Erreur lors de la mise à jour du profil';
-      document.body.appendChild(errorDiv);
-      setTimeout(() => document.body.removeChild(errorDiv), 3000);
+      // Show error toast
+      showError('Erreur lors de la mise à jour du profil');
     } finally {
       setSaving(false);
     }

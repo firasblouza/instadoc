@@ -1,5 +1,8 @@
-import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+// import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
+// import { AuthProvider } from "./context/AuthContext";
+// import { NotificationProvider } from "./context/NotificationContext";
+import { SEOProvider } from "./context/SEOContext";
 import { useEffect } from "react";
 
 import jwt_decode from "jwt-decode";
@@ -9,10 +12,11 @@ import useLogout from "./hooks/useLogout";
 import Layout from "./components/Layout";
 import Home from "./components/Home";
 import Doctors from "./components/Doctors";
+import Medicines from "./components/Medicines";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import RequireAuth from "./components/RequireAuth";
-import Authenticated from "./components/Authenticated";
+// import Authenticated from "./components/Authenticated";
 import Doctor from "./components/Profiles/Doctor";
 
 // Appointments
@@ -28,11 +32,16 @@ import ManagePatients from "./components/Dashboard/tabs/admin/ManagePatients";
 import ManageDoctors from "./components/Dashboard/tabs/admin/ManageDoctors";
 import Settings from "./components/Dashboard/tabs/Settings";
 import ManageLabs from "./components/Dashboard/tabs/admin/ManageLabs";
+import ManageMedicines from "./components/Dashboard/tabs/admin/ManageMedicines";
+import ManageBlogs from "./components/Dashboard/tabs/admin/ManageBlogs";
+import ManageSEO from "./components/Dashboard/tabs/admin/ManageSEO";
+import Blog from "./components/Blog";
+import BlogPost from "./components/BlogPost";
 import Labs from "./components/Labs";
 
 // Hooks
 
-import useAccessToken from "./hooks/useAccessToken";
+// import useAccessToken from "./hooks/useAccessToken";
 import Demandes from "./components/Dashboard/tabs/doctor/Demandes";
 import PatientDemandes from "./components/Dashboard/tabs/patient/Demandes";
 import Contact from "./components/Contact";
@@ -43,7 +52,7 @@ import GlobalLoader from "./components/GlobalLoader";
 const App = () => {
   const location = useLocation();
   const accessToken = localStorage.getItem("accessToken");
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const decodedToken = accessToken ? jwt_decode(accessToken) : null;
 
   useEffect(() => {
@@ -52,7 +61,7 @@ const App = () => {
 
   const Logout = () => {
     const handleLogout = useLogout();
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
     useEffect(() => {
       const performLogout = async () => {
@@ -67,7 +76,8 @@ const App = () => {
   return (
     <>
       <GlobalLoader />
-      <Routes>
+      <SEOProvider>
+        <Routes>
       {/* Home Route */}
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
@@ -79,9 +89,20 @@ const App = () => {
         <Route index element={<Doctors />} />
       </Route>
 
+      {/* Medicines Routes */}
+      <Route path="medicines" element={<Layout />}>
+        <Route index element={<Medicines />} />
+      </Route>
+
       {/* Lab Routes */}
       <Route path="labs" element={<Layout />}>
         <Route index element={<Labs />} />
+      </Route>
+
+      {/* Blog Routes */}
+      <Route path="blog" element={<Layout />}>
+        <Route index element={<Blog />} />
+        <Route path=":slug" element={<BlogPost />} />
       </Route>
 
       {/* Individual Profiles */}
@@ -107,7 +128,10 @@ const App = () => {
           <Route path="admin/patients" element={<ManagePatients />} />
           <Route path="admin/doctors" element={<ManageDoctors />} />
           <Route path="admin/labs" element={<ManageLabs />} />
+          <Route path="admin/medicines" element={<ManageMedicines />} />
           <Route path="admin/reviews" element={<ManageRatings />} />
+          <Route path="admin/blogs" element={<ManageBlogs />} />
+          <Route path="admin/seo" element={<ManageSEO />} />
 
           {/* End Admin Routes */}
 
@@ -139,7 +163,8 @@ const App = () => {
         <Route path="dashboard" element={<Dashboard />} />
       </Route>
       <Route path="logout" element={<Logout />} />
-      </Routes>
+        </Routes>
+      </SEOProvider>
     </>
   );
 };
