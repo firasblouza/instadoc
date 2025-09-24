@@ -15,10 +15,12 @@ import {
   FaArrowUp
 } from "react-icons/fa";
 import { useState, useEffect } from "react";
+import { useToast } from "./Notifications/ToastContainer";
 import { btechIcon } from "../assets";
 
 const Footer = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const { showSuccess, showError } = useToast();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,7 +40,9 @@ const Footer = () => {
     { name: "Accueil", path: "/" },
     { name: "À propos", path: "/#about" },
     { name: "Médecins", path: "/doctors" },
+    { name: "Médicaments", path: "/medicines" },
     { name: "Laboratoires", path: "/labs" },
+    { name: "Blog", path: "/blog" },
     { name: "Contact", path: "/contact" }
   ];
 
@@ -206,10 +210,10 @@ const Footer = () => {
                 e.preventDefault();
                 const email = e.target.email.value;
                 if (!email) {
-                  alert('Veuillez entrer votre adresse email');
+                  showError('Veuillez entrer votre adresse email');
                   return;
                 }
-                alert(`Merci ${email}! Inscription newsletter - Fonctionnalité à implémenter.`);
+                showSuccess(`Merci ${email}! Inscription newsletter - Fonctionnalité à implémenter.`);
                 e.target.reset();
               }} className="flex flex-col sm:flex-row gap-3">
                 <input

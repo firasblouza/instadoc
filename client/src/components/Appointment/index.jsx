@@ -7,6 +7,7 @@ import Interface from "./Interface";
 
 import useAccessToken from "../../hooks/useAccessToken";
 import axios from "../../api/axios";
+import { useToast } from "../Notifications/ToastContainer";
 
 import { socket } from "./socket";
 
@@ -22,6 +23,7 @@ const Appointment = () => {
   const { apptId } = useParams();
   const navigate = useNavigate();
   const { accessToken, decodedToken } = useAccessToken();
+  const { showSuccess, showError } = useToast();
 
   const { auth } = useAuth();
 
@@ -92,10 +94,10 @@ const Appointment = () => {
         }
       );
       if (response.status === 200) {
-        window.alert("Consultation Terminée avec succés");
+        showSuccess("Consultation terminée avec succès");
         navigate("/dashboard/consultations");
       } else {
-        window.alert("Désole, une erreur s'est produit");
+        showError("Désolé, une erreur s'est produite");
       }
     } catch (err) {
       console.log(err);

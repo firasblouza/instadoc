@@ -12,6 +12,7 @@ import {
 } from "react-icons/fa";
 import AuthContext from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../Notifications/ToastContainer";
 
 import axios from "../../api/axios";
 
@@ -26,6 +27,7 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
   const fileInputRef = useRef(null);
 
   const { accessToken } = useAccessToken();
+  const { showError } = useToast();
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
@@ -117,7 +119,7 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
         console.log(err);
       }
     } else {
-      window.alert("Message can't be empty");
+      showError("Le message ne peut pas être vide");
     }
   };
   
@@ -159,7 +161,7 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
 
     } catch (error) {
       console.error("File upload failed", error);
-      alert("Erreur lors de l'envoi du fichier.");
+      showError("Erreur lors de l'envoi du fichier");
     }
   };
 

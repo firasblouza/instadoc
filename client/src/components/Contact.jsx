@@ -13,6 +13,7 @@ import {
   FaGithub
 } from "react-icons/fa";
 import { btechIcon } from "../assets";
+import { useToast } from "./Notifications/ToastContainer";
 import LoadingButton from "./LoadingButton";
 
 const Contact = () => {
@@ -23,6 +24,7 @@ const Contact = () => {
     message: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showSuccess, showError } = useToast();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -37,14 +39,14 @@ const Contact = () => {
     setIsSubmitting(true);
 
     if (!formData.name || !formData.email || !formData.message) {
-      alert('Veuillez remplir tous les champs obligatoires');
+      showError('Veuillez remplir tous les champs obligatoires');
       setIsSubmitting(false);
       return;
     }
 
     try {
       console.log('Contact form submission:', formData);
-      alert(`Merci ${formData.name}! Votre message a été envoyé. Nous vous répondrons sous 24h. (Fonctionnalité backend à implémenter)`);
+      showSuccess(`Merci ${formData.name}! Votre message a été envoyé. Nous vous répondrons sous 24h. (Fonctionnalité backend à implémenter)`);
       
       setFormData({
         name: "",
@@ -53,7 +55,7 @@ const Contact = () => {
         message: ""
       });
     } catch (error) {
-      alert('Erreur lors de l\'envoi du message. Veuillez réessayer.');
+      showError('Erreur lors de l\'envoi du message. Veuillez réessayer.');
     } finally {
       setIsSubmitting(false);
     }

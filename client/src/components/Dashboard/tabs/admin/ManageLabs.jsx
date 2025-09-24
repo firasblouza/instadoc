@@ -5,6 +5,7 @@ import useAccessToken from "../../../../hooks/useAccessToken";
 import AuthContext from "../../../../context/AuthContext";
 import MedicalLoader from "../../../MedicalLoader";
 import LoadingButton from "../../../LoadingButton";
+import { useToast } from "../../../Notifications/ToastContainer";
 
 const ManageLabs = () => {
   const effectRan = useRef(false);
@@ -32,6 +33,7 @@ const ManageLabs = () => {
 
   const { accessToken } = useAccessToken();
   const { API_URL } = useContext(AuthContext);
+  const { showSuccess, showError } = useToast();
   const IMG_URL = `${API_URL}/uploads/`;
 
   const fetchLabs = useCallback(async () => {
@@ -181,9 +183,10 @@ const ManageLabs = () => {
       setSelectedLab(null);
       setSelectedImage(null);
       setImagePreview(null);
+      showSuccess("Laboratoire modifié avec succès");
     } catch (error) {
       console.error("Error updating lab:", error);
-      alert("Erreur lors de la modification du laboratoire");
+      showError("Erreur lors de la modification du laboratoire");
     } finally {
       setActionLoading(false);
     }
@@ -233,9 +236,10 @@ const ManageLabs = () => {
       });
       setNewLabImage(null);
       setNewLabImagePreview(null);
+      showSuccess("Laboratoire ajouté avec succès");
     } catch (error) {
       console.error("Error adding lab:", error);
-      alert("Erreur lors de l'ajout du laboratoire");
+      showError("Erreur lors de l'ajout du laboratoire");
     } finally {
       setActionLoading(false);
     }

@@ -31,7 +31,7 @@ const usePageSEO = (pageName, customTitle = null, customDescription = null, cust
       };
       addSchemaMarkup(organizationSchema);
     }
-  }, [pageName, customTitle, customDescription, customImage, location.pathname, setPageSEO, addCanonicalUrl, addSchemaMarkup]);
+  }, [pageName, customTitle, customDescription, customImage, location.pathname]);
 };
 
 export default usePageSEO;

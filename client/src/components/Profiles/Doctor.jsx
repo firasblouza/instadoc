@@ -17,6 +17,7 @@ import {
   FaArrowLeft
 } from "react-icons/fa";
 import { capitalize } from "../../utils/Capitalize";
+import { useToast } from "../Notifications/ToastContainer";
 
 import ImagePreview from "../Dashboard/UI/ImagePreview";
 import Modal from "../Dashboard/UI/Modal";
@@ -27,11 +28,11 @@ import StarRating from "./StarRating";
 import AvgRating from "./AvgRating";
 import AuthContext from "../../context/AuthContext";
 import MedicalLoader from "../MedicalLoader";
-import { useToast } from "../Notifications/ToastContainer";
 
 const Doctor = () => {
   const { doctorId } = useParams();
   const navigate = useNavigate();
+  const { showSuccess, showError, showInfo } = useToast();
 
   const [doctor, setDoctor] = useState({});
   const [loading, setLoading] = useState(true);
@@ -68,7 +69,6 @@ const Doctor = () => {
   const effectRan = useRef(false);
 
   const { accessToken, decodedToken } = useAccessToken();
-  const { showSuccess, showError } = useToast();
 
   const { API_URL } = useContext(AuthContext);
   const IMG_URL = `${API_URL}/uploads/`;
@@ -343,16 +343,12 @@ const Doctor = () => {
           }
         }
       } else {
-        window.alert(
-          "Vous devez être connecté en tant que patient pour effectuer cette action"
-        );
+        showError("Vous devez être connecté en tant que patient pour effectuer cette action");
         setShowModal(false);
         window.location.href = "/login";
       }
     } else {
-      window.alert(
-        "Vous devez être connecté en tant que patient pour effectuer cette action"
-      );
+      showError("Vous devez être connecté en tant que patient pour effectuer cette action");
       setShowModal(false);
       window.location.href = "/login";
     }
@@ -365,11 +361,11 @@ const Doctor = () => {
 
   const sendRating = async () => {
     if (!review || review === "") {
-      window.alert("Vous devez entrer un commentaire");
+      showError("Vous devez entrer un commentaire");
       return;
     }
     if (star === 0) {
-      window.alert("Vous devez entrer une note");
+      showError("Vous devez entrer une note");
       return;
     }
 
@@ -385,12 +381,12 @@ const Doctor = () => {
 
       const response = await axios.post("/ratings", ratingData);
       if (response.status === 200) {
-        window.alert("Votre avis à été envoyé avec succès");
+        showSuccess("Votre avis a été envoyé avec succès");
         setReview("");
         setStar(0);
         fetchDoctor();
       } else {
-        window.alert("Une erreur s'est produite");
+        showError("Une erreur s'est produite");
       }
     } catch (err) {
       if (err?.response?.data?.message) {
@@ -486,7 +482,7 @@ const Doctor = () => {
                 <button 
                   onClick={() => {
                     console.log('Add to favorites feature - to implement');
-                    alert('Fonctionnalité "Favoris" - À implémenter prochainement!');
+                    showInfo('Fonctionnalité "Favoris" - À implémenter prochainement!');
                   }}
                   className="btn-secondary flex-1 p-3"
                   title="Ajouter aux favoris"
@@ -503,7 +499,7 @@ const Doctor = () => {
                       });
                     } else {
                       navigator.clipboard.writeText(window.location.href);
-                      alert('Lien copié dans le presse-papiers!');
+                      showSuccess('Lien copié dans le presse-papiers!');
                     }
                   }}
                   className="btn-secondary flex-1 p-3"

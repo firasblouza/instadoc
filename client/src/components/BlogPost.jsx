@@ -7,6 +7,7 @@ import MedicalLoader from "./MedicalLoader";
 import LoadingButton from "./LoadingButton";
 import useAccessToken from "../hooks/useAccessToken";
 import { useSEO } from "../context/SEOContext";
+import { useToast } from "./Notifications/ToastContainer";
 
 const BlogPost = () => {
   const { slug } = useParams();
@@ -22,6 +23,7 @@ const BlogPost = () => {
   const { API_URL } = useContext(AuthContext);
   const { accessToken } = useAccessToken();
   const { setPageSEO } = useSEO();
+  const { showSuccess } = useToast();
   const IMG_URL = `${API_URL}/uploads/`;
 
   const fetchBlogPost = useCallback(async () => {
@@ -118,7 +120,7 @@ const BlogPost = () => {
     } else {
       // Fallback: copy to clipboard
       navigator.clipboard.writeText(window.location.href);
-      alert('Lien copié dans le presse-papiers !');
+      showSuccess('Lien copié dans le presse-papiers !');
     }
   };
 

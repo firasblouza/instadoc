@@ -6,7 +6,7 @@ const MedicalLoader = ({ type = "heartbeat", message = "Chargement..." }) => {
     <div className="flex flex-col items-center space-y-6">
       <div className="relative">
         {/* Heartbeat Animation */}
-        <div className="flex items-center justify-center">
+        <div className="flex items-center bg-neutral-200 justify-center">
           <FaHeartbeat className="text-6xl text-red-500 animate-pulse" />
         </div>
         

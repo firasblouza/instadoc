@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from '../api/axios';
 import useAccessToken from '../hooks/useAccessToken';
 
@@ -7,17 +7,30 @@ const SEOContext = createContext();
 export const SEOProvider = ({ children }) => {
   const [seoData, setSeoData] = useState({});
   const [loading, setLoading] = useState(true);
+  const [seoCache, setSeoCache] = useState({}); // Cache to prevent repeated API calls
   const { accessToken } = useAccessToken();
 
-  const fetchPageSEO = async (pageName) => {
+  const fetchPageSEO = useCallback(async (pageName) => {
+    // Check cache first
+    if (seoCache[pageName]) {
+      return seoCache[pageName];
+    }
+
     try {
       const response = await axios.get(`/seo/page/${pageName}`);
-      return response.data.data;
+      const seoData = response.data.data;
+      
+      // Cache the result
+      if (seoData) {
+        setSeoCache(prev => ({ ...prev, [pageName]: seoData }));
+      }
+      
+      return seoData;
     } catch (error) {
       console.error(`Error fetching SEO for page ${pageName}:`, error);
       return null;
     }
-  };
+  }, [seoCache]);
 
   const updatePageTitle = (title) => {
     if (title) {
@@ -96,7 +109,7 @@ export const SEOProvider = ({ children }) => {
     });
   };
 
-  const setPageSEO = async (pageName, customTitle = null, customDescription = null, customImage = null) => {
+  const setPageSEO = useCallback(async (pageName, customTitle = null, customDescription = null, customImage = null) => {
     try {
       setLoading(true);
       const seoData = await fetchPageSEO(pageName);
@@ -109,18 +122,24 @@ export const SEOProvider = ({ children }) => {
           image: customImage || seoData.image
         };
 
-        setSeoData(finalSeoData);
-        updatePageTitle(finalSeoData.title);
-        updateMetaTags(finalSeoData);
+        // Only update if the data has actually changed
+        const currentTitle = document.title;
+        const currentDescription = document.querySelector('meta[name="description"]')?.getAttribute('content');
+        
+        if (currentTitle !== finalSeoData.title || currentDescription !== finalSeoData.description) {
+          setSeoData(finalSeoData);
+          updatePageTitle(finalSeoData.title);
+          updateMetaTags(finalSeoData);
+        }
       }
     } catch (error) {
       console.error('Error setting page SEO:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchPageSEO]);
 
-  const addSchemaMarkup = (schemaData) => {
+  const addSchemaMarkup = useCallback((schemaData) => {
     if (!schemaData) return;
 
     // Remove existing schema markup
@@ -134,9 +153,9 @@ export const SEOProvider = ({ children }) => {
     script.type = 'application/ld+json';
     script.textContent = JSON.stringify(schemaData);
     document.head.appendChild(script);
-  };
+  }, []);
 
-  const addCanonicalUrl = (url) => {
+  const addCanonicalUrl = useCallback((url) => {
     let canonical = document.querySelector('link[rel="canonical"]');
     if (canonical) {
       canonical.setAttribute('href', url);
@@ -146,7 +165,7 @@ export const SEOProvider = ({ children }) => {
       canonical.setAttribute('href', url);
       document.head.appendChild(canonical);
     }
-  };
+  }, []);
 
   const addGoogleAnalytics = (trackingId) => {
     if (!trackingId) return;

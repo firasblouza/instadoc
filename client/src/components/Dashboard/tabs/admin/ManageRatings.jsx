@@ -4,6 +4,7 @@ import axios from "../../../../api/axios";
 import useAccessToken from "../../../../hooks/useAccessToken";
 import MedicalLoader from "../../../MedicalLoader";
 import LoadingButton from "../../../LoadingButton";
+import { useToast } from "../../../Notifications/ToastContainer";
 
 const ManageRatings = () => {
   const effectRan = useRef(false);
@@ -18,6 +19,7 @@ const ManageRatings = () => {
   const [actionLoading, setActionLoading] = useState(false);
 
   const { accessToken } = useAccessToken();
+  const { showSuccess, showError } = useToast();
 
   const fetchRatings = useCallback(async () => {
     try {
@@ -88,9 +90,10 @@ const ManageRatings = () => {
       await fetchRatings();
       setShowEditModal(false);
       setSelectedRating(null);
+      showSuccess("Avis modifié avec succès");
     } catch (error) {
       console.error("Error updating rating:", error);
-      alert("Erreur lors de la modification de l&apos;avis");
+      showError("Erreur lors de la modification de l'avis");
     } finally {
       setActionLoading(false);
     }

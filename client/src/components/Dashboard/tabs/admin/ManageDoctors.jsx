@@ -150,9 +150,10 @@ const ManageDoctors = () => {
       await fetchDoctors();
       setShowDeleteModal(false);
       setSelectedDoctor(null);
+      showSuccess("Médecin supprimé avec succès");
       } catch (error) {
       console.error("Error deleting doctor:", error);
-      alert("Erreur lors de la suppression du médecin");
+      showError("Erreur lors de la suppression du médecin");
     } finally {
       setActionLoading(false);
     }
@@ -218,9 +219,10 @@ const ManageDoctors = () => {
       setUploadedCV(null);
       setUploadedID(null);
       setUploadedLicense(null);
+      showSuccess("Médecin modifié avec succès");
     } catch (error) {
       console.error("Error updating doctor:", error);
-      alert("Erreur lors de la modification du médecin");
+      showError("Erreur lors de la modification du médecin");
     } finally {
       setActionLoading(false);
     }

@@ -5,6 +5,7 @@ import useAccessToken from "../../../../hooks/useAccessToken";
 import AuthContext from "../../../../context/AuthContext";
 import MedicalLoader from "../../../MedicalLoader";
 import LoadingButton from "../../../LoadingButton";
+import { useToast } from "../../../Notifications/ToastContainer";
 
 const ManagePatients = () => {
   const effectRan = useRef(false);
@@ -21,6 +22,7 @@ const ManagePatients = () => {
 
   const { accessToken } = useAccessToken();
   const { API_URL } = useContext(AuthContext);
+  const { showSuccess, showError, showInfo } = useToast();
   const IMG_URL = `${API_URL}/uploads/`;
 
   const fetchPatients = useCallback(async () => {
@@ -99,9 +101,10 @@ const ManagePatients = () => {
       await fetchPatients();
       setShowDeleteModal(false);
       setSelectedPatient(null);
+      showSuccess("Patient supprimé avec succès");
     } catch (error) {
       console.error("Error deleting patient:", error);
-      alert("Erreur lors de la suppression du patient");
+      showError("Erreur lors de la suppression du patient");
     } finally {
       setActionLoading(false);
     }
@@ -155,10 +158,11 @@ const ManagePatients = () => {
       setShowEditModal(false);
       setSelectedPatient(null);
       setUploadedProfile(null);
+      showSuccess("Patient modifié avec succès");
     } catch (error) {
       console.error("Error updating patient:", error);
       console.error("Error response:", error.response?.data);
-      alert("Erreur lors de la modification du patient");
+      showError("Erreur lors de la modification du patient");
     } finally {
       setActionLoading(false);
     }

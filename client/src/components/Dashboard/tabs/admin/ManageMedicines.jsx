@@ -4,6 +4,7 @@ import useAccessToken from "../../../../hooks/useAccessToken";
 import AuthContext from "../../../../context/AuthContext";
 import MedicalLoader from "../../../MedicalLoader";
 import LoadingButton from "../../../LoadingButton";
+import { useToast } from "../../../Notifications/ToastContainer";
 import axios from "../../../../api/axios";
 
 // Medicine form options
@@ -50,6 +51,7 @@ const ManageMedicines = () => {
 
   const { accessToken } = useAccessToken();
   const { API_URL } = useContext(AuthContext);
+  const { showSuccess, showError } = useToast();
   const IMG_URL = `${API_URL}/uploads/`;
 
 
@@ -126,9 +128,10 @@ const ManageMedicines = () => {
       await fetchMedicines();
       setShowDeleteModal(false);
       setSelectedMedicine(null);
+      showSuccess("Médicament supprimé avec succès");
     } catch (error) {
       console.error("Error deleting medicine:", error);
-      alert("Erreur lors de la suppression du médicament");
+      showError("Erreur lors de la suppression du médicament");
     } finally {
       setActionLoading(false);
     }
@@ -169,9 +172,10 @@ const ManageMedicines = () => {
       await fetchMedicines();
       setShowEditModal(false);
       setSelectedMedicine(null);
+      showSuccess("Médicament modifié avec succès");
     } catch (error) {
       console.error("Error updating medicine:", error);
-      alert("Erreur lors de la modification du médicament");
+      showError("Erreur lors de la modification du médicament");
     } finally {
       setActionLoading(false);
     }
@@ -220,9 +224,10 @@ const ManageMedicines = () => {
         sideEffects: "",
         prescriptionRequired: false
       });
+      showSuccess("Médicament ajouté avec succès");
     } catch (error) {
       console.error("Error adding medicine:", error);
-      alert("Erreur lors de l'ajout du médicament");
+      showError("Erreur lors de l'ajout du médicament");
     } finally {
       setActionLoading(false);
     }
