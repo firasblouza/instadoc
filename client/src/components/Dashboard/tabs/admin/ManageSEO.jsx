@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef, useCallback, useContext } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { FaSearch, FaGlobe, FaCode, FaChartLine, FaUpload, FaEye, FaTimes, FaInfoCircle, FaExternalLinkAlt, FaFileAlt, FaRss, FaRobot } from "react-icons/fa";
 import axios from "../../../../api/axios";
 import useAccessToken from "../../../../hooks/useAccessToken";
-import AuthContext from "../../../../context/AuthContext";
 import MedicalLoader from "../../../MedicalLoader";
 import LoadingButton from "../../../LoadingButton";
 import { useToast } from "../../../Notifications/ToastContainer";
 import { useSEO } from "../../../../context/SEOContext";
+import { getImageURL } from "../../../../lib/constants";
 
 const ManageSEO = () => {
   const effectRan = useRef(false);
@@ -20,8 +20,7 @@ const ManageSEO = () => {
   const { accessToken } = useAccessToken();
   const { showSuccess, showError } = useToast();
   const { clearSEOCache } = useSEO();
-  const { API_URL } = useContext(AuthContext);
-  const IMG_URL = `${API_URL}/uploads/`;
+  const IMG_URL = (filename) => getImageURL(filename);
 
   const tabs = [
     { id: "general", name: "Général", icon: FaGlobe },
@@ -188,7 +187,7 @@ const ManageSEO = () => {
         {selectedFiles[field] || seoData[field] ? (
           <div className="space-y-3">
             <img
-              src={selectedFiles[field] ? URL.createObjectURL(selectedFiles[field]) : `${IMG_URL}${seoData[field]}`}
+              src={selectedFiles[field] ? URL.createObjectURL(selectedFiles[field]) : IMG_URL(seoData[field])}
               alt="Preview"
               className="mx-auto max-h-32 rounded-lg shadow-md"
             />
@@ -343,7 +342,7 @@ const ManageSEO = () => {
               <div className="flex items-start gap-3">
                 <FaInfoCircle className="text-yellow-500 text-xl mt-1 flex-shrink-0" />
                 <div>
-                  <h4 className="font-semibold text-neutral-900 mb-2">Suggestions d'amélioration</h4>
+                  <h4 className="font-semibold text-neutral-900 mb-2">Suggestions d&apos;amélioration</h4>
                   <ul className="space-y-1">
                     {analytics.suggestions.map((suggestion, index) => (
                       <li key={index} className="text-sm text-neutral-600 flex items-center gap-2">

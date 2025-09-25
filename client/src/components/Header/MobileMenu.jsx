@@ -1,6 +1,8 @@
 import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import { FaTimes, FaHome, FaUserMd, FaFlask, FaEnvelope, FaSignInAlt, FaTachometerAlt, FaSignOutAlt, FaPills, FaFileAlt } from "react-icons/fa";
+import logo from "../../assets/logo.png";
+import { getImageURL } from "../../lib/constants";
 import useAuth from "../../hooks/useAuth";
 import useLogout from "../../hooks/useLogout";
 import AuthContext from "../../context/AuthContext";
@@ -11,7 +13,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
   const handleLogout = useLogout();
   const { API_URL } = useContext(AuthContext);
   const { unreadCount } = useContext(NotificationContext);
-  const IMG_URL = `${API_URL}/uploads/`;
+  const IMG_URL = (filename) => getImageURL(filename);
 
   const menuItems = [
     { name: "Accueil", path: "/", icon: FaHome },
@@ -62,8 +64,12 @@ const MobileMenu = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center">
-              <FaUserMd className="text-white text-sm" />
+            <div className="w-12 h-12 rounded-xl overflow-hidden">
+              <img 
+                src={logo} 
+                alt="InstaDoc Logo" 
+                className="w-full h-full object-cover"
+              />
             </div>
             <span className="font-semibold text-gray-900">InstaDoc</span>
           </div>
@@ -82,7 +88,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
               <div className="relative">
                 {auth.profileImage ? (
                   <img
-                    src={`${IMG_URL}${auth.profileImage}`}
+                    src={IMG_URL(auth.profileImage)}
                     alt={auth.fullName}
                     className="w-12 h-12 rounded-full object-cover border-2 border-primary-500"
                     onError={(e) => {

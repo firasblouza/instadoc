@@ -8,6 +8,7 @@ import LoadingButton from "./LoadingButton";
 import useAccessToken from "../hooks/useAccessToken";
 import { useSEO } from "../context/SEOContext";
 import { useToast } from "./Notifications/ToastContainer";
+import { getImageURL } from "../lib/constants";
 
 const BlogPost = () => {
   const { slug } = useParams();
@@ -24,7 +25,7 @@ const BlogPost = () => {
   const { accessToken } = useAccessToken();
   const { setPageSEO } = useSEO();
   const { showSuccess } = useToast();
-  const IMG_URL = `${API_URL}/uploads/`;
+  const IMG_URL = (filename) => getImageURL(filename);
 
   const fetchBlogPost = useCallback(async () => {
     try {
@@ -42,7 +43,7 @@ const BlogPost = () => {
 
       // Set dynamic SEO for blog post
       if (blogData) {
-        const blogImage = blogData.featuredImage ? `${IMG_URL}${blogData.featuredImage}` : null;
+        const blogImage = blogData.featuredImage ? IMG_URL(blogData.featuredImage) : null;
         setPageSEO('blog', blogData.title, blogData.excerpt, blogImage);
       }
     } catch (error) {
@@ -203,7 +204,7 @@ const BlogPost = () => {
                   <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-neutral-200">
                     {blog.author.profileImage ? (
                       <img
-                        src={`${IMG_URL}${blog.author.profileImage}`}
+                        src={IMG_URL(blog.author.profileImage)}
                         alt={blog.author.firstName}
                         className="w-full h-full object-cover"
                       />
@@ -271,7 +272,7 @@ const BlogPost = () => {
             {blog.featuredImage && (
               <div className="mb-8">
                 <img
-                  src={`${IMG_URL}${blog.featuredImage}`}
+                  src={IMG_URL(blog.featuredImage)}
                   alt={blog.title}
                   className="w-full h-64 lg:h-96 object-cover rounded-2xl shadow-lg"
                 />
@@ -348,7 +349,7 @@ const BlogPost = () => {
                       <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
                         {comment.user.profileImage ? (
                           <img
-                            src={`${IMG_URL}${comment.user.profileImage}`}
+                            src={IMG_URL(comment.user.profileImage)}
                             alt={comment.userName}
                             className="w-full h-full object-cover rounded-full"
                           />
@@ -390,7 +391,7 @@ const BlogPost = () => {
                   <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-neutral-200">
                     {blog.author.profileImage ? (
                       <img
-                        src={`${IMG_URL}${blog.author.profileImage}`}
+                        src={IMG_URL(blog.author.profileImage)}
                         alt={blog.author.firstName}
                         className="w-full h-full object-cover"
                       />
@@ -432,7 +433,7 @@ const BlogPost = () => {
                           <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
                             {relatedBlog.featuredImage ? (
                               <img
-                                src={`${IMG_URL}${relatedBlog.featuredImage}`}
+                                src={IMG_URL(relatedBlog.featuredImage)}
                                 alt={relatedBlog.title}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                               />

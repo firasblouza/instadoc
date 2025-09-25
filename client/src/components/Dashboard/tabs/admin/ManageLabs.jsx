@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef, useCallback, useContext } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { FaTrashAlt, FaEye, FaEdit, FaSync, FaFlask, FaSearch, FaPlus, FaEnvelope, FaPhone, FaMapMarkerAlt, FaUpload } from "react-icons/fa";
 import axios from "../../../../api/axios";
 import useAccessToken from "../../../../hooks/useAccessToken";
-import AuthContext from "../../../../context/AuthContext";
 import MedicalLoader from "../../../MedicalLoader";
 import LoadingButton from "../../../LoadingButton";
 import { useToast } from "../../../Notifications/ToastContainer";
+import { getImageURL } from "../../../../lib/constants";
 
 const ManageLabs = () => {
   const effectRan = useRef(false);
@@ -32,9 +32,8 @@ const ManageLabs = () => {
   const [newLabImagePreview, setNewLabImagePreview] = useState(null);
 
   const { accessToken } = useAccessToken();
-  const { API_URL } = useContext(AuthContext);
   const { showSuccess, showError } = useToast();
-  const IMG_URL = `${API_URL}/uploads/`;
+  const IMG_URL = (filename) => getImageURL(filename);
 
   const fetchLabs = useCallback(async () => {
     try {
@@ -372,7 +371,7 @@ const ManageLabs = () => {
                       <div className="w-14 h-14 rounded-xl overflow-hidden border border-neutral-200 flex-shrink-0">
                         {lab.labImage ? (
                           <img
-                            src={`${IMG_URL}${lab.labImage}`}
+                            src={IMG_URL(lab.labImage)}
                             alt={lab.name}
                             className="w-full h-full object-cover"
                             onError={(e) => {
@@ -480,7 +479,7 @@ const ManageLabs = () => {
                 <div className="w-16 h-16 rounded-full overflow-hidden border border-neutral-200">
                   {selectedLab.labImage ? (
                     <img
-                      src={`${IMG_URL}${selectedLab.labImage}`}
+                      src={IMG_URL(selectedLab.labImage)}
                       alt={selectedLab.name}
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -797,8 +796,8 @@ const ManageLabs = () => {
                           imagePreview
                             ? imagePreview
                             : selectedLab.labImage
-                            ? `${IMG_URL}${selectedLab.labImage}`
-                            : `${IMG_URL}imagePlaceholder.png`
+                            ? IMG_URL(selectedLab.labImage)
+                            : IMG_URL("imagePlaceholder.png")
                         }
                         alt="Image du laboratoire"
                         className="mx-auto max-h-40 rounded-lg shadow-md"

@@ -5,6 +5,7 @@ import AuthContext from "../../../../context/AuthContext";
 import MedicalLoader from "../../../MedicalLoader";
 import LoadingButton from "../../../LoadingButton";
 import { useToast } from "../../../Notifications/ToastContainer";
+import { getImageURL } from "../../../../lib/constants";
 import axios from "../../../../api/axios";
 
 // Medicine form options
@@ -52,7 +53,7 @@ const ManageMedicines = () => {
   const { accessToken } = useAccessToken();
   const { API_URL } = useContext(AuthContext);
   const { showSuccess, showError } = useToast();
-  const IMG_URL = `${API_URL}/uploads/`;
+  const IMG_URL = (filename) => getImageURL(filename);
 
 
   const fetchMedicines = useCallback(async () => {
@@ -362,7 +363,7 @@ const ManageMedicines = () => {
                       <div className="w-14 h-14 rounded-xl overflow-hidden border border-neutral-200 flex-shrink-0">
                         {medicine.medicineImage ? (
                           <img
-                            src={`${IMG_URL}${medicine.medicineImage}`}
+                            src={IMG_URL(medicine.medicineImage)}
                             alt={medicine.name}
                             className="w-full h-full object-cover"
                             onError={(e) => {
@@ -463,7 +464,7 @@ const ManageMedicines = () => {
                 <div className="w-16 h-16 rounded-full overflow-hidden border border-neutral-200">
                   {selectedMedicine.medicineImage ? (
                     <img
-                      src={`${IMG_URL}${selectedMedicine.medicineImage}`}
+                      src={IMG_URL(selectedMedicine.medicineImage)}
                       alt={selectedMedicine.name}
                       className="w-full h-full object-cover"
                       onError={(e) => {

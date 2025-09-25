@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef, useCallback, useContext } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { FaTrashAlt, FaEye, FaEdit, FaSync, FaUserMd, FaSearch, FaFilter, FaEnvelope, FaPhone, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaHourglassHalf, FaUpload } from "react-icons/fa";
 import axios from "../../../../api/axios";
 import useAccessToken from "../../../../hooks/useAccessToken";
-import AuthContext from "../../../../context/AuthContext";
 import MedicalLoader from "../../../MedicalLoader";
 import LoadingButton from "../../../LoadingButton";
 import { useToast } from "../../../Notifications/ToastContainer";
+import { getImageURL } from "../../../../lib/constants";
 
 const ManageDoctors = () => {
   const effectRan = useRef(false);
@@ -28,8 +28,7 @@ const ManageDoctors = () => {
 
   const { accessToken } = useAccessToken();
   const { showSuccess, showError } = useToast();
-  const { API_URL } = useContext(AuthContext);
-  const IMG_URL = `${API_URL}/uploads/`;
+  const IMG_URL = (filename) => getImageURL(filename);
 
   const fetchDoctors = useCallback(async () => {
     try {
@@ -441,7 +440,7 @@ const ManageDoctors = () => {
                     <div className="flex items-start space-x-4">
                       <div className="w-14 h-14 rounded-xl overflow-hidden border border-neutral-200 flex-shrink-0">
                         <img
-                          src={doctor.profileImage ? `${IMG_URL}${doctor.profileImage}` : `${API_URL}/imagePlaceholder.png`}
+                          src={doctor.profileImage ? IMG_URL(doctor.profileImage) : IMG_URL("imagePlaceholder.png")}
                           alt={`Dr. ${doctor.firstName} ${doctor.lastName}`}
                           className="w-full h-full object-cover"
                         />
@@ -563,7 +562,7 @@ const ManageDoctors = () => {
               <div className="flex items-center space-x-4 p-4 bg-sky-50 rounded-xl">
                 <div className="w-20 h-20 rounded-xl overflow-hidden border border-neutral-200">
                   <img
-                    src={selectedDoctor.profileImage ? `${IMG_URL}${selectedDoctor.profileImage}` : `${API_URL}/imagePlaceholder.png`}
+                    src={selectedDoctor.profileImage ? IMG_URL(selectedDoctor.profileImage) : IMG_URL("imagePlaceholder.png")}
                     alt={`Dr. ${selectedDoctor.firstName} ${selectedDoctor.lastName}`}
                     className="w-full h-full object-cover"
                   />

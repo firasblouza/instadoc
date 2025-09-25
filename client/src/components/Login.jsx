@@ -7,7 +7,6 @@ import {
   FaLock, 
   FaEye, 
   FaEyeSlash, 
-  FaUserMd, 
   FaShieldAlt,
   FaArrowRight
 } from "react-icons/fa";
@@ -57,11 +56,8 @@ const Login = () => {
           <div className="w-full max-w-md">
             {/* Mobile Logo & Header */}
             <div className="text-center mb-8">
-              <div className="flex items-center justify-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center">
-                  <FaUserMd className="text-white text-xl" />
-                </div>
-                <img src={logo} alt="InstaDoc" className="h-10" />
+              <div className="flex items-center justify-center mb-6">
+                <img src={logo} alt="InstaDoc" className="h-16" />
               </div>
               <h1 className="heading-2 text-neutral-800 mb-2">Bienvenue</h1>
               <p className="text-neutral-600">Connectez-vous à votre compte</p>
@@ -157,7 +153,7 @@ const Login = () => {
               <div className="mt-8 text-center">
                 <p className="text-neutral-600 mb-4">Vous n&apos;avez pas de compte?</p>
                 <Link to="/signup" className="btn-secondary btn-lg w-full group">
-                  <FaUserMd className="mr-2" />
+                  <FaUser className="mr-2" />
                   Créer un compte
                   <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                 </Link>
@@ -166,13 +162,13 @@ const Login = () => {
 
             {/* Trust Indicators */}
             <div className="mt-8 text-center">
-              <div className="flex items-center justify-center gap-6 text-sm text-neutral-500">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-sm text-neutral-500">
                 <div className="flex items-center gap-2">
                   <FaShieldAlt className="text-green-500" />
                   <span>Connexion sécurisée</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <FaUserMd className="text-primary-500" />
+                  <FaUser className="text-primary-500" />
                   <span>Plateforme médicale</span>
                 </div>
               </div>
@@ -195,7 +191,7 @@ const Login = () => {
                 <div className="relative z-10 text-white space-y-8 max-w-lg">
                   <div className="space-y-5">
                     <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium">
-                      <FaUserMd className="mr-2" />
+                      <FaUser className="mr-2" />
                       Plateforme Médicale
                     </div>
                     
@@ -221,7 +217,7 @@ const Login = () => {
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-                        <FaUserMd className="text-blue-300" />
+                        <FaUser className="text-blue-300" />
                       </div>
                       <span className="text-base">Médecins Certifiés</span>
                     </div>
@@ -243,7 +239,7 @@ const Login = () => {
                   <div className="pt-6">
                     <p className="text-white/80 mb-4 text-base">Vous n&apos;avez pas encore de compte?</p>
                     <Link to="/signup" className="btn btn-lg bg-white text-primary-600 hover:bg-gray-50 hover:scale-105 transform transition-all duration-300 shadow-xl hover:shadow-2xl font-semibold w-full">
-                      <FaUserMd className="mr-2" />
+                      <FaUser className="mr-2" />
                       Créer un compte gratuitement
                       <FaArrowRight className="ml-2" />
                     </Link>
@@ -258,7 +254,7 @@ const Login = () => {
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-3 mb-5">
                       <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center">
-                        <FaUserMd className="text-white text-lg" />
+                        <FaUser className="text-white text-lg" />
                       </div>
                       <img src={logo} alt="InstaDoc" className="h-10" />
                     </div>
@@ -358,7 +354,7 @@ const Login = () => {
                       <span>Sécurisé</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <FaUserMd className="text-primary-500" />
+                      <FaUser className="text-primary-500" />
                       <span>Certifié</span>
                     </div>
                   </div>

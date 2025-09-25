@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import { useContext, useState } from "react";
-import { FaUserMd, FaBars, FaChevronDown, FaSignOutAlt, FaTachometerAlt } from "react-icons/fa";
+import { FaBars, FaChevronDown, FaSignOutAlt, FaTachometerAlt } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
+import logo from "../../assets/logo.png";
+import { getImageURL } from "../../lib/constants";
 
 import useAuth from "../../hooks/useAuth";
 import useLogout from "../../hooks/useLogout";
@@ -23,7 +25,7 @@ const Navbar = () => {
 
   const { aboutRef, API_URL } = useContext(AuthContext);
   const { unreadCount } = useContext(NotificationContext);
-  const IMG_URL = `${API_URL}/uploads/`;
+  const IMG_URL = (filename) => getImageURL(filename);
 
   const getActiveTab = () => {
     const path = location.pathname;
@@ -68,8 +70,12 @@ const Navbar = () => {
             
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-                <FaUserMd className="text-white text-lg" />
+              <div className="w-10 h-10 rounded-xl overflow-hidden group-hover:scale-105 transition-transform duration-200">
+                <img 
+                  src={logo} 
+                  alt="InstaDoc Logo" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               <span className="text-xl font-bold text-neutral-800 hidden sm:block">
                 InstaDoc
@@ -118,7 +124,7 @@ const Navbar = () => {
                     <div className="relative">
                       {auth.profileImage ? (
                         <img
-                          src={`${IMG_URL}${auth.profileImage}`}
+                          src={IMG_URL(auth.profileImage)}
                           alt={auth.fullName}
                           className="w-8 h-8 rounded-full object-cover border-2 border-primary-500"
                           onError={(e) => {

@@ -10,6 +10,7 @@ import AvgRating from "./Profiles/AvgRating";
 import AuthContext from "../context/AuthContext";
 import MedicalLoader from "./MedicalLoader";
 import usePageSEO from "../hooks/usePageSEO";
+import { getImageURL } from "../lib/constants";
 
 const Doctors = () => {
   const [initialDoctors, setInitialDoctors] = useState([]);
@@ -23,7 +24,7 @@ const Doctors = () => {
   usePageSEO('doctors');
 
   const { API_URL } = useContext(AuthContext);
-  const IMG_URL = `${API_URL}/uploads/`;
+  const IMG_URL = (filename) => getImageURL(filename);
 
   const effectRan = useRef(false);
   const navigate = useNavigate();
@@ -164,11 +165,11 @@ const Doctors = () => {
       </section>
 
       {/* Search and Filters */}
-      <section className="py-8 bg-white shadow-sm sticky top-0 z-30">
+      <section className="py-8 bg-white shadow-sm">
         <div className="container">
-          <div className="flex flex-col lg:flex-row gap-6 items-center">
+          <div className="flex flex-col gap-4 w-full">
             {/* Search */}
-            <div className="flex-1 relative">
+            <div className="relative">
               <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400" />
               <input
                 type="text"
@@ -180,11 +181,11 @@ const Doctors = () => {
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+            <div className="flex flex-col sm:flex-row gap-4 w-full">
               <select
                 value={selectedSpecialty}
                 onChange={(e) => setSelectedSpecialty(e.target.value)}
-                className="px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white min-w-[200px]"
+                className="flex-1 px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
               >
                 <option value="all">Toutes les spécialités</option>
                 {doctorSpecialties.map((specialty) => (
@@ -197,7 +198,7 @@ const Doctors = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white min-w-[150px]"
+                className="flex-1 px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
               >
                 <option value="name">Trier par nom</option>
                 <option value="rating">Meilleure note</option>
@@ -248,7 +249,7 @@ const Doctors = () => {
                 >
                   <div className="relative overflow-hidden rounded-t-xl">
                     <img
-                      src={`${IMG_URL}${doctor.profileImage}`}
+                      src={IMG_URL(doctor.profileImage)}
                       alt={`Dr. ${doctor.firstName} ${doctor.lastName}`}
                       className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                     />

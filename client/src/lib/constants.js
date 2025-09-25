@@ -5,19 +5,29 @@ export const SOCKET_URL = import.meta.env.PROD
   ? window.location.origin 
   : "http://localhost:3001";
 
-// Image and media URLs - always relative
+// Image and media URLs - use server URL in development, relative in production
 export const getImageURL = (filename) => {
   if (!filename) return null;
   
   // Remove any existing protocol/host from filename
   const cleanFilename = filename.replace(/^https?:\/\/[^\/]+/, '');
   
-  // Ensure it starts with /uploads/
+  // In development, use the full server URL
+  if (!import.meta.env.PROD) {
+    const serverURL = "http://localhost:3001";
+    if (cleanFilename.startsWith('/uploads/')) {
+      return `${serverURL}${cleanFilename}`;
+    }
+    return cleanFilename.startsWith('/') 
+      ? `${serverURL}/uploads${cleanFilename}`
+      : `${serverURL}/uploads/${cleanFilename}`;
+  }
+  
+  // In production, use relative paths
   if (cleanFilename.startsWith('/uploads/')) {
     return cleanFilename;
   }
   
-  // Add /uploads/ prefix if not present
   return cleanFilename.startsWith('/') 
     ? `/uploads${cleanFilename}`
     : `/uploads/${cleanFilename}`;

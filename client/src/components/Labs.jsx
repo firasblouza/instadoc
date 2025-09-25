@@ -129,7 +129,7 @@ const Labs = () => {
       </section>
 
       {/* Search and Filters */}
-      <section className="py-8 bg-white shadow-sm sticky top-0 z-30">
+      <section className="py-8 bg-white shadow-sm  z-30">
         <div className="container">
           <div className="flex flex-col lg:flex-row gap-6 items-center">
             <div className="flex-1 relative">

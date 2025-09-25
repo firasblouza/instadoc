@@ -13,6 +13,7 @@ import {
 import AuthContext from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../Notifications/ToastContainer";
+import { getImageURL } from "../../lib/constants";
 
 import axios from "../../api/axios";
 
@@ -174,11 +175,11 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
   }, [messages]);
 
   const { API_URL } = useContext(AuthContext);
-  const IMG_URL = `${API_URL}/uploads/`;
-  const IMG_Placeholder = `${API_URL}/imagePlaceholder.png`;
+  const IMG_URL = (filename) => getImageURL(filename);
+  const IMG_Placeholder = getImageURL("imagePlaceholder.png");
   
   const MessageBubble = ({ msg, isMine, party }) => {
-    const partyImage = party?.profileImage ? `${IMG_URL}${party.profileImage}` : IMG_Placeholder;
+    const partyImage = party?.profileImage ? IMG_URL(party.profileImage) : IMG_Placeholder;
     
     const renderContent = () => {
       switch (msg.fileType) {
@@ -233,7 +234,7 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
           </button>
           <div className="flex items-center gap-3 ml-2">
             <img 
-              src={otherParty.profileImage ? `${IMG_URL}${otherParty.profileImage}` : IMG_Placeholder} 
+              src={otherParty.profileImage ? IMG_URL(otherParty.profileImage) : IMG_Placeholder} 
               alt={otherParty.firstName} 
               className="w-10 h-10 rounded-full object-cover" 
             />

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaUser, FaEnvelope, FaLock, FaCalendarAlt, FaUserMd, FaEye, FaEyeSlash, FaArrowRight, FaArrowLeft } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaLock, FaCalendarAlt, FaEye, FaEyeSlash, FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import LoadingButton from "../LoadingButton";
 
 const SignupMain = ({
@@ -79,7 +79,7 @@ const SignupMain = ({
       {/* Role Selection */}
       <div>
         <label className="flex items-center gap-2 text-sm font-medium text-neutral-700 mb-2">
-          <FaUserMd className="text-primary-500" />
+          <FaUser className="text-primary-500" />
           Je suis un(e)
         </label>
         <select

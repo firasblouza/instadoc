@@ -1,7 +1,7 @@
 import { logo, doctors } from "../../assets";
 import { useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaUserMd, FaShieldAlt, FaArrowLeft, FaStethoscope, FaClock, FaHeart } from "react-icons/fa";
+import { FaShieldAlt,FaUser, FaArrowLeft, FaStethoscope, FaClock, FaHeart } from "react-icons/fa";
 import AuthContext from "../../context/AuthContext";
 
 const Signup = () => {
@@ -43,11 +43,8 @@ const Signup = () => {
           <div className="w-full max-w-md">
             {/* Mobile Header */}
             <div className="text-center mb-8">
-              <div className="flex items-center justify-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-secondary-500 to-primary-500 flex items-center justify-center">
-                  <FaUserMd className="text-white text-xl" />
-                </div>
-                <img src={logo} alt="InstaDoc" className="h-10" />
+              <div className="flex items-center justify-center mb-6">
+                <img src={logo} alt="InstaDoc" className="h-16" />
               </div>
               <h1 className="heading-2 text-neutral-800 mb-2">Créer un compte</h1>
               <p className="text-neutral-600">{getStepTitle()}</p>
@@ -145,7 +142,7 @@ const Signup = () => {
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-                      <FaUserMd className="text-purple-300" />
+                      <FaUser className="text-purple-300" />
                     </div>
                     <span className="text-base">Accès Immédiat</span>
                   </div>
@@ -169,7 +166,7 @@ const Signup = () => {
                 <div className="text-center">
                   <div className="flex items-center justify-center gap-3 mb-5">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-secondary-500 to-primary-500 flex items-center justify-center">
-                      <FaUserMd className="text-white text-lg" />
+                      <FaUser className="text-white text-lg" />
                     </div>
                     <img src={logo} alt="InstaDoc" className="h-10" />
                   </div>
@@ -225,7 +222,7 @@ const Signup = () => {
                     <span>Sécurisé</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaUserMd className="text-primary-500" />
+                    <FaUser className="text-primary-500" />
                     <span>Médical</span>
                   </div>
                 </div>

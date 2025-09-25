@@ -155,7 +155,7 @@ const Doctor = () => {
   }, [fetchDoctor]);
 
   const handleImagePreview = (image) => {
-    setImageModal({ state: true, image: `${IMG_URL}${image}` });
+    setImageModal({ state: true, image: IMG_URL(image) });
   };
 
   const handleShowModal = () => {
@@ -419,22 +419,22 @@ const Doctor = () => {
         <div className="container">
           <div className="grid lg:grid-cols-3 gap-8 items-center">
             <div className="lg:col-span-2 space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white/20">
+              <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 lg:gap-4">
+                <div className="w-32 h-32 lg:w-24 lg:h-24 rounded-full overflow-hidden border-4 border-white/20">
                   <img
                     src={doctor.profileImage ? IMG_URL(doctor.profileImage) : IMG_Placeholder}
                     alt={`Dr. ${doctor.firstName} ${doctor.lastName}`}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div>
+                <div className="text-center lg:text-left">
                   <h1 className="heading-2 text-white">
                     Dr. {doctor.firstName} {doctor.lastName}
                   </h1>
                   <p className="text-xl text-white/90 font-medium">
                     {doctor.speciality}
                   </p>
-                  <div className="flex items-center gap-3 mt-2">
+                  <div className="flex items-center justify-center lg:justify-start gap-3 mt-2">
                     <div className="flex items-center gap-1">
                       <AvgRating rating={avgRating} />
                       <span className="text-white/80">({avgRating.toFixed(1)})</span>
@@ -469,7 +469,7 @@ const Doctor = () => {
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 w-full max-w-sm mx-auto lg:max-w-none lg:mx-0">
           <button
             onClick={handleShowModal}
                 className="btn btn-lg bg-white text-primary-600 hover:bg-gray-50 hover:scale-105 transform transition-all duration-300 shadow-xl hover:shadow-2xl font-semibold w-full"
@@ -478,13 +478,13 @@ const Doctor = () => {
             Demander une consultation
           </button>
               
-              <div className="flex gap-3">
+              <div className="flex gap-3 w-full">
                 <button 
                   onClick={() => {
                     console.log('Add to favorites feature - to implement');
                     showInfo('Fonctionnalité "Favoris" - À implémenter prochainement!');
                   }}
-                  className="btn-secondary flex-1 p-3"
+                  className="btn-secondary flex-1 p-3 min-w-0"
                   title="Ajouter aux favoris"
                 >
                   <FaHeart />
@@ -502,7 +502,7 @@ const Doctor = () => {
                       showSuccess('Lien copié dans le presse-papiers!');
                     }
                   }}
-                  className="btn-secondary flex-1 p-3"
+                  className="btn-secondary flex-1 p-3 min-w-0"
                   title="Partager le profil"
                 >
                   <FaShare />
@@ -763,7 +763,7 @@ const Doctor = () => {
             <div className="bg-primary-50 rounded-xl p-4 flex items-center gap-4">
               <div className="w-12 h-12 rounded-full overflow-hidden">
                 <img
-                  src={doctor.profileImage ? `${IMG_URL}${doctor.profileImage}` : IMG_Placeholder}
+                  src={doctor.profileImage ? IMG_URL(doctor.profileImage) : IMG_Placeholder}
                   alt={`Dr. ${doctor.firstName} ${doctor.lastName}`}
                   className="w-full h-full object-cover"
                 />

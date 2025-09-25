@@ -170,7 +170,7 @@ const Medicines = () => {
       </section>
 
       {/* Search and Filters */}
-      <section className="py-8 bg-white shadow-sm sticky top-0 z-30">
+      <section className="py-8 bg-white shadow-sm z-30">
         <div className="container">
           <div className="flex flex-col lg:flex-row gap-6 items-center">
             {/* Search */}

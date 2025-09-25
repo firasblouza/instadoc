@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaCalendarAlt, FaClock, FaMoneyBillWave, FaUserMd, FaTimes } from "react-icons/fa";
+import { FaCalendarAlt, FaClock, FaMoneyBillWave, FaTimes } from "react-icons/fa";
 import axios from "../../api/axios";
 import useAccessToken from "../../hooks/useAccessToken";
 import AuthContext from "../../context/AuthContext";
@@ -140,8 +140,7 @@ const BookingModal = ({ isOpen, onClose, doctor }) => {
         onClose();
         
         // Redirect to payment if needed
-        const appointmentId = response.data.appointment._id;
-        navigate(`/payment/checkout/${appointmentId}`);
+    
       }
     } catch (error) {
       console.error("Error creating appointment:", error);

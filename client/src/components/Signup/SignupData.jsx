@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaLock, FaCalendarAlt, FaEye, FaEyeSlash, FaArrowRight, FaArrowLeft, FaUserMd, FaPhone, FaUpload, FaImage } from "react-icons/fa";
+import { FaLock, FaCalendarAlt, FaEye, FaEyeSlash, FaArrowRight, FaArrowLeft, FaUser, FaPhone, FaUpload, FaImage } from "react-icons/fa";
 import { doctorSpecialties } from "../../data/data";
 import LoadingButton from "../LoadingButton";
 
@@ -160,7 +160,7 @@ const SignupData = ({
       {userData.role === "doctor" && (
         <div>
           <label className="flex items-center gap-2 text-sm font-medium text-neutral-700 mb-2">
-            <FaUserMd className="text-primary-500" />
+            <FaUser className="text-primary-500" />
             Spécialité médicale
           </label>
           <select
