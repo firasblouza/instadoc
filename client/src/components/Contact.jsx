@@ -15,6 +15,7 @@ import {
 import { btechIcon } from "../assets";
 import { useToast } from "./Notifications/ToastContainer";
 import LoadingButton from "./LoadingButton";
+import usePageSEO from "../hooks/usePageSEO";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -25,6 +26,9 @@ const Contact = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showSuccess, showError } = useToast();
+
+  // Set page SEO
+  usePageSEO('contact');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

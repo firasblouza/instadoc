@@ -7,6 +7,16 @@ import LoadingButton from "../../../LoadingButton";
 import { useToast } from "../../../Notifications/ToastContainer";
 import { getImageURL } from "../../../../lib/constants";
 
+// Medical specialties list
+const medicalSpecialties = [
+  "Médecine Générale", "Cardiologie", "Neurologie", "Pédiatrie", "Gynécologie", 
+  "Dermatologie", "Orthopédie", "Psychiatrie", "Chirurgie", "Radiologie",
+  "Anesthésiologie", "Ophtalmologie", "Oto-rhino-laryngologie", "Urologie",
+  "Endocrinologie", "Gastro-entérologie", "Pneumologie", "Rhumatologie",
+  "Hématologie", "Oncologie", "Médecine d'urgence", "Médecine du travail",
+  "Médecine légale", "Médecine du sport", "Médecine interne"
+];
+
 const ManageDoctors = () => {
   const effectRan = useRef(false);
   const [loading, setLoading] = useState(true);
@@ -307,80 +317,80 @@ const ManageDoctors = () => {
   }
 
   return (
-    <section className="w-full bg-gradient-to-br from-primary-50 via-white to-secondary-50 p-4">
+    <section className="w-full bg-gradient-to-br from-primary-50 via-white to-secondary-50 p-2 sm:p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sky-600 text-sm font-medium mb-4">
-            <FaUserMd className="mr-2" />
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="inline-flex items-center px-3 sm:px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sky-600 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
+            <FaUserMd className="mr-2 text-sm" />
             Gestion des Médecins
           </div>
-          <h1 className="heading-1 text-neutral-900 mb-2">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900 mb-2">
             Gestion des{' '}
             <span className="bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
               médecins
             </span>
         </h1>
-          <p className="body-large text-neutral-600 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-neutral-600 max-w-2xl mx-auto px-4">
             Approuvez et gérez les médecins de la plateforme
             </p>
           </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <div className="card-hover border-l-4 border-sky-500">
-            <div className="card-body">
+            <div className="card-body p-3 sm:p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-neutral-600">Total</p>
-                  <p className="text-2xl font-bold text-neutral-900">{statistics.total}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">Total</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-900">{statistics.total}</p>
                 </div>
-                <FaUserMd className="text-sky-500 text-2xl" />
+                <FaUserMd className="text-sky-500 text-lg sm:text-2xl flex-shrink-0" />
               </div>
             </div>
           </div>
 
           <div className="card-hover border-l-4 border-orange-500">
-            <div className="card-body">
+            <div className="card-body p-3 sm:p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-neutral-600">En attente</p>
-                  <p className="text-2xl font-bold text-neutral-900">{statistics.pending}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">En attente</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-900">{statistics.pending}</p>
                 </div>
-                <FaHourglassHalf className="text-orange-500 text-2xl" />
+                <FaHourglassHalf className="text-orange-500 text-lg sm:text-2xl flex-shrink-0" />
               </div>
             </div>
           </div>
 
           <div className="card-hover border-l-4 border-green-500">
-            <div className="card-body">
+            <div className="card-body p-3 sm:p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-neutral-600">Approuvés</p>
-                  <p className="text-2xl font-bold text-neutral-900">{statistics.approved}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">Approuvés</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-900">{statistics.approved}</p>
                 </div>
-                <FaCheckCircle className="text-green-500 text-2xl" />
+                <FaCheckCircle className="text-green-500 text-lg sm:text-2xl flex-shrink-0" />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
           <div className="card-hover border-l-4 border-red-500">
-            <div className="card-body">
+            <div className="card-body p-3 sm:p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-neutral-600">Rejetés</p>
-                  <p className="text-2xl font-bold text-neutral-900">{statistics.rejected}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">Rejetés</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-900">{statistics.rejected}</p>
                 </div>
-                <FaTimesCircle className="text-red-500 text-2xl" />
+                <FaTimesCircle className="text-red-500 text-lg sm:text-2xl flex-shrink-0" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Search and Filters */}
-        <div className="card mb-6">
-          <div className="card-body">
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="card mb-4 sm:mb-6">
+          <div className="card-body p-3 sm:p-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center justify-between">
               <div className="relative flex-1 max-w-md">
                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" />
               <input
@@ -631,7 +641,7 @@ const ManageDoctors = () => {
                     {selectedDoctor.idImage && (
                       <div className="text-center">
                         <img
-                          src={`${IMG_URL}${selectedDoctor.idImage}`}
+                          src={IMG_URL(selectedDoctor.idImage)}
                           alt="Pièce d'identité"
                           className="w-full h-32 object-cover rounded-lg border border-neutral-200 mb-2"
                         />
@@ -642,7 +652,7 @@ const ManageDoctors = () => {
                     {selectedDoctor.licenseImage && (
                       <div className="text-center">
                         <img
-                          src={`${IMG_URL}${selectedDoctor.licenseImage}`}
+                          src={IMG_URL(selectedDoctor.licenseImage)}
                           alt="Licence médicale"
                           className="w-full h-32 object-cover rounded-lg border border-neutral-200 mb-2"
                         />
@@ -653,7 +663,7 @@ const ManageDoctors = () => {
                     {selectedDoctor.cvImage && (
                       <div className="text-center">
                         <img
-                          src={`${IMG_URL}${selectedDoctor.cvImage}`}
+                          src={IMG_URL(selectedDoctor.cvImage)}
                           alt="CV"
                           className="w-full h-32 object-cover rounded-lg border border-neutral-200 mb-2"
                         />
@@ -807,13 +817,17 @@ const ManageDoctors = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Spécialité</label>
-                  <input
-                    type="text"
+                  <select
                     value={selectedDoctor.speciality || ''}
                     onChange={(e) => setSelectedDoctor({...selectedDoctor, speciality: e.target.value})}
-                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
-                          />
-                        </div>
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all bg-white"
+                  >
+                    <option value="">Sélectionner une spécialité</option>
+                    {medicalSpecialties.map((specialty) => (
+                      <option key={specialty} value={specialty}>{specialty}</option>
+                    ))}
+                  </select>
+                </div>
 
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Numéro de licence</label>
@@ -862,8 +876,8 @@ const ManageDoctors = () => {
                               uploadedProfile
                                 ? URL.createObjectURL(uploadedProfile)
                                 : selectedDoctor.profileImage
-                                ? `${IMG_URL}${selectedDoctor.profileImage}`
-                                : `${IMG_URL}imagePlaceholder.png`
+                                ? IMG_URL(selectedDoctor.profileImage)
+                                : IMG_URL("imagePlaceholder.png")
                             }
                             alt="Photo de profil"
                             className="mx-auto max-h-32 rounded-lg shadow-md"
@@ -909,8 +923,8 @@ const ManageDoctors = () => {
                               uploadedCV
                                 ? URL.createObjectURL(uploadedCV)
                                 : selectedDoctor.cvImage
-                                ? `${IMG_URL}${selectedDoctor.cvImage}`
-                                : `${IMG_URL}imagePlaceholder.png`
+                                ? IMG_URL(selectedDoctor.cvImage)
+                                : IMG_URL("imagePlaceholder.png")
                             }
                             alt="CV"
                             className="mx-auto max-h-32 rounded-lg shadow-md"
@@ -956,8 +970,8 @@ const ManageDoctors = () => {
                               uploadedID
                                 ? URL.createObjectURL(uploadedID)
                                 : selectedDoctor.idImage
-                                ? `${IMG_URL}${selectedDoctor.idImage}`
-                                : `${IMG_URL}imagePlaceholder.png`
+                                ? IMG_URL(selectedDoctor.idImage)
+                                : IMG_URL("imagePlaceholder.png")
                             }
                             alt="Pièce d'identité"
                             className="mx-auto max-h-32 rounded-lg shadow-md"
@@ -1003,8 +1017,8 @@ const ManageDoctors = () => {
                               uploadedLicense
                                 ? URL.createObjectURL(uploadedLicense)
                                 : selectedDoctor.licenseImage
-                                ? `${IMG_URL}${selectedDoctor.licenseImage}`
-                                : `${IMG_URL}imagePlaceholder.png`
+                                ? IMG_URL(selectedDoctor.licenseImage)
+                                : IMG_URL("imagePlaceholder.png")
                             }
                             alt="Licence médicale"
                             className="mx-auto max-h-32 rounded-lg shadow-md"

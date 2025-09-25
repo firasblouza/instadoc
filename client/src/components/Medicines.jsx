@@ -5,6 +5,7 @@ import axios from "../api/axios";
 import AuthContext from "../context/AuthContext";
 import MedicalLoader from "./MedicalLoader";
 import Modal from "./Dashboard/UI/Modal";
+import usePageSEO from "../hooks/usePageSEO";
 
 // Medicine categories for smart filtering
 const medicineCategories = [
@@ -35,6 +36,9 @@ const Medicines = () => {
 
   const effectRan = useRef(false);
   const navigate = useNavigate();
+
+  // Set page SEO
+  usePageSEO('medicines');
 
   const fetchMedicines = useCallback(async () => {
     setLoading(true);

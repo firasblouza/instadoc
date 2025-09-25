@@ -241,10 +241,13 @@ const Blog = () => {
         </div>
       </section>
 
+      {/* Spacer between hero and content */}
+      <div className="bg-white py-8"></div>
+
       <div className="container">
 
         {/* Search and Filters */}
-        <div className="card mb-8">
+        <div className="card mb-8 -mt-16 relative z-10">
           <div className="card-body">
             <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
               {/* Search */}

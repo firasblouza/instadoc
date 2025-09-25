@@ -25,9 +25,54 @@ export const SEOProvider = ({ children }) => {
       return seoData;
     } catch (error) {
       console.error(`Error fetching SEO for page ${pageName}:`, error);
-      return null;
+      
+      // Return fallback SEO data based on page
+      const fallbackSEO = getFallbackSEO(pageName);
+      console.log(`🔄 Using fallback SEO for ${pageName}:`, fallbackSEO);
+      
+      // Cache the fallback
+      setSeoCache(prev => ({ ...prev, [pageName]: fallbackSEO }));
+      
+      return fallbackSEO;
     }
   }, []);
+
+  const getFallbackSEO = (pageName) => {
+    const fallbacks = {
+      home: {
+        title: "InstaDoc - Plateforme de Télémédecine",
+        description: "InstaDoc est votre plateforme de télémédecine en Tunisie. Consultez des médecins qualifiés en ligne, trouvez des médicaments et laboratoires, et gérez votre santé facilement.",
+        keywords: "télémédecine, consultation médicale, médecin en ligne, santé, Tunisie, InstaDoc"
+      },
+      doctors: {
+        title: "Médecins - InstaDoc",
+        description: "Découvrez nos médecins qualifiés sur InstaDoc. Trouvez le spécialiste qu'il vous faut pour votre consultation médicale en ligne.",
+        keywords: "médecins, spécialistes, consultation médicale, télémédecine"
+      },
+      medicines: {
+        title: "Médicaments - InstaDoc",
+        description: "Consultez notre catalogue de médicaments sur InstaDoc. Informations détaillées et prix des médicaments disponibles.",
+        keywords: "médicaments, pharmacie, prix, catalogue, santé"
+      },
+      labs: {
+        title: "Laboratoires - InstaDoc",
+        description: "Trouvez les laboratoires d'analyses médicales près de chez vous. Informations de contact et localisation des laboratoires partenaires.",
+        keywords: "laboratoires, analyses médicales, examens, santé"
+      },
+      blog: {
+        title: "Blog Santé - InstaDoc",
+        description: "Découvrez nos articles de santé et conseils médicaux sur le blog InstaDoc. Restez informé sur votre santé.",
+        keywords: "blog santé, conseils médicaux, articles santé, bien-être"
+      },
+      contact: {
+        title: "Contact - InstaDoc",
+        description: "Contactez l'équipe InstaDoc pour toute question ou assistance. Nous sommes là pour vous aider.",
+        keywords: "contact, support, assistance, aide"
+      }
+    };
+    
+    return fallbacks[pageName] || fallbacks.home;
+  };
 
   const updatePageTitle = (title) => {
     if (title) {
@@ -115,36 +160,31 @@ export const SEOProvider = ({ children }) => {
       
       const seoData = await fetchPageSEO(pageName);
       
-      if (seoData) {
-        const finalSeoData = {
-          ...seoData,
-          title: customTitle || seoData.title,
-          description: customDescription || seoData.description,
-          image: customImage || seoData.image
-        };
+      // Always ensure we have SEO data (either from API or fallback)
+      const finalSeoData = {
+        ...seoData,
+        title: customTitle || seoData?.title || getFallbackSEO(pageName).title,
+        description: customDescription || seoData?.description || getFallbackSEO(pageName).description,
+        image: customImage || seoData?.image || getFallbackSEO(pageName).image
+      };
 
-        console.log(`🎯 Final SEO data:`, finalSeoData);
+      console.log(`🎯 Final SEO data:`, finalSeoData);
 
-        // Only update if the data has actually changed
-        const currentTitle = document.title;
-        const currentDescription = document.querySelector('meta[name="description"]')?.getAttribute('content');
-        
-        console.log(`🎯 Current title: ${currentTitle}`);
-        console.log(`🎯 Current description: ${currentDescription}`);
-        
-        if (currentTitle !== finalSeoData.title || currentDescription !== finalSeoData.description) {
-          console.log(`🎯 Updating SEO data...`);
-          setSeoData(finalSeoData);
-          updatePageTitle(finalSeoData.title);
-          updateMetaTags(finalSeoData);
-        } else {
-          console.log(`🎯 SEO data unchanged, skipping update`);
-        }
-      } else {
-        console.log(`🎯 No SEO data found for page: ${pageName}`);
-      }
+      // Always update SEO data to ensure it's applied
+      setSeoData(finalSeoData);
+      updatePageTitle(finalSeoData.title);
+      updateMetaTags(finalSeoData);
+      
+      console.log(`✅ SEO data applied for ${pageName}`);
     } catch (error) {
       console.error('Error setting page SEO:', error);
+      
+      // Even if there's an error, apply fallback SEO
+      const fallbackData = getFallbackSEO(pageName);
+      setSeoData(fallbackData);
+      updatePageTitle(fallbackData.title);
+      updateMetaTags(fallbackData);
+      console.log(`🔄 Applied fallback SEO for ${pageName}`);
     } finally {
       setLoading(false);
     }

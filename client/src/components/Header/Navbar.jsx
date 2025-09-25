@@ -66,17 +66,15 @@ const Navbar = () => {
     <>
       <nav className="bg-white/95 backdrop-blur-sm border-b border-neutral-200 sticky top-0 z-40">
         <div className="container">
-          <div className="flex items-center justify-between h-20">
+          <div className="flex items-center justify-between h-16">
             
             {/* Logo */}
             <Link to="/" className="flex items-center group">
-              <div className="w-20 h-20 rounded-xl overflow-hidden group-hover:scale-105 transition-transform duration-200">
-                <img 
-                  src={logo} 
-                  alt="InstaDoc Logo" 
-                  className="w-full h-full object-contain"
-                />
-              </div>
+              <img 
+                src={logo} 
+                alt="InstaDoc Logo" 
+                className="h-10 sm:h-12 group-hover:scale-105 transition-transform duration-200"
+              />
               </Link>
 
             {/* Desktop Navigation */}

@@ -19,6 +19,7 @@ import {
 import { capitalize } from "../../utils/Capitalize";
 import { useToast } from "../Notifications/ToastContainer";
 import { getImageURL } from "../../lib/constants";
+import usePageSEO from "../../hooks/usePageSEO";
 
 import ImagePreview from "../Dashboard/UI/ImagePreview";
 import Modal from "../Dashboard/UI/Modal";
@@ -73,6 +74,9 @@ const Doctor = () => {
   // Use centralized image URL helper
   const IMG_URL = (filename) => getImageURL(filename);
   const IMG_Placeholder = "/imagePlaceholder.png";
+
+  // Set page SEO - will be updated when doctor data loads
+  usePageSEO('doctors');
 
   const calculateAverageRating = (ratings) => {
     if (ratings.length === 0) {

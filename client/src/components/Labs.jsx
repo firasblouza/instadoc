@@ -16,6 +16,15 @@ import Modal from "./Dashboard/UI/Modal";
 import axios from "../api/axios";
 import AuthContext from "../context/AuthContext";
 import MedicalLoader from "./MedicalLoader";
+import usePageSEO from "../hooks/usePageSEO";
+
+// Tunisian cities list
+const tunisianCities = [
+  "Tunis", "Sfax", "Sousse", "Kairouan", "Bizerte", "Gabès", "Ariana", "Gafsa",
+  "Monastir", "Ben Arous", "Kasserine", "Médenine", "Nabeul", "Tataouine", 
+  "Béja", "Jendouba", "Kébili", "Mahdia", "Manouba", "Siliana", "Tozeur",
+  "Zaghouan", "Sidi Bouzid", "Kef"
+];
 
 const Labs = () => {
   const [labs, setLabs] = useState([]);
@@ -31,6 +40,9 @@ const Labs = () => {
   const IMG_URL = `${API_URL}/uploads/`;
 
   const effectRan = useRef(false);
+
+  // Set page SEO
+  usePageSEO('labs');
 
   useEffect(() => {
     if (showModal) {

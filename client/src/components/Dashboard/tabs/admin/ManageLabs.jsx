@@ -7,6 +7,14 @@ import LoadingButton from "../../../LoadingButton";
 import { useToast } from "../../../Notifications/ToastContainer";
 import { getImageURL } from "../../../../lib/constants";
 
+// Tunisian cities list
+const tunisianCities = [
+  "Tunis", "Sfax", "Sousse", "Kairouan", "Bizerte", "Gabès", "Ariana", "Gafsa",
+  "Monastir", "Ben Arous", "Kasserine", "Médenine", "Nabeul", "Tataouine", 
+  "Béja", "Jendouba", "Kébili", "Mahdia", "Manouba", "Siliana", "Tozeur",
+  "Zaghouan", "Sidi Bouzid", "Kef"
+];
+
 const ManageLabs = () => {
   const effectRan = useRef(false);
   const [loading, setLoading] = useState(true);
@@ -23,9 +31,10 @@ const ManageLabs = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [newLab, setNewLab] = useState({
     name: "",
-      email: "",
+    email: "",
     phoneNumber: "",
     address: "",
+    city: "",
     description: ""
   });
   const [newLabImage, setNewLabImage] = useState(null);
@@ -200,7 +209,7 @@ const ManageLabs = () => {
         name: newLab.name,
         address: {
           location: newLab.address,
-          city: newLab.address // You might want to separate city and location
+          city: newLab.city
         },
         contact: {
           email: newLab.email,
@@ -611,8 +620,22 @@ const ManageLabs = () => {
                 </div>
 
                 <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Ville</label>
+                  <select
+                    value={newLab.city}
+                    onChange={(e) => setNewLab({...newLab, city: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all bg-white"
+                  >
+                    <option value="">Sélectionner une ville</option>
+                    {tunisianCities.map((city) => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Adresse</label>
-                          <input
+                  <input
                     type="text"
                     value={newLab.address}
                     onChange={(e) => setNewLab({...newLab, address: e.target.value})}
@@ -761,16 +784,20 @@ const ManageLabs = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Ville</label>
-                  <input
-                        type="text"
+                  <select
                     value={selectedLab.address?.city || ''}
                     onChange={(e) => setSelectedLab({
                             ...selectedLab,
                       address: {...selectedLab.address, city: e.target.value}
                     })}
-                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
-                      />
-                    </div>
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all bg-white"
+                  >
+                    <option value="">Sélectionner une ville</option>
+                    {tunisianCities.map((city) => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
+                </div>
 
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Adresse</label>

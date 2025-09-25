@@ -219,89 +219,89 @@ const PatientHome = () => {
   const totalAppointments = Object.values(statistics).reduce((sum, val) => sum + val, 0);
 
   return (
-    <section className="w-full bg-gradient-to-br from-primary-50 via-white to-secondary-50 p-4">
+    <section className="w-full bg-gradient-to-br from-primary-50 via-white to-secondary-50 p-2 sm:p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sky-600 text-sm font-medium mb-4">
-            <FaHeart className="mr-2" />
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="inline-flex items-center px-3 sm:px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sky-600 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
+            <FaHeart className="mr-2 text-sm" />
             Tableau de Bord Patient
           </div>
-          <h1 className="heading-1 text-neutral-900 mb-2">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900 mb-2">
             Bonjour{' '}
             <span className="bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
               {decodedToken?.UserInfo?.lastName || 'Patient'}
             </span>{' '}
             👋
           </h1>
-          <p className="body-large text-neutral-600 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-neutral-600 max-w-2xl mx-auto px-4">
             Gérez vos consultations et suivez votre santé en toute simplicité
           </p>
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
           {/* Total Appointments */}
           <div className="card-hover border-l-4 border-sky-500">
-            <div className="card-body">
+            <div className="card-body p-3 sm:p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-neutral-600">Total</p>
-                  <p className="text-2xl font-bold text-neutral-900">{totalAppointments}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">Total</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-900">{totalAppointments}</p>
                 </div>
-                <FaClipboardList className="text-sky-500 text-2xl" />
+                <FaClipboardList className="text-sky-500 text-lg sm:text-2xl flex-shrink-0" />
               </div>
             </div>
           </div>
 
           {/* Approved */}
           <div className="card-hover border-l-4 border-green-500">
-            <div className="card-body">
+            <div className="card-body p-3 sm:p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-neutral-600">En cours</p>
-                  <p className="text-2xl font-bold text-neutral-900">{statistics.approved}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">En cours</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-900">{statistics.approved}</p>
                 </div>
-                <FaHeart className="text-green-500 text-2xl" />
+                <FaHeart className="text-green-500 text-lg sm:text-2xl flex-shrink-0" />
               </div>
             </div>
           </div>
 
           {/* Completed */}
           <div className="card-hover border-l-4 border-sky-500">
-            <div className="card-body">
+            <div className="card-body p-3 sm:p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-neutral-600">Terminées</p>
-                  <p className="text-2xl font-bold text-neutral-900">{statistics.completed}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">Terminées</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-900">{statistics.completed}</p>
                 </div>
-                <FaChartLine className="text-sky-500 text-2xl" />
+                <FaChartLine className="text-sky-500 text-lg sm:text-2xl flex-shrink-0" />
               </div>
             </div>
           </div>
 
           {/* Pending */}
           <div className="card-hover border-l-4 border-orange-500">
-            <div className="card-body">
+            <div className="card-body p-3 sm:p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-neutral-600">En attente</p>
-                  <p className="text-2xl font-bold text-neutral-900">{statistics.pending}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">En attente</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-900">{statistics.pending}</p>
                 </div>
-                <FaClock className="text-orange-500 text-2xl" />
+                <FaClock className="text-orange-500 text-lg sm:text-2xl flex-shrink-0" />
               </div>
             </div>
           </div>
 
           {/* Rejected/Cancelled */}
           <div className="card-hover border-l-4 border-red-500">
-            <div className="card-body">
+            <div className="card-body p-3 sm:p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-neutral-600">Autres</p>
-                  <p className="text-2xl font-bold text-neutral-900">{statistics.rejected + statistics.cancelled}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">Autres</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-900">{statistics.rejected + statistics.cancelled}</p>
                 </div>
-                <FaEye className="text-red-500 text-2xl" />
+                <FaEye className="text-red-500 text-lg sm:text-2xl flex-shrink-0" />
               </div>
             </div>
           </div>
