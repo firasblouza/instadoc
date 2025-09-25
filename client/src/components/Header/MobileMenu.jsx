@@ -63,15 +63,12 @@ const MobileMenu = ({ isOpen, onClose }) => {
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-16 h-16 rounded-xl overflow-hidden">
-              <img 
-                src={logo} 
-                alt="InstaDoc Logo" 
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <span className="font-semibold text-gray-900">InstaDoc</span>
+          <div className="w-40 h-40 rounded-xl overflow-hidden">
+            <img 
+              src={logo} 
+              alt="InstaDoc Logo" 
+              className="w-full h-full object-cover"
+            />
           </div>
           <button
             onClick={onClose}
