@@ -1,10 +1,8 @@
 import { useState, useEffect, useRef, useContext, useCallback } from "react";
-import { FaSearch, FaFilter, FaPills, FaEye, FaTag, FaIndustry, FaWeight, FaCapsules } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { FaSearch, FaFilter, FaPills, FaEye, FaTag, FaIndustry, FaWeight, FaCapsules, FaFileAlt, FaExclamationTriangle } from "react-icons/fa";
 import axios from "../api/axios";
 import AuthContext from "../context/AuthContext";
 import MedicalLoader from "./MedicalLoader";
-import Modal from "./Dashboard/UI/Modal";
 import usePageSEO from "../hooks/usePageSEO";
 
 // Medicine categories for smart filtering
@@ -35,7 +33,6 @@ const Medicines = () => {
   const IMG_URL = `${API_URL}/uploads/`;
 
   const effectRan = useRef(false);
-  const navigate = useNavigate();
 
   // Set page SEO
   usePageSEO('medicines');
@@ -351,98 +348,122 @@ const Medicines = () => {
 
       {/* Medicine Details Modal */}
       {showModal && selectedMedicine && (
-        <Modal
-          showModal={showModal}
-          setShowModal={setShowModal}
-          title="Détails du médicament"
-        >
-          <div className="space-y-6">
-            {/* Medicine Header */}
-            <div className="flex items-start gap-4">
-              <div className="w-20 h-20 bg-gradient-to-br from-primary-100 to-secondary-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                {selectedMedicine.medicineImage ? (
-                  <img
-                    src={`${IMG_URL}${selectedMedicine.medicineImage}`}
-                    alt={selectedMedicine.name}
-                    className="w-full h-full object-cover rounded-xl"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
-                    }}
-                  />
-                ) : null}
-                <FaPills 
-                  className="text-3xl text-primary-500"
-                  style={{ display: selectedMedicine.medicineImage ? 'none' : 'block' }}
-                />
-              </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-neutral-800 mb-2">
-                  {selectedMedicine.name}
-                </h2>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(selectedMedicine.category)}`}>
-                    {getCategoryName(selectedMedicine.category)}
-                  </span>
-                  {selectedMedicine.prescriptionRequired && (
-                    <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
-                      Ordonnance requise
-                    </span>
-                  )}
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Header Section */}
+            <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                    {selectedMedicine.medicineImage ? (
+                      <img
+                        src={IMG_URL(selectedMedicine.medicineImage)}
+                        alt={selectedMedicine.name}
+                        className="w-full h-full object-cover rounded-xl"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <FaPills 
+                      className="text-2xl text-white"
+                      style={{ display: selectedMedicine.medicineImage ? 'none' : 'block' }}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold mb-2">
+                      {selectedMedicine.name}
+                    </h2>
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="px-3 py-1 bg-white/20 rounded-full text-sm font-medium">
+                        {getCategoryName(selectedMedicine.category)}
+                      </span>
+                      {selectedMedicine.prescriptionRequired && (
+                        <span className="px-3 py-1 bg-red-500/80 text-white rounded-full text-sm font-medium">
+                          Ordonnance requise
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-3xl font-bold">
+                      {selectedMedicine.price.toFixed(2)} TND
+                    </p>
+                  </div>
                 </div>
-                <p className="text-3xl font-bold text-primary-600">
-                  {selectedMedicine.price.toFixed(2)} TND
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="text-white/80 hover:text-white text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            {/* Content Section */}
+            <div className="p-6 space-y-8">
+              {/* Key Information Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                  <div className="flex items-center gap-3 mb-2">
+                    <FaIndustry className="text-blue-600 text-lg" />
+                    <h4 className="font-semibold text-blue-900">Fabricant</h4>
+                  </div>
+                  <p className="text-blue-800 font-medium">{selectedMedicine.manufacturer}</p>
+                </div>
+                
+                <div className="bg-green-50 p-4 rounded-xl border border-green-200">
+                  <div className="flex items-center gap-3 mb-2">
+                    <FaWeight className="text-green-600 text-lg" />
+                    <h4 className="font-semibold text-green-900">Dosage</h4>
+                  </div>
+                  <p className="text-green-800 font-medium">{selectedMedicine.dosage}</p>
+                </div>
+                
+                <div className="bg-purple-50 p-4 rounded-xl border border-purple-200">
+                  <div className="flex items-center gap-3 mb-2">
+                    <FaCapsules className="text-purple-600 text-lg" />
+                    <h4 className="font-semibold text-purple-900">Forme</h4>
+                  </div>
+                  <p className="text-purple-800 font-medium capitalize">{selectedMedicine.form}</p>
+                </div>
+              </div>
+
+              {/* Description Section */}
+              <div className="bg-neutral-50 p-6 rounded-xl border border-neutral-200">
+                <h3 className="text-xl font-bold text-neutral-800 mb-4 flex items-center gap-2">
+                  <FaFileAlt className="text-primary-600" />
+                  Description
+                </h3>
+                <p className="text-neutral-700 leading-relaxed text-lg">
+                  {selectedMedicine.description}
                 </p>
               </div>
-            </div>
 
-            {/* Medicine Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-lg font-semibold text-neutral-800 mb-3">Description</h3>
-                <p className="text-neutral-600">{selectedMedicine.description}</p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold text-neutral-800 mb-3">Informations</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600">Fabricant:</span>
-                    <span className="font-medium">{selectedMedicine.manufacturer}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600">Dosage:</span>
-                    <span className="font-medium">{selectedMedicine.dosage}</span>
-                  </div>
-                  {selectedMedicine.form && (
-                    <div className="flex justify-between">
-                      <span className="text-neutral-600">Forme:</span>
-                      <span className="font-medium capitalize">{selectedMedicine.form}</span>
-                    </div>
-                  )}
+              {/* Side Effects Section */}
+              {selectedMedicine.sideEffects && (
+                <div className="bg-orange-50 p-6 rounded-xl border border-orange-200">
+                  <h3 className="text-xl font-bold text-orange-800 mb-4 flex items-center gap-2">
+                    <FaExclamationTriangle className="text-orange-600" />
+                    Effets secondaires
+                  </h3>
+                  <p className="text-orange-700 leading-relaxed text-lg">
+                    {selectedMedicine.sideEffects}
+                  </p>
                 </div>
-              </div>
-            </div>
+              )}
 
-            {/* Side Effects */}
-            {selectedMedicine.sideEffects && (
-              <div>
-                <h3 className="text-lg font-semibold text-neutral-800 mb-3">Effets secondaires</h3>
-                <p className="text-neutral-600">{selectedMedicine.sideEffects}</p>
+              {/* Action Buttons */}
+              <div className="flex gap-4 pt-6 border-t border-neutral-200">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="flex-1 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl transition-colors duration-200 font-semibold"
+                >
+                  Fermer
+                </button>
               </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex gap-4 pt-4 border-t border-neutral-200">
-              <button
-                onClick={() => setShowModal(false)}
-                className="w-full px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl transition-colors duration-200"
-              >
-                Fermer
-              </button>
             </div>
           </div>
-        </Modal>
+        </div>
       )}
     </div>
   );
