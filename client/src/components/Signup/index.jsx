@@ -1,7 +1,7 @@
 import { logo, doctors } from "../../assets";
 import { useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaShieldAlt,FaUser, FaArrowLeft, FaStethoscope, FaClock, FaHeart } from "react-icons/fa";
+import { FaShieldAlt, FaUser, FaArrowLeft, FaStethoscope, FaClock, FaHeart } from "react-icons/fa";
 import AuthContext from "../../context/AuthContext";
 
 const Signup = () => {
