@@ -1,4 +1,6 @@
 const Appointment = require("../models/Appointment");
+const Notification = require("../models/Notification");
+const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 
 const getAllAppointments = async (req, res) => {
@@ -125,6 +127,31 @@ const scheduleAppointment = async (req, res) => {
       endDateTime: end || undefined
     });
 
+    // Create notification for doctor
+    try {
+      const patient = await User.findById(userId).select('firstName lastName').exec();
+      const patientName = patient ? `${patient.firstName} ${patient.lastName}` : 'Un patient';
+      
+      const notification = await Notification.create({
+        userId: doctorId,
+        title: "Nouvelle demande de consultation",
+        message: `${patientName} souhaite prendre rendez-vous avec vous.`,
+        type: "appointment",
+        priority: "high",
+        actionUrl: "/dashboard/consultations",
+        metadata: { appointmentId: newAppointment._id }
+      });
+
+      // Broadcast notification via WebSocket
+      const io = req.app.get('io');
+      if (io) {
+        io.to(`user_${doctorId}`).emit('new-notification', notification);
+        console.log(`📱 Real-time notification sent to doctor ${doctorId}`);
+      }
+    } catch (notifError) {
+      console.error("Error creating appointment notification:", notifError);
+    }
+
     res.status(201).json({ message: "Rendez-vous créé avec succès", appointmentId: newAppointment._id });
   } catch (err) {
     res.status(500).json({ message: "Erreur lors de la création du rendez-vous" });
@@ -173,7 +200,64 @@ const modifyAppointmentById = async (req, res) => {
       { $set: req.body },
       { new: true }
     ).exec();
+    
     if (updatedAppointment) {
+      // Create notification for status changes
+      try {
+        const doctor = await User.findById(updatedAppointment.doctorId).select('firstName lastName').exec();
+        const patient = await User.findById(updatedAppointment.userId).select('firstName lastName').exec();
+        
+        const doctorName = doctor ? `Dr. ${doctor.firstName} ${doctor.lastName}` : 'Votre médecin';
+        const patientName = patient ? `${patient.firstName} ${patient.lastName}` : 'Un patient';
+        
+        let notificationData = {};
+        
+        if (req.body.status === "approved") {
+          notificationData = {
+            userId: updatedAppointment.userId,
+            title: "Rendez-vous confirmé",
+            message: `Votre rendez-vous avec ${doctorName} a été confirmé.`,
+            type: "appointment",
+            priority: "high",
+            actionUrl: "/dashboard/consultations",
+            metadata: { appointmentId: updatedAppointment._id }
+          };
+        } else if (req.body.status === "rejected") {
+          notificationData = {
+            userId: updatedAppointment.userId,
+            title: "Rendez-vous rejeté",
+            message: `Votre demande de rendez-vous avec ${doctorName} a été rejetée.`,
+            type: "appointment",
+            priority: "high",
+            actionUrl: "/dashboard/consultations",
+            metadata: { appointmentId: updatedAppointment._id }
+          };
+        }
+        
+        if (notificationData.userId) {
+          const notification = await Notification.create(notificationData);
+          
+          // Broadcast notification via WebSocket
+          const io = req.app.get('io');
+          if (io) {
+            console.log(`📱 Broadcasting notification to room: user_${notificationData.userId}`);
+            console.log(`📱 Notification data:`, {
+              title: notificationData.title,
+              message: notificationData.message,
+              type: notificationData.type,
+              userId: notificationData.userId
+            });
+            
+            io.to(`user_${notificationData.userId}`).emit('new-notification', notification);
+            console.log(`📱 Real-time status notification sent to user ${notificationData.userId}`);
+          } else {
+            console.log(`❌ No WebSocket instance found`);
+          }
+        }
+      } catch (notifError) {
+        console.error("Error creating status notification:", notifError);
+      }
+      
       res.status(200).json({ message: "Rendez-vous mis à jour avec succès" });
     } else {
       res.status(404).json({ message: "Rendez-vous non trouvé" });

@@ -182,94 +182,94 @@ const PatientDemandes = () => {
   }
 
   return (
-    <section className="w-full bg-gradient-to-br from-primary-50 via-white to-secondary-50 p-4">
-      <div className="max-w-7xl mx-auto">
+    <section className="w-full bg-gradient-to-br from-primary-50 via-white to-secondary-50 p-2 sm:p-4">
+      <div className="max-w-4xl mx-auto px-2 sm:px-4">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sky-600 text-sm font-medium mb-4">
-            <FaUserMd className="mr-2" />
+        <div className="text-center mb-4 sm:mb-6">
+          <div className="inline-flex items-center px-3 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sky-600 text-xs font-medium mb-3">
+            <FaUserMd className="mr-2 text-sm" />
             Mes Consultations
           </div>
-          <h1 className="heading-1 text-neutral-900 mb-2">
-            Gérez vos{' '}
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900 mb-2">
+            Mes{' '}
             <span className="bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
-              consultations
+              Consultations
             </span>
           </h1>
-          <p className="body-large text-neutral-600 max-w-2xl mx-auto">
-            Suivez l&apos;état de vos consultations médicales et accédez facilement à vos rendez-vous
+          <p className="text-xs sm:text-sm text-neutral-600 max-w-xl mx-auto px-2">
+            Suivez l&apos;état de vos consultations médicales
           </p>
         </div>
 
         {/* Statistics Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <div className="card-hover border-l-4 border-orange-500">
-            <div className="card-body">
+            <div className="card-body p-2 sm:p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-neutral-600">En attente</p>
-                  <p className="text-2xl font-bold text-neutral-900">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">En attente</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-900">
                     {appointments.filter(apt => apt.status === "pending").length}
                   </p>
                 </div>
-                <FaHourglassHalf className="text-orange-500 text-2xl" />
+                <FaHourglassHalf className="text-orange-500 text-lg sm:text-2xl flex-shrink-0" />
               </div>
             </div>
           </div>
 
           <div className="card-hover border-l-4 border-green-500">
-            <div className="card-body">
+            <div className="card-body p-2 sm:p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-neutral-600">Approuvées</p>
-                  <p className="text-2xl font-bold text-neutral-900">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">Approuvées</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-900">
                     {appointments.filter(apt => apt.status === "approved").length}
                   </p>
                 </div>
-                <FaCheckCircle className="text-green-500 text-2xl" />
+                <FaCheckCircle className="text-green-500 text-lg sm:text-2xl flex-shrink-0" />
               </div>
             </div>
           </div>
 
           <div className="card-hover border-l-4 border-sky-500">
-            <div className="card-body">
+            <div className="card-body p-2 sm:p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-neutral-600">Terminées</p>
-                  <p className="text-2xl font-bold text-neutral-900">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">Terminées</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-900">
                     {appointments.filter(apt => apt.status === "completed").length}
                   </p>
                 </div>
-                <FaCheckCircle className="text-sky-500 text-2xl" />
+                <FaCheckCircle className="text-sky-500 text-lg sm:text-2xl flex-shrink-0" />
               </div>
             </div>
           </div>
 
           <div className="card-hover border-l-4 border-red-500">
-            <div className="card-body">
+            <div className="card-body p-2 sm:p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-neutral-600">Autres</p>
-                  <p className="text-2xl font-bold text-neutral-900">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">Rejeté</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-900">
                     {appointments.filter(apt => apt.status === "rejected" || apt.status === "cancelled").length}
                   </p>
                 </div>
-                <FaTimesCircle className="text-red-500 text-2xl" />
+                <FaTimesCircle className="text-red-500 text-lg sm:text-2xl flex-shrink-0" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Filters and Search */}
-        <div className="card mb-6">
-          <div className="card-body">
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="card mb-4 sm:mb-6">
+          <div className="card-body p-2 sm:p-4">
+            <div className="flex flex-col gap-3 sm:gap-4">
               {/* Search */}
-              <div className="relative flex-1 max-w-md">
+              <div className="relative w-full">
                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" />
                 <input
                   type="text"
-                  placeholder="Rechercher par médecin ou motif..."
+                  placeholder="Rechercher..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
@@ -277,14 +277,14 @@ const PatientDemandes = () => {
               </div>
 
               {/* Status Filter */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 flex-1">
                 <FaFilter className="text-neutral-500" />
                 <select
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
-                  className="px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all bg-white"
+                  className="flex-1 px-3 sm:px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all bg-white text-sm"
                 >
-                  <option value="all">Tous les statuts</option>
+                  <option value="all">Tous</option>
                   <option value="pending">En attente</option>
                   <option value="approved">Approuvées</option>
                   <option value="completed">Terminées</option>
@@ -314,26 +314,26 @@ const PatientDemandes = () => {
           ) : (
             <div className="divide-y divide-neutral-200">
               {filteredAppointments.map((appointment) => (
-                <div key={appointment._id} className="p-6 hover:bg-neutral-50 transition-all duration-200">
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <div className="flex items-start space-x-4">
+                <div key={appointment._id} className="p-3 sm:p-6 hover:bg-neutral-50 transition-all duration-200">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
+                    <div className="flex items-start space-x-3 sm:space-x-4">
                       {/* Doctor Avatar */}
-                      <div className="w-14 h-14 bg-gradient-to-br from-sky-100 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <FaUserMd className="text-sky-600 text-xl" />
+                      <div className="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-sky-100 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <FaUserMd className="text-sky-600 text-lg sm:text-xl" />
                       </div>
                       
                       {/* Appointment Details */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
-                          <h3 className="text-lg font-semibold text-gray-800 truncate">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                          <h3 className="text-base sm:text-lg font-semibold text-gray-800 truncate">
                             Dr. {appointment.doctor?.firstName} {appointment.doctor?.lastName}
                           </h3>
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(appointment.status)} w-fit`}>
+                          <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(appointment.status)} w-fit`}>
                             {getStatusText(appointment.status)}
                           </span>
                         </div>
                         
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm text-gray-600 mb-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 text-xs sm:text-sm text-gray-600 mb-2">
                           <div className="flex items-center gap-2">
                             <FaUserMd className="text-sky-500 flex-shrink-0" />
                             <span className="truncate">{appointment.doctor?.specialty || 'Médecin généraliste'}</span>
@@ -367,7 +367,7 @@ const PatientDemandes = () => {
                         className="btn-secondary text-sm flex items-center justify-center gap-2"
                       >
                         <FaEye />
-                        <span className="hidden sm:inline">Voir détails</span>
+                        <span className="hidden sm:inline">Voir</span>
                         <span className="sm:hidden">Détails</span>
                       </button>
 

@@ -312,24 +312,6 @@ const Doctor = () => {
                 }
               );
               if (response.status === 201) {
-                // Create notification for doctor
-                try {
-                  await axios.post("/notifications", {
-                    userId: doctor._id,
-                    title: "Nouvelle demande de consultation",
-                    message: `${decodedToken.UserInfo.fullName} souhaite prendre rendez-vous avec vous.`,
-                    type: "appointment",
-                    priority: "high",
-                    actionUrl: "/dashboard/consultations"
-                  }, {
-                    headers: {
-                      Authorization: `Bearer ${accessToken}`
-                    }
-                  });
-                } catch (notifError) {
-                  console.error("Error creating notification:", notifError);
-                }
-
                 // Show success toast
                 showSuccess("Votre demande a été envoyée avec succès!");
                 

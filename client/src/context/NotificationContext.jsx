@@ -80,7 +80,7 @@ export const NotificationProvider = ({ children }) => {
   // Mark all notifications as read
   const markAllAsRead = async () => {
     try {
-      await axios.put(`/notifications/user/${decodedToken.UserInfo.id}/read-all`, {}, {
+      await api.put(`/notifications/user/${decodedToken.UserInfo.id}/read-all`, {}, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }
@@ -232,6 +232,9 @@ export const NotificationProvider = ({ children }) => {
       }
     });
 
+    // Connect the socket
+    socket.connect();
+
     // Handle connection events
     socket.on('connect', () => {
       console.log('🔌 Socket connected:', socket.id);
@@ -248,6 +251,9 @@ export const NotificationProvider = ({ children }) => {
     // Listen for new notifications
     socket.on("new-notification", (notification) => {
       console.log("📱 New notification received:", notification);
+      console.log("📱 Current user ID:", decodedToken?.UserInfo?.id);
+      console.log("📱 Notification user ID:", notification.userId);
+      
       setNotifications(prev => [notification, ...prev]);
       if (!notification.isRead) {
         setUnreadCount(prev => prev + 1);
@@ -256,7 +262,12 @@ export const NotificationProvider = ({ children }) => {
       // Show toast for high priority notifications
       if (notification.priority === "high") {
         if (notification.type === "appointment") {
-          showInfo(`📅 ${notification.title}: ${notification.message}`);
+          // Check if it's a rejection by looking at the title
+          if (notification.title.includes("rejeté") || notification.title.includes("rejetée")) {
+            showWarning(`⚠️ ${notification.title}: ${notification.message}`);
+          } else {
+            showInfo(`📅 ${notification.title}: ${notification.message}`);
+          }
         } else if (notification.type === "approval") {
           showSuccess(`✅ ${notification.title}: ${notification.message}`);
         } else if (notification.type === "rejection") {

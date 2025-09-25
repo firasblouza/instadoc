@@ -22,17 +22,49 @@ import useAccessToken from "../../hooks/useAccessToken";
 const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsultation }) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [typingUser, setTypingUser] = useState(null);
+  const [seenStatus, setSeenStatus] = useState({});
+  const [isUserTyping, setIsUserTyping] = useState(false);
 
   const chatBox = useRef();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
   const { accessToken } = useAccessToken();
   const { showError } = useToast();
 
-  const handleInputChange = (e) => {
+  const handleInputChange = useCallback((e) => {
     setInput(e.target.value);
-  };
+    
+    // Handle typing indicator
+    if (!isUserTyping) {
+      setIsUserTyping(true);
+      socket.emit("typing", {
+        appointmentId: appointment?._id,
+        userId: client?.id,
+        userName: client?.fullName,
+        isTyping: true
+      });
+    }
+
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // Set new timeout to stop typing indicator
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsUserTyping(false);
+      socket.emit("typing", {
+        appointmentId: appointment?._id,
+        userId: client?.id,
+        userName: client?.fullName,
+        isTyping: false
+      });
+    }, 1000);
+  }, [isUserTyping, socket]);
 
   const fetchMessages = useCallback(async () => {
     if (appointment && appointment._id) {
@@ -56,19 +88,61 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
         console.log(err);
       }
     }
-  }, [appointment, accessToken]);
+  }, [appointment?._id, accessToken]);
 
+  // Socket listeners - set up once and use refs for current values
   useEffect(() => {
-    socket.on("send-message", (messageObj) => {
+    const handleMessage = (messageObj) => {
       setMessages((prevMessage) => [...prevMessage, messageObj]);
-    });
+    };
 
-    fetchMessages();
+    const handleTyping = (data) => {
+      // Use current values instead of dependencies
+      const currentAppointmentId = appointment?._id;
+      const currentClientId = client?.id;
+      
+      if (data.appointmentId === currentAppointmentId && data.userId !== currentClientId) {
+        if (data.isTyping) {
+          setTypingUser(data.userName);
+          setIsTyping(true);
+        } else {
+          setTypingUser(null);
+          setIsTyping(false);
+        }
+      }
+    };
+
+    const handleMessageSeen = (data) => {
+      const currentAppointmentId = appointment?._id;
+      
+      if (data.appointmentId === currentAppointmentId) {
+        setSeenStatus(prev => ({
+          ...prev,
+          [data.messageId]: {
+            seenBy: data.seenBy,
+            seenAt: data.seenAt
+          }
+        }));
+      }
+    };
+
+    socket.on("send-message", handleMessage);
+    socket.on("typing", handleTyping);
+    socket.on("message-seen", handleMessageSeen);
 
     return () => {
-      socket.off("send-message");
+      socket.off("send-message", handleMessage);
+      socket.off("typing", handleTyping);
+      socket.off("message-seen", handleMessageSeen);
     };
-  }, [socket, fetchMessages]);
+  }, [socket]); // Only depend on socket, not appointment or client
+
+  // Fetch messages only when appointment changes
+  useEffect(() => {
+    if (appointment && appointment._id) {
+      fetchMessages();
+    }
+  }, [appointment?._id, fetchMessages]);
 
   useEffect(() => {
     // Check if appointment.messages is defined
@@ -90,7 +164,7 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
     };
   }, [appointment]);
 
-  const sendMessage = async () => {
+  const sendMessage = useCallback(async () => {
     if (input && input !== "") {
       try {
         const messageObj = {
@@ -98,11 +172,24 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
           senderName: client.fullName,
           role: client.role,
           content: input.trim(),
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          messageId: Date.now().toString() // Add unique ID for seen tracking
         };
         setMessages((prevMessages) => [...prevMessages, messageObj]);
         socket.emit("send-message", messageObj, appointment._id);
         setInput("");
+
+        // Stop typing indicator when sending message
+        setIsUserTyping(false);
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+        socket.emit("typing", {
+          appointmentId: appointment._id,
+          userId: client.id,
+          userName: client.fullName,
+          isTyping: false
+        });
 
         const send = await axios.put(
           `/appointments/message/${appointment._id}`,
@@ -122,9 +209,9 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
     } else {
       showError("Le message ne peut pas être vide");
     }
-  };
+  }, [input, client, socket, appointment._id, accessToken, showError]);
   
-  const handleFileUpload = async (e) => {
+  const handleFileUpload = useCallback(async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -164,7 +251,19 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
       console.error("File upload failed", error);
       showError("Erreur lors de l'envoi du fichier");
     }
-  };
+  }, [appointment._id, accessToken, client, socket, showError]);
+
+  // Mark messages as seen when they come into view
+  const markMessageAsSeen = useCallback((messageId) => {
+    if (messageId && !seenStatus[messageId]) {
+      socket.emit("message-seen", {
+        appointmentId: appointment._id,
+        messageId: messageId,
+        seenBy: client.id,
+        seenAt: new Date().toISOString()
+      });
+    }
+  }, [socket, appointment._id, client.id, seenStatus]);
 
   useEffect(() => {
     // Scroll the chatbox to the bottom on component load
@@ -174,12 +273,23 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
     }
   }, [messages]);
 
+  // Cleanup typing timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const { API_URL } = useContext(AuthContext);
   const IMG_URL = (filename) => getImageURL(filename);
   const IMG_Placeholder = getImageURL("imagePlaceholder.png");
   
   const MessageBubble = ({ msg, isMine, party }) => {
     const partyImage = party?.profileImage ? IMG_URL(party.profileImage) : IMG_Placeholder;
+    const messageId = msg.messageId || msg._id;
+    const isSeen = seenStatus[messageId];
     
     const renderContent = () => {
       switch (msg.fileType) {
@@ -199,10 +309,31 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
 
     return (
       <div className={`flex items-start gap-3 ${isMine ? "flex-row-reverse" : ""}`}>
-        <img src={partyImage} alt={party?.firstName} className="w-8 h-8 rounded-full object-cover" />
+        <img 
+          src={partyImage} 
+          alt={party?.firstName} 
+          className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+          onLoad={() => {
+            // Mark message as seen when image loads
+            if (isMine && messageId) {
+              markMessageAsSeen(messageId);
+            }
+          }}
+        />
         <div className={`p-3 rounded-2xl ${isMine ? "bg-primary-500 text-white rounded-br-none" : "bg-white text-neutral-800 rounded-bl-none shadow-sm"}`}>
           {renderContent()}
-          <p className="text-xs opacity-70 mt-1 text-right">{new Date(msg.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
+          <div className="flex items-center justify-between mt-1">
+            <p className="text-xs opacity-70">{new Date(msg.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
+            {isMine && (
+              <div className="flex items-center gap-1">
+                {isSeen ? (
+                  <span className="text-xs opacity-70">✓✓</span>
+                ) : (
+                  <span className="text-xs opacity-50">✓</span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -214,7 +345,9 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
       fileUrl: PropTypes.string,
       fileName: PropTypes.string,
       content: PropTypes.string,
-      createdAt: PropTypes.string.isRequired
+      createdAt: PropTypes.string.isRequired,
+      messageId: PropTypes.string,
+      _id: PropTypes.string
     }).isRequired,
     isMine: PropTypes.bool.isRequired,
     party: PropTypes.shape({
@@ -271,6 +404,27 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
           const party = isMine ? client : (client.role === 'doctor' ? appointment.patient : appointment.doctor);
           return <MessageBubble key={index} msg={message} isMine={isMine} party={party} />;
         })}
+        
+        {/* Typing Indicator */}
+        {isTyping && typingUser && (
+          <div className="flex items-start gap-3">
+            <img 
+              src={client.role === 'doctor' ? IMG_URL(appointment.patient?.profileImage) : IMG_URL(appointment.doctor?.profileImage)} 
+              alt={typingUser} 
+              className="w-8 h-8 rounded-full object-cover" 
+            />
+            <div className="bg-white text-neutral-800 rounded-2xl rounded-bl-none shadow-sm p-3">
+              <div className="flex items-center gap-1">
+                <span className="text-sm text-neutral-600">{typingUser} est en train d&apos;écrire</span>
+                <div className="flex gap-1">
+                  <div className="w-1 h-1 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-1 h-1 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-1 h-1 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="p-4 bg-white border-t border-neutral-200">
@@ -283,7 +437,7 @@ const Interface = ({ appointment, client, socket, handleSidebarToggle, endConsul
             type="text"
             value={input}
             placeholder="Écrire un message..."
-            className="flex-1 input-style"
+            className="flex-1 px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all outline-none"
             onChange={(e) => handleInputChange(e)}
             onKeyUp={(e) => {
               if (e.key === "Enter") {

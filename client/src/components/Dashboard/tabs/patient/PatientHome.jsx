@@ -23,6 +23,14 @@ const PatientHome = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const { accessToken, decodedToken } = useAccessToken();
+  
+  // Debug: Log the decoded token to see what fields are available
+  useEffect(() => {
+    if (decodedToken) {
+      console.log("PatientHome - Decoded token:", decodedToken);
+      console.log("PatientHome - UserInfo:", decodedToken.UserInfo);
+    }
+  }, [decodedToken]);
 
   const fetchPatientData = useCallback(async () => {
     try {
@@ -219,8 +227,8 @@ const PatientHome = () => {
   const totalAppointments = Object.values(statistics).reduce((sum, val) => sum + val, 0);
 
   return (
-    <section className="w-full bg-gradient-to-br from-primary-50 via-white to-secondary-50 p-2 sm:p-4">
-      <div className="max-w-7xl mx-auto">
+    <section className="w-full bg-gradient-to-br from-primary-50 via-white to-secondary-50 p-1 sm:p-4">
+      <div className="max-w-6xl mx-auto px-2 sm:px-4">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
           <div className="inline-flex items-center px-3 sm:px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sky-600 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
@@ -230,7 +238,7 @@ const PatientHome = () => {
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900 mb-2">
             Bonjour{' '}
             <span className="bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
-              {decodedToken?.UserInfo?.lastName || 'Patient'}
+              {decodedToken?.UserInfo?.fullName || 'Patient'}
             </span>{' '}
             👋
           </h1>

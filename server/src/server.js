@@ -3,6 +3,7 @@ const PORT = process.env.PORT;
 const IO_PORT = process.env.IO_PORT || 3000;
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 const app = express();
 const dbConnect = require("./config/db");
 const mongoose = require("mongoose");
@@ -29,9 +30,22 @@ io.use((socket, next) => {
     socket.apptId = apptId;
   }
   
-  if (userId) {
-    socket.userId = userId;
-    socket.join(`user_${userId}`); // Join user-specific room for notifications
+  if (userId && token) {
+    try {
+      // Verify JWT token
+      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+      if (decoded.UserInfo.id === userId) {
+        socket.userId = userId;
+        socket.join(`user_${userId}`); // Join user-specific room for notifications
+        console.log(`✅ User ${userId} authenticated and joined room user_${userId}`);
+      } else {
+        console.log(`❌ User ID mismatch in socket auth`);
+        return next(new Error('Authentication failed'));
+      }
+    } catch (err) {
+      console.log(`❌ Invalid token in socket auth:`, err.message);
+      return next(new Error('Authentication failed'));
+    }
   }
   
   next();
@@ -40,9 +54,14 @@ io.use((socket, next) => {
 // IO Connection
 io.on("connection", (socket) => {
   console.log(`Client ${socket.id} connected to room ${socket.apptId}`);
+  console.log(`Socket userId: ${socket.userId}`);
   
   if (socket.apptId) {
     socket.join(socket.apptId);
+  }
+  
+  if (socket.userId) {
+    console.log(`✅ User ${socket.userId} connected and in room user_${socket.userId}`);
   }
   
   socket.on("add-note", (updatedNotes, id) => {
@@ -61,8 +80,23 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("typing", (data) => {
+    if (data.appointmentId) {
+      socket.to(data.appointmentId).emit("typing", data);
+    }
+  });
+
+  socket.on("message-seen", (data) => {
+    if (data.appointmentId) {
+      socket.to(data.appointmentId).emit("message-seen", data);
+    }
+  });
+
   socket.on("disconnect", () => {
     console.log(`Client ${socket.id} disconnected`);
+    if (socket.userId) {
+      console.log(`❌ User ${socket.userId} disconnected from room user_${socket.userId}`);
+    }
   });
 
   socket.on("error", (error) => {

@@ -262,27 +262,27 @@ const ManageLabs = () => {
   }
 
   return (
-    <section className="w-full bg-gradient-to-br from-primary-50 via-white to-secondary-50 p-4">
-      <div className="max-w-7xl mx-auto">
+    <section className="w-full bg-gradient-to-br from-primary-50 via-white to-secondary-50 p-1 sm:p-4">
+      <div className="max-w-6xl mx-auto px-2 sm:px-4">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sky-600 text-sm font-medium mb-4">
-            <FaFlask className="mr-2" />
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="inline-flex items-center px-3 sm:px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sky-600 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
+            <FaFlask className="mr-2 text-sm" />
             Gestion des Laboratoires
           </div>
-          <h1 className="heading-1 text-neutral-900 mb-2">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900 mb-2">
             Gestion des{' '}
             <span className="bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
               laboratoires
             </span>
           </h1>
-          <p className="body-large text-neutral-600 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-neutral-600 max-w-2xl mx-auto px-4">
             Gérez les laboratoires partenaires de la plateforme
           </p>
         </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8">
           <div className="card-hover border-l-4 border-sky-500">
             <div className="card-body">
               <div className="flex items-center justify-between">
@@ -321,13 +321,13 @@ const ManageLabs = () => {
         </div>
 
         {/* Search and Actions */}
-        <div className="card mb-6">
-          <div className="card-body">
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-              <div className="relative flex-1 max-w-md">
+        <div className="card mb-4 sm:mb-6">
+          <div className="card-body p-2 sm:p-4">
+            <div className="flex flex-col gap-3 sm:gap-4">
+              <div className="relative w-full">
                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" />
-              <input
-                type="text"
+                <input
+                  type="text"
                   placeholder="Rechercher un laboratoire..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -335,10 +335,10 @@ const ManageLabs = () => {
                 />
               </div>
               
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={() => setShowAddModal(true)}
-                  className="btn-primary flex items-center gap-2"
+                  className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
                   <FaPlus />
                   Ajouter
@@ -346,7 +346,7 @@ const ManageLabs = () => {
                 
                 <button
                   onClick={fetchLabs}
-                  className="btn-secondary flex items-center gap-2"
+                  className="btn-secondary flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
                   <FaSync />
                   Actualiser
@@ -374,10 +374,10 @@ const ManageLabs = () => {
           ) : (
             <div className="divide-y divide-neutral-200">
               {filteredLabs.map((lab) => (
-                <div key={lab._id} className="p-6 hover:bg-neutral-50 transition-all duration-200">
+                <div key={lab._id} className="p-3 sm:p-6 hover:bg-neutral-50 transition-all duration-200">
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-14 h-14 rounded-xl overflow-hidden border border-neutral-200 flex-shrink-0">
+                    <div className="flex items-start space-x-3 sm:space-x-4">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden border border-neutral-200 flex-shrink-0">
                         {lab.labImage ? (
                           <img
                             src={IMG_URL(lab.labImage)}
@@ -428,7 +428,7 @@ const ManageLabs = () => {
                       </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                    <div className="flex flex-wrap gap-2 sm:gap-3">
                       <button
                         onClick={() => handleViewDetails(lab)}
                         className="btn-secondary px-4 py-2 font-medium flex items-center justify-center gap-2"

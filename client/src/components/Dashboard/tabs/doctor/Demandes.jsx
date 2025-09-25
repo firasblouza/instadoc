@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaEye, FaTrashAlt, FaCheck, FaTimes, FaCalendarAlt, FaUser, FaClock, FaFilter, FaSearch, FaEnvelope, FaUserMd } from "react-icons/fa";
+import { FaEye, FaTrashAlt, FaCheck, FaTimes, FaCalendarAlt, FaUser, FaClock, FaFilter, FaSearch, FaEnvelope, FaUserMd, FaHourglassHalf, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import axios from "../../../../api/axios";
 import useAccessToken from "../../../../hooks/useAccessToken";
 import MedicalLoader from "../../../MedicalLoader";
@@ -180,25 +180,7 @@ const DoctorDemandes = () => {
         }
       );
 
-      // Create notification for patient
-      try {
-        await axios.post("/notifications", {
-          userId: selectedAppointment.userId,
-          title: actionType === "approve" ? "Rendez-vous confirmé" : "Rendez-vous rejeté",
-          message: actionType === "approve" 
-            ? `Votre rendez-vous avec Dr. ${decodedToken.UserInfo.fullName} a été confirmé.`
-            : `Votre demande de rendez-vous avec Dr. ${decodedToken.UserInfo.fullName} a été rejetée.`,
-          type: "appointment",
-          priority: "high",
-          actionUrl: "/dashboard/consultations"
-        }, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          }
-        });
-      } catch (notifError) {
-        console.error("Error creating notification:", notifError);
-      }
+      // Notification will be created automatically by the server
 
       // Show toast notification
       if (actionType === "approve") {
@@ -253,95 +235,122 @@ const DoctorDemandes = () => {
   }
 
   return (
-    <section className="w-full bg-gradient-to-br from-primary-50 via-white to-secondary-50 p-4">
-      <div className="max-w-7xl mx-auto">
+    <section className="w-full bg-gradient-to-br from-primary-50 via-white to-secondary-50 p-2 sm:p-4">
+      <div className="max-w-4xl mx-auto px-2 sm:px-4">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sky-600 text-sm font-medium mb-4">
-            <FaUserMd className="mr-2" />
+        <div className="text-center mb-4 sm:mb-6">
+          <div className="inline-flex items-center px-3 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sky-600 text-xs font-medium mb-3">
+            <FaUserMd className="mr-2 text-sm" />
             Mes Demandes
           </div>
-          <h1 className="heading-1 text-neutral-900 mb-2">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900 mb-2">
             Gestion des{' '}
             <span className="bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
               demandes
             </span>
-        </h1>
-          <p className="body-large text-neutral-600 max-w-2xl mx-auto">
+          </h1>
+          <p className="text-xs sm:text-sm text-neutral-600 max-w-xl mx-auto px-2">
             Gérez les demandes de consultation de vos patients
-            </p>
-          </div>
+          </p>
+        </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-          <div className="card-hover border-l-4 border-sky-500">
-            <div className="card-body text-center">
-              <p className="text-2xl font-bold text-neutral-900">{statistics.total}</p>
-              <p className="text-sm text-neutral-600">Total</p>
-            </div>
-          </div>
+        {/* Statistics Overview */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <div className="card-hover border-l-4 border-orange-500">
-            <div className="card-body text-center">
-              <p className="text-2xl font-bold text-neutral-900">{statistics.pending}</p>
-              <p className="text-sm text-neutral-600">En attente</p>
+            <div className="card-body p-2 sm:p-4">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">En attente</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-900">
+                    {statistics.pending}
+                  </p>
+                </div>
+                <FaHourglassHalf className="text-orange-500 text-lg sm:text-2xl flex-shrink-0" />
+              </div>
             </div>
           </div>
+
           <div className="card-hover border-l-4 border-green-500">
-            <div className="card-body text-center">
-              <p className="text-2xl font-bold text-neutral-900">{statistics.approved}</p>
-              <p className="text-sm text-neutral-600">Approuvées</p>
+            <div className="card-body p-2 sm:p-4">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">Approuvées</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-900">
+                    {statistics.approved}
+                  </p>
+                </div>
+                <FaCheckCircle className="text-green-500 text-lg sm:text-2xl flex-shrink-0" />
+              </div>
             </div>
           </div>
+
           <div className="card-hover border-l-4 border-sky-500">
-            <div className="card-body text-center">
-              <p className="text-2xl font-bold text-neutral-900">{statistics.completed}</p>
-              <p className="text-sm text-neutral-600">Terminées</p>
+            <div className="card-body p-2 sm:p-4">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">Terminées</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-900">
+                    {statistics.completed}
+                  </p>
+                </div>
+                <FaCheckCircle className="text-sky-500 text-lg sm:text-2xl flex-shrink-0" />
+              </div>
             </div>
           </div>
+
           <div className="card-hover border-l-4 border-red-500">
-            <div className="card-body text-center">
-              <p className="text-2xl font-bold text-neutral-900">{statistics.rejected}</p>
-              <p className="text-sm text-neutral-600">Rejetées</p>
+            <div className="card-body p-2 sm:p-4">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-neutral-600">Rejetées</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-900">
+                    {statistics.rejected}
+                  </p>
+                </div>
+                <FaTimesCircle className="text-red-500 text-lg sm:text-2xl flex-shrink-0" />
+              </div>
             </div>
-          </div>
-          </div>
-
-        {/* Filters and Search */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            {/* Search */}
-            <div className="relative flex-1 max-w-md">
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Rechercher par patient ou motif..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-          </div>
-
-            {/* Status Filter */}
-            <div className="flex items-center gap-2">
-              <FaFilter className="text-gray-500" />
-              <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">Tous les statuts</option>
-                <option value="pending">En attente</option>
-                <option value="approved">Approuvées</option>
-                <option value="completed">Terminées</option>
-                <option value="rejected">Rejetées</option>
-                <option value="cancelled">Annulées</option>
-              </select>
           </div>
         </div>
-      </div>
+
+        {/* Filters and Search */}
+        <div className="card mb-4 sm:mb-6">
+          <div className="card-body p-2 sm:p-4">
+            <div className="flex flex-col gap-3 sm:gap-4">
+              {/* Search */}
+              <div className="relative w-full">
+                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" />
+                <input
+                  type="text"
+                  placeholder="Rechercher..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                />
+              </div>
+
+              {/* Status Filter */}
+              <div className="flex items-center gap-2 flex-1">
+                <FaFilter className="text-neutral-500" />
+                <select
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value)}
+                  className="flex-1 px-3 sm:px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all bg-white text-sm"
+                >
+                  <option value="all">Tous</option>
+                  <option value="pending">En attente</option>
+                  <option value="approved">Approuvées</option>
+                  <option value="completed">Terminées</option>
+                  <option value="rejected">Rejetées</option>
+                  <option value="cancelled">Annulées</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Appointments List */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="card overflow-hidden">
           {filteredAppointments.length === 0 ? (
             <div className="text-center py-12">
               <FaCalendarAlt className="text-gray-300 text-6xl mx-auto mb-4" />
@@ -354,81 +363,82 @@ const DoctorDemandes = () => {
                   : "Essayez de modifier vos filtres de recherche"
                 }
               </p>
-                        </div>
+            </div>
           ) : (
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-neutral-200">
               {filteredAppointments.map((appointment) => (
-                <div key={appointment._id} className="p-6 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
+                <div key={appointment._id} className="p-3 sm:p-6 hover:bg-neutral-50 transition-all duration-200">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
+                    <div className="flex items-start space-x-3 sm:space-x-4">
                       {/* Patient Avatar */}
-                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                        <FaUser className="text-blue-600 text-xl" />
-                        </div>
+                      <div className="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-sky-100 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <FaUser className="text-sky-600 text-lg sm:text-xl" />
+                      </div>
                       
                       {/* Appointment Details */}
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-800">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                          <h3 className="text-base sm:text-lg font-semibold text-gray-800 truncate">
                             {appointment.patient?.firstName} {appointment.patient?.lastName}
                           </h3>
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(appointment.status)}`}>
+                          <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(appointment.status)} w-fit`}>
                             {getStatusText(appointment.status)}
                           </span>
                         </div>
                         
-                        <div className="flex items-center gap-6 text-sm text-gray-600 mb-2">
-                          <div className="flex items-center gap-1">
-                            <FaEnvelope className="text-gray-400" />
-                            <span>{appointment.patient?.email}</span>
-                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 text-xs sm:text-sm text-gray-600 mb-2">
+                          <div className="flex items-center gap-2">
+                            <FaEnvelope className="text-sky-500 flex-shrink-0" />
+                            <span className="truncate">{appointment.patient?.email}</span>
+                          </div>
                           
-                          <div className="flex items-center gap-1">
-                            <FaCalendarAlt className="text-gray-400" />
-                            <span>
-                              {formatDate(appointment.startDateTime || appointment.date)}
-                            </span>
-                        </div>
+                          <div className="flex items-center gap-2">
+                            <FaCalendarAlt className="text-sky-500 flex-shrink-0" />
+                            <span>{formatDate(appointment.startDateTime || appointment.date)}</span>
+                          </div>
                           
                           {appointment.startDateTime && (
-                            <div className="flex items-center gap-1">
-                              <FaClock className="text-gray-400" />
+                            <div className="flex items-center gap-2">
+                              <FaClock className="text-sky-500 flex-shrink-0" />
                               <span>{formatTime(appointment.startDateTime)}</span>
-                    </div>
-                  )}
-                </div>
+                            </div>
+                          )}
+                        </div>
                         
-                        <p className="text-sm text-gray-500">
-                          <strong>Motif:</strong> {appointment.reason}
+                        <p className="text-sm text-gray-600 bg-neutral-50 p-3 rounded-lg">
+                          <strong className="text-gray-800">Motif:</strong> {appointment.reason}
                         </p>
-              </div>
-            </div>
+                      </div>
+                    </div>
 
                     {/* Actions */}
-                    <div className="flex items-center space-x-3">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                       <button
                         onClick={() => handleViewDetails(appointment)}
-                        className="btn-secondary px-4 py-2 font-medium flex items-center gap-2"
+                        className="btn-secondary text-sm flex items-center justify-center gap-2"
                       >
                         <FaEye />
-                        Détails
+                        <span className="hidden sm:inline">Voir</span>
+                        <span className="sm:hidden">Détails</span>
                       </button>
 
                       {appointment.status === "pending" && (
                         <>
                           <button
                             onClick={() => handleActionClick(appointment, "approve")}
-                            className="btn bg-green-500 text-white hover:bg-green-600 focus:ring-green-500 px-4 py-2 font-medium flex items-center gap-2"
+                            className="btn bg-green-500 text-white hover:bg-green-600 focus:ring-green-500 text-sm flex items-center justify-center gap-2"
                           >
                             <FaCheck />
-                            Approuver
+                            <span className="hidden sm:inline">Approuver</span>
+                            <span className="sm:hidden">Approuver</span>
                           </button>
                           <button
                             onClick={() => handleActionClick(appointment, "reject")}
-                            className="btn bg-red-500 text-white hover:bg-red-600 focus:ring-red-500 px-4 py-2 font-medium flex items-center gap-2"
+                            className="btn bg-red-500 text-white hover:bg-red-600 focus:ring-red-500 text-sm flex items-center justify-center gap-2"
                           >
                             <FaTimes />
-                            Rejeter
+                            <span className="hidden sm:inline">Rejeter</span>
+                            <span className="sm:hidden">Rejeter</span>
                           </button>
                         </>
                       )}
@@ -436,19 +446,21 @@ const DoctorDemandes = () => {
                       {(appointment.status === "approved" || appointment.status === "completed") && (
                         <button
                           onClick={() => handleJoinConsultation(appointment._id)}
-                          className="btn-primary px-4 py-2 font-medium flex items-center gap-2"
+                          className="btn-primary text-sm flex items-center justify-center gap-2"
                         >
                           <FaEye />
-                          Consultation
+                          <span className="hidden sm:inline">Consultation</span>
+                          <span className="sm:hidden">Chat</span>
                         </button>
                       )}
-                      
+
                       <button
                         onClick={() => handleDeleteAppointment(appointment._id)}
-                        className="btn-secondary px-4 py-2 font-medium flex items-center gap-2"
+                        className="btn bg-red-500 text-white hover:bg-red-600 focus:ring-red-500 text-sm flex items-center justify-center gap-2"
                       >
                         <FaTrashAlt />
-                        Supprimer
+                        <span className="hidden sm:inline">Supprimer</span>
+                        <span className="sm:hidden">Supprimer</span>
                       </button>
                     </div>
                   </div>

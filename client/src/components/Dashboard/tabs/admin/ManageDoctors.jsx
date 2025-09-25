@@ -261,25 +261,7 @@ const ManageDoctors = () => {
         }
       );
 
-      // Create notification for doctor
-      try {
-        await axios.post("/notifications", {
-          userId: selectedDoctor._id,
-          title: actionType === "approve" ? "Profil approuvé" : "Profil rejeté",
-          message: actionType === "approve" 
-            ? "Félicitations! Votre profil médical a été approuvé par l'administration."
-            : "Votre profil médical nécessite des modifications. Veuillez consulter les commentaires.",
-          type: actionType === "approve" ? "approval" : "rejection",
-          priority: "high",
-          actionUrl: "/dashboard/profile"
-        }, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          }
-        });
-      } catch (notifError) {
-        console.error("Error creating notification:", notifError);
-      }
+      // Notification will be created automatically by the server
 
       // Show toast notification
       if (actionType === "approve") {
@@ -317,8 +299,8 @@ const ManageDoctors = () => {
   }
 
   return (
-    <section className="w-full bg-gradient-to-br from-primary-50 via-white to-secondary-50 p-2 sm:p-4">
-      <div className="max-w-7xl mx-auto">
+    <section className="w-full bg-gradient-to-br from-primary-50 via-white to-secondary-50 p-1 sm:p-4">
+      <div className="max-w-6xl mx-auto px-2 sm:px-4">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
           <div className="inline-flex items-center px-3 sm:px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sky-600 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
@@ -337,7 +319,7 @@ const ManageDoctors = () => {
           </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6 sm:mb-8">
           <div className="card-hover border-l-4 border-sky-500">
             <div className="card-body p-3 sm:p-4">
               <div className="flex items-center justify-between">
@@ -389,12 +371,12 @@ const ManageDoctors = () => {
 
         {/* Search and Filters */}
         <div className="card mb-4 sm:mb-6">
-          <div className="card-body p-3 sm:p-4">
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center justify-between">
-              <div className="relative flex-1 max-w-md">
+          <div className="card-body p-2 sm:p-4">
+            <div className="flex flex-col gap-3 sm:gap-4">
+              <div className="relative w-full">
                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" />
-              <input
-                type="text"
+                <input
+                  type="text"
                   placeholder="Rechercher un médecin..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -402,22 +384,24 @@ const ManageDoctors = () => {
                 />
               </div>
 
-              <div className="flex items-center gap-3">
-                <FaFilter className="text-neutral-500" />
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all bg-white"
-                >
-                  <option value="all">Tous les statuts</option>
-                  <option value="pending">En attente</option>
-                  <option value="approved">Approuvés</option>
-                  <option value="rejected">Rejetés</option>
-                </select>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <div className="flex items-center gap-2 flex-1">
+                  <FaFilter className="text-neutral-500" />
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="flex-1 px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all bg-white"
+                  >
+                    <option value="all">Tous les statuts</option>
+                    <option value="pending">En attente</option>
+                    <option value="approved">Approuvés</option>
+                    <option value="rejected">Rejetés</option>
+                  </select>
+                </div>
                 
                 <button
                   onClick={fetchDoctors}
-                  className="btn-secondary flex items-center gap-2"
+                  className="btn-secondary flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
                   <FaSync />
                   Actualiser
@@ -445,10 +429,10 @@ const ManageDoctors = () => {
           ) : (
             <div className="divide-y divide-neutral-200">
               {filteredDoctors.map((doctor) => (
-                <div key={doctor._id} className="p-6 hover:bg-neutral-50 transition-all duration-200">
+                <div key={doctor._id} className="p-3 sm:p-6 hover:bg-neutral-50 transition-all duration-200">
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-14 h-14 rounded-xl overflow-hidden border border-neutral-200 flex-shrink-0">
+                    <div className="flex items-start space-x-3 sm:space-x-4">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden border border-neutral-200 flex-shrink-0">
                         <img
                           src={doctor.profileImage ? IMG_URL(doctor.profileImage) : IMG_URL("imagePlaceholder.png")}
                           alt={`Dr. ${doctor.firstName} ${doctor.lastName}`}
@@ -457,16 +441,16 @@ const ManageDoctors = () => {
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
-                          <h3 className="text-lg font-semibold text-neutral-900 truncate">
+                        <div className="flex flex-col gap-2 mb-3">
+                          <h3 className="text-base sm:text-lg font-semibold text-neutral-900 truncate">
                             Dr. {doctor.firstName} {doctor.lastName}
                           </h3>
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(doctor.verifiedStatus)} w-fit`}>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(doctor.verifiedStatus)} w-fit`}>
                             {getStatusText(doctor.verifiedStatus)}
                           </span>
                         </div>
                         
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm text-neutral-600 mb-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm text-neutral-600 mb-2">
                           <div className="flex items-center gap-2">
                             <FaUserMd className="text-sky-500 flex-shrink-0" />
                             <span className="truncate">{doctor.specialty || 'Médecin généraliste'}</span>
@@ -491,7 +475,7 @@ const ManageDoctors = () => {
                 </div>
               </div>
 
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                    <div className="flex flex-wrap gap-2 sm:gap-3">
                       <button
                         onClick={() => handleViewDetails(doctor)}
                         className="btn-secondary px-4 py-2 font-medium flex items-center justify-center gap-2"

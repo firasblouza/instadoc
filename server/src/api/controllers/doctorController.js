@@ -1,6 +1,7 @@
 const Doctor = require("../models/Doctor");
 const Appointment = require("../models/Appointment");
 const Rating = require("../models/Rating");
+const Notification = require("../models/Notification");
 const bcrypt = require("bcrypt");
 const { request } = require("express");
 
@@ -107,7 +108,29 @@ const approveDoctorById = async (req, res) => {
       verifiedStatus: "approved",
       pendingApproval: true
     }).exec();
+    
     if (doctor) {
+      // Create notification for doctor
+      try {
+        const notification = await Notification.create({
+          userId: doctor._id,
+          title: "Profil approuvé",
+          message: "Félicitations! Votre profil médical a été approuvé par l'administration.",
+          type: "approval",
+          priority: "high",
+          actionUrl: "/dashboard/profile"
+        });
+
+        // Broadcast notification via WebSocket
+        const io = req.app.get('io');
+        if (io) {
+          io.to(`user_${doctor._id}`).emit('new-notification', notification);
+          console.log(`📱 Real-time approval notification sent to doctor ${doctor._id}`);
+        }
+      } catch (notifError) {
+        console.error("Error creating approval notification:", notifError);
+      }
+
       res.status(200).json({ message: "Doctor approved successfully" });
     } else {
       res.status(404).json({ message: "Doctor not found" });
