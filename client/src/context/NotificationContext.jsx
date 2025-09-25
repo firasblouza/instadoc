@@ -1,8 +1,8 @@
 import { createContext, useState, useEffect, useCallback, useContext } from "react";
-import axios from "../api/axios";
+import { api } from "../lib/api";
 import useAccessToken from "../hooks/useAccessToken";
 import AuthContext from "./AuthContext";
-import { io } from "socket.io-client";
+import { createSocketConnection } from "../lib/socket";
 import { useToast } from "../components/Notifications/ToastContainer";
 
 const NotificationContext = createContext({});
@@ -27,7 +27,7 @@ export const NotificationProvider = ({ children }) => {
       if (showLoadingState) {
         setLoading(true);
       }
-      const response = await axios.get(`/notifications/user/${decodedToken.UserInfo.id}`, {
+      const response = await api.get(`/notifications/user/${decodedToken.UserInfo.id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }
@@ -53,7 +53,7 @@ export const NotificationProvider = ({ children }) => {
   // Mark notification as read
   const markAsRead = async (notificationId) => {
     try {
-      await axios.put(`/notifications/${notificationId}/read`, {}, {
+      await api.put(`/notifications/${notificationId}/read`, {}, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }
@@ -107,7 +107,7 @@ export const NotificationProvider = ({ children }) => {
   // Delete notification
   const deleteNotification = async (notificationId) => {
     try {
-      await axios.delete(`/notifications/${notificationId}`, {
+      await api.delete(`/notifications/${notificationId}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }
@@ -225,14 +225,11 @@ export const NotificationProvider = ({ children }) => {
   useEffect(() => {
     if (!accessToken || !decodedToken?.UserInfo?.id || !isInitialized) return;
 
-    const socket = io(API_URL, {
+    const socket = createSocketConnection({
       auth: {
         token: accessToken,
         userId: decodedToken.UserInfo.id
-      },
-      transports: ['websocket', 'polling'],
-      timeout: 20000,
-      forceNew: true
+      }
     });
 
     // Handle connection events

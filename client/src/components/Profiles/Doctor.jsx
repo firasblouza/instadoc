@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useContext, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import { 
@@ -18,6 +18,7 @@ import {
 } from "react-icons/fa";
 import { capitalize } from "../../utils/Capitalize";
 import { useToast } from "../Notifications/ToastContainer";
+import { getImageURL } from "../../lib/constants";
 
 import ImagePreview from "../Dashboard/UI/ImagePreview";
 import Modal from "../Dashboard/UI/Modal";
@@ -26,7 +27,6 @@ import axios from "../../api/axios";
 import useAccessToken from "../../hooks/useAccessToken";
 import StarRating from "./StarRating";
 import AvgRating from "./AvgRating";
-import AuthContext from "../../context/AuthContext";
 import MedicalLoader from "../MedicalLoader";
 
 const Doctor = () => {
@@ -70,9 +70,9 @@ const Doctor = () => {
 
   const { accessToken, decodedToken } = useAccessToken();
 
-  const { API_URL } = useContext(AuthContext);
-  const IMG_URL = `${API_URL}/uploads/`;
-  const IMG_Placeholder = `${API_URL}/imagePlaceholder.png`;
+  // Use centralized image URL helper
+  const IMG_URL = (filename) => getImageURL(filename);
+  const IMG_Placeholder = "/imagePlaceholder.png";
 
   const calculateAverageRating = (ratings) => {
     if (ratings.length === 0) {
@@ -422,7 +422,7 @@ const Doctor = () => {
               <div className="flex items-center gap-4">
                 <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white/20">
                   <img
-                    src={doctor.profileImage ? `${IMG_URL}${doctor.profileImage}` : IMG_Placeholder}
+                    src={doctor.profileImage ? IMG_URL(doctor.profileImage) : IMG_Placeholder}
                     alt={`Dr. ${doctor.firstName} ${doctor.lastName}`}
                     className="w-full h-full object-cover"
                   />

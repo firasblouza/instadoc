@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import axios from '../api/axios';
+import { createContext, useContext, useState, useCallback } from 'react';
+import { api } from '../lib/api';
 import useAccessToken from '../hooks/useAccessToken';
 
 const SEOContext = createContext();
@@ -8,12 +8,11 @@ export const SEOProvider = ({ children }) => {
   const [seoData, setSeoData] = useState({});
   const [loading, setLoading] = useState(true);
   const [seoCache, setSeoCache] = useState({}); // Cache to prevent repeated API calls
-  const { accessToken } = useAccessToken();
 
   const fetchPageSEO = useCallback(async (pageName) => {
     try {
       console.log(`🔍 Fetching SEO for page: ${pageName}`);
-      const response = await axios.get(`/seo/page/${pageName}`);
+      const response = await api.get(`/seo/page/${pageName}`);
       const seoData = response.data.data;
       
       console.log(`📊 SEO data for ${pageName}:`, seoData);

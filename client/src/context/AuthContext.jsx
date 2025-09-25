@@ -72,7 +72,8 @@ export const AuthProvider = ({ children }) => {
   const LOGIN_URL = "/login";
   const REGISTER_URL = "/register";
 
-  const API_URL = "http://localhost:3001";
+  // Use environment-based API URL
+  const API_URL = import.meta.env.PROD ? window.location.origin : "http://localhost:3001";
 
   // Section Refs
 

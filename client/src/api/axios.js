@@ -1,14 +1,9 @@
-import axios from "axios";
-const BASE_URL = "http://localhost:3001";
-// const BASE_URL = "https://instadoc-api.onrender.com";
-export default axios.create({
-  baseURL: BASE_URL
-});
+// Legacy axios configuration - DEPRECATED
+// Use src/lib/api.js instead for new code
+import { api } from "../lib/api.js";
 
-export const axiosPrivate = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-    withCredentials: true
-  }
-});
+// Export the centralized API instance for backward compatibility
+export default api;
+
+// Legacy axiosPrivate - now just an alias to the main API
+export const axiosPrivate = api;
