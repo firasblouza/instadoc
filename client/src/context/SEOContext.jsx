@@ -11,14 +11,12 @@ export const SEOProvider = ({ children }) => {
   const { accessToken } = useAccessToken();
 
   const fetchPageSEO = useCallback(async (pageName) => {
-    // Check cache first
-    if (seoCache[pageName]) {
-      return seoCache[pageName];
-    }
-
     try {
+      console.log(`🔍 Fetching SEO for page: ${pageName}`);
       const response = await axios.get(`/seo/page/${pageName}`);
       const seoData = response.data.data;
+      
+      console.log(`📊 SEO data for ${pageName}:`, seoData);
       
       // Cache the result
       if (seoData) {
@@ -30,7 +28,7 @@ export const SEOProvider = ({ children }) => {
       console.error(`Error fetching SEO for page ${pageName}:`, error);
       return null;
     }
-  }, [seoCache]);
+  }, []);
 
   const updatePageTitle = (title) => {
     if (title) {
@@ -112,6 +110,10 @@ export const SEOProvider = ({ children }) => {
   const setPageSEO = useCallback(async (pageName, customTitle = null, customDescription = null, customImage = null) => {
     try {
       setLoading(true);
+      console.log(`🎯 Setting SEO for page: ${pageName}`);
+      console.log(`🎯 Custom title: ${customTitle}`);
+      console.log(`🎯 Custom description: ${customDescription}`);
+      
       const seoData = await fetchPageSEO(pageName);
       
       if (seoData) {
@@ -122,15 +124,25 @@ export const SEOProvider = ({ children }) => {
           image: customImage || seoData.image
         };
 
+        console.log(`🎯 Final SEO data:`, finalSeoData);
+
         // Only update if the data has actually changed
         const currentTitle = document.title;
         const currentDescription = document.querySelector('meta[name="description"]')?.getAttribute('content');
         
+        console.log(`🎯 Current title: ${currentTitle}`);
+        console.log(`🎯 Current description: ${currentDescription}`);
+        
         if (currentTitle !== finalSeoData.title || currentDescription !== finalSeoData.description) {
+          console.log(`🎯 Updating SEO data...`);
           setSeoData(finalSeoData);
           updatePageTitle(finalSeoData.title);
           updateMetaTags(finalSeoData);
+        } else {
+          console.log(`🎯 SEO data unchanged, skipping update`);
         }
+      } else {
+        console.log(`🎯 No SEO data found for page: ${pageName}`);
       }
     } catch (error) {
       console.error('Error setting page SEO:', error);
@@ -210,6 +222,11 @@ export const SEOProvider = ({ children }) => {
     document.body.insertBefore(noscript, document.body.firstChild);
   };
 
+  const clearSEOCache = useCallback(() => {
+    console.log('🧹 Clearing SEO cache');
+    setSeoCache({});
+  }, []);
+
   const value = {
     seoData,
     loading,
@@ -219,7 +236,8 @@ export const SEOProvider = ({ children }) => {
     addGoogleAnalytics,
     addGoogleTagManager,
     updatePageTitle,
-    updateMetaTags
+    updateMetaTags,
+    clearSEOCache
   };
 
   return (

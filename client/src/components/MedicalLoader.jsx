@@ -3,15 +3,15 @@ import { FaUserMd, FaHeartbeat, FaStethoscope } from "react-icons/fa";
 /* eslint-disable react/prop-types */
 const MedicalLoader = ({ type = "heartbeat", message = "Chargement..." }) => {
   const HeartbeatLoader = () => (
-    <div className="flex flex-col items-center space-y-6">
+    <div className="flex flex-col bg-white items-center space-y-6">
       <div className="relative">
         {/* Heartbeat Animation */}
-        <div className="flex items-center bg-neutral-200 justify-center">
+        <div className="flex items-center justify-center">
           <FaHeartbeat className="text-6xl text-red-500 animate-pulse" />
         </div>
         
         {/* Heartbeat Line */}
-        <div className="mt-4 w-32 h-1 bg-neutral-200 rounded-full overflow-hidden">
+        <div className="mt-4 w-32 h-1  rounded-full overflow-hidden">
           <div className="h-full bg-gradient-to-r from-red-500 to-pink-500 rounded-full animate-pulse heartbeat-line"></div>
         </div>
       </div>
@@ -72,7 +72,7 @@ const MedicalLoader = ({ type = "heartbeat", message = "Chargement..." }) => {
   );
 
   const MedicalPulseLoader = () => (
-    <div className="flex flex-col items-center space-y-6">
+    <div className="flex flex-colitems-center space-y-6">
       <div className="relative flex items-center justify-center">
         {/* Central Medical Icon */}
         <div className="w-16 h-16 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center z-10">

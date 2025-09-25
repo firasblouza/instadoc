@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback, useContext } from "react";
-import { FaSearch, FaGlobe, FaImage, FaCode, FaChartLine, FaCog, FaUpload, FaEye, FaCheck, FaTimes, FaInfoCircle, FaExternalLinkAlt, FaFileAlt, FaRss, FaRobot } from "react-icons/fa";
+import { FaSearch, FaGlobe, FaCode, FaChartLine, FaUpload, FaEye, FaTimes, FaInfoCircle, FaExternalLinkAlt, FaFileAlt, FaRss, FaRobot } from "react-icons/fa";
 import axios from "../../../../api/axios";
 import useAccessToken from "../../../../hooks/useAccessToken";
 import AuthContext from "../../../../context/AuthContext";
 import MedicalLoader from "../../../MedicalLoader";
 import LoadingButton from "../../../LoadingButton";
 import { useToast } from "../../../Notifications/ToastContainer";
+import { useSEO } from "../../../../context/SEOContext";
 
 const ManageSEO = () => {
   const effectRan = useRef(false);
@@ -18,6 +19,7 @@ const ManageSEO = () => {
 
   const { accessToken } = useAccessToken();
   const { showSuccess, showError } = useToast();
+  const { clearSEOCache } = useSEO();
   const { API_URL } = useContext(AuthContext);
   const IMG_URL = `${API_URL}/uploads/`;
 
@@ -138,6 +140,7 @@ const ManageSEO = () => {
       });
 
       setSelectedFiles({});
+      clearSEOCache(); // Clear the SEO cache so fresh data is fetched
       await fetchSEOSettings();
       showSuccess("Paramètres SEO mis à jour avec succès");
     } catch (error) {
