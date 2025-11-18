@@ -124,7 +124,7 @@ const Hero = () => {
                         <FaUserMd className="text-white text-xl" />
                       </div>
                       <div>
-                        <h3 className="text-white font-semibold">Dr. Firas Blouza</h3>
+                        <h3 className="text-white font-semibold">Dr. Tasnim Benslema</h3>
                         <p className="text-white/70 text-sm">Médecin généraliste</p>
                       </div>
                     </div>

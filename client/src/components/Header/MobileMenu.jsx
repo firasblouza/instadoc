@@ -66,7 +66,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
           <div className="flex items-center">
             <img 
               src={logo} 
-              alt="InstaDoc Logo" 
+              alt="InstaCure Logo" 
               className="h-10"
             />
           </div>

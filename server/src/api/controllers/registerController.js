@@ -66,7 +66,7 @@ const handleSignup = async (req, res) => {
       try {
         await Notification.create({
           userId: newDoctor._id,
-          title: "Bienvenue sur InstaDoc",
+          title: "Bienvenue sur InstaCure",
           message: "Votre compte médecin a été créé avec succès. Votre profil est en cours de vérification.",
           type: "welcome",
           priority: "medium",
@@ -112,7 +112,7 @@ const handleSignup = async (req, res) => {
     try {
       await Notification.create({
         userId: newUser._id,
-        title: "Bienvenue sur InstaDoc",
+        title: "Bienvenue sur InstaCure",
         message: "Votre compte patient a été créé avec succès. Découvrez toutes nos fonctionnalités!",
         type: "welcome",
         priority: "medium",

@@ -195,7 +195,7 @@ const AdminHome = () => {
             </span>
           </h1>
           <p className="text-sm sm:text-base text-neutral-600 max-w-2xl mx-auto px-4">
-            Vue d&apos;ensemble et gestion de la plateforme InstaDoc
+            Vue d&apos;ensemble et gestion de la plateforme InstaCure
           </p>
         </div>
 

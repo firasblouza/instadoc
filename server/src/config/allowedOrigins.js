@@ -6,12 +6,12 @@ const allowedOrigins = [
   "http://127.0.0.1:3001","http://localhost:3001",
   "http://127.0.0.1:5173","http://localhost:5173",
   // prod (add these two)
-  "https://instadoc.tn",
-  "https://www.instadoc.tn",
+  "https://InstaCure.tn",
+  "https://www.InstaCure.tn",
   // old previews
-  "https://instadoc.onrender.com",
-  "https://instadocc.netlify.app",
-  "https://instadoc-server.vercel.app",
-  "https://instadoc.vercel.app"
+  "https://InstaCure.onrender.com",
+  "https://InstaCurec.netlify.app",
+  "https://InstaCure-server.vercel.app",
+  "https://InstaCure.vercel.app"
 ];
 module.exports = allowedOrigins;

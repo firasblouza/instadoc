@@ -328,7 +328,7 @@ const DoctorHome = () => {
           </span>
         </h1>
         <p className="body-large text-neutral-600 max-w-2xl mx-auto">
-          Voici un aperçu de votre journée sur InstaDoc
+          Voici un aperçu de votre journée sur InstaCure
         </p>
         </div>
 

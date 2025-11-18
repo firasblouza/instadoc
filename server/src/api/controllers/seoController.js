@@ -8,21 +8,21 @@ const getSEOSettings = async (req, res) => {
     // If no SEO settings exist, create default ones
     if (!seoSettings) {
       seoSettings = new SEO({
-        siteTitle: "InstaDoc - Plateforme de Télémédecine",
-        siteDescription: "InstaDoc est votre plateforme de télémédecine moderne. Consultez des médecins qualifiés, gérez vos médicaments et laboratoires en ligne.",
+        siteTitle: "InstaCure - Plateforme de Télémédecine",
+        siteDescription: "InstaCure est votre plateforme de télémédecine moderne. Consultez des médecins qualifiés, gérez vos médicaments et laboratoires en ligne.",
         siteKeywords: ["télémédecine", "médecins en ligne", "consultation médicale", "santé digitale"],
-        homeTitle: "InstaDoc - Consultation Médicale en Ligne",
+        homeTitle: "InstaCure - Consultation Médicale en Ligne",
         homeDescription: "Consultez des médecins qualifiés depuis chez vous. Plateforme de télémédecine sécurisée et moderne.",
-        doctorsTitle: "Médecins Qualifiés - InstaDoc",
+        doctorsTitle: "Médecins Qualifiés - InstaCure",
         doctorsDescription: "Découvrez notre équipe de médecins qualifiés et spécialisés. Consultation en ligne sécurisée.",
-        medicinesTitle: "Catalogue des Médicaments - InstaDoc",
+        medicinesTitle: "Catalogue des Médicaments - InstaCure",
         medicinesDescription: "Informations détaillées sur les médicaments. Prix et descriptions pour tous les traitements.",
-        labsTitle: "Laboratoires Partenaires - InstaDoc",
+        labsTitle: "Laboratoires Partenaires - InstaCure",
         labsDescription: "Trouvez les laboratoires partenaires près de chez vous. Analyses et examens médicaux.",
         blogTitle: "Blog Médical - Conseils et Actualités",
         blogDescription: "Articles médicaux rédigés par des professionnels. Conseils santé et actualités médicales.",
-        contactTitle: "Contact - InstaDoc",
-        contactDescription: "Contactez notre équipe InstaDoc. Support client et assistance technique.",
+        contactTitle: "Contact - InstaCure",
+        contactDescription: "Contactez notre équipe InstaCure. Support client et assistance technique.",
         isActive: true
       });
       await seoSettings.save();
@@ -364,21 +364,21 @@ const resetSEOSettings = async (req, res) => {
     
     // Create new default settings
     const defaultSEO = new SEO({
-      siteTitle: "InstaDoc - Plateforme de Télémédecine",
-      siteDescription: "InstaDoc est votre plateforme de télémédecine moderne. Consultez des médecins qualifiés, gérez vos médicaments et laboratoires en ligne.",
+      siteTitle: "InstaCure - Plateforme de Télémédecine",
+      siteDescription: "InstaCure est votre plateforme de télémédecine moderne. Consultez des médecins qualifiés, gérez vos médicaments et laboratoires en ligne.",
       siteKeywords: ["télémédecine", "médecins en ligne", "consultation médicale", "santé digitale"],
-      homeTitle: "InstaDoc - Consultation Médicale en Ligne",
+      homeTitle: "InstaCure - Consultation Médicale en Ligne",
       homeDescription: "Consultez des médecins qualifiés depuis chez vous. Plateforme de télémédecine sécurisée et moderne.",
-      doctorsTitle: "Médecins Qualifiés - InstaDoc",
+      doctorsTitle: "Médecins Qualifiés - InstaCure",
       doctorsDescription: "Découvrez notre équipe de médecins qualifiés et spécialisés. Consultation en ligne sécurisée.",
-      medicinesTitle: "Catalogue des Médicaments - InstaDoc",
+      medicinesTitle: "Catalogue des Médicaments - InstaCure",
       medicinesDescription: "Informations détaillées sur les médicaments. Prix et descriptions pour tous les traitements.",
-      labsTitle: "Laboratoires Partenaires - InstaDoc",
+      labsTitle: "Laboratoires Partenaires - InstaCure",
       labsDescription: "Trouvez les laboratoires partenaires près de chez vous. Analyses et examens médicaux.",
       blogTitle: "Blog Médical - Conseils et Actualités",
       blogDescription: "Articles médicaux rédigés par des professionnels. Conseils santé et actualités médicales.",
-      contactTitle: "Contact - InstaDoc",
-      contactDescription: "Contactez notre équipe InstaDoc. Support client et assistance technique.",
+      contactTitle: "Contact - InstaCure",
+      contactDescription: "Contactez notre équipe InstaCure. Support client et assistance technique.",
       isActive: true
     });
     

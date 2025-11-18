@@ -44,7 +44,7 @@ const Signup = () => {
             {/* Mobile Header */}
             <div className="text-center mb-8">
               <div className="flex items-center justify-center mb-6">
-                <img src={logo} alt="InstaDoc" className="h-16" />
+                <img src={logo} alt="InstaCure" className="h-16" />
               </div>
               <h1 className="heading-2 text-neutral-800 mb-2">Créer un compte</h1>
               <p className="text-neutral-600">{getStepTitle()}</p>
@@ -111,7 +111,7 @@ const Signup = () => {
                   <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
                     Commencez avec{' '}
                     <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
-                      InstaDoc
+                      InstaCure
                     </span>
                   </h2>
                   
@@ -168,7 +168,7 @@ const Signup = () => {
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-secondary-500 to-primary-500 flex items-center justify-center">
                       <FaUser className="text-white text-lg" />
                     </div>
-                    <img src={logo} alt="InstaDoc" className="h-10" />
+                    <img src={logo} alt="InstaCure" className="h-10" />
                   </div>
                   <h1 className="text-3xl font-bold text-neutral-800 mb-2">Inscription</h1>
                   <p className="text-base text-neutral-600">{getStepTitle()}</p>

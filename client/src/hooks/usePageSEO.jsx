@@ -19,7 +19,7 @@ const usePageSEO = (pageName, customTitle = null, customDescription = null, cust
       const organizationSchema = {
         "@context": "https://schema.org",
         "@type": "Organization",
-        "name": "InstaDoc",
+        "name": "InstaCure",
         "url": window.location.origin,
         "logo": `${window.location.origin}/uploads/logo.png`,
         "description": "Plateforme de télémédecine moderne",

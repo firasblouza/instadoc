@@ -64,7 +64,7 @@ const Mission = () => {
                 </span>
               </h2>
               <p className="body-large text-white/90">
-                Notre mission à InstaDoc est de transformer l'accès aux soins grâce à une plateforme 
+                Notre mission à InstaCure est de transformer l'accès aux soins grâce à une plateforme 
                 en ligne innovante et sûre. Nous visons à connecter les patients avec des professionnels 
                 de la santé qualifiés pour des consultations médicales pratiques et adaptées, améliorant 
                 ainsi la santé et la qualité de vie de nos utilisateurs.

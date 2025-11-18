@@ -81,8 +81,8 @@ const Contact = () => {
     {
       icon: FaEnvelope,
       title: "Email",
-      content: "contact@instadoc.com",
-      action: () => window.open('mailto:contact@instadoc.com', '_blank')
+      content: "contact@InstaCure.com",
+      action: () => window.open('mailto:contact@InstaCure.com', '_blank')
     },
     {
       icon: FaClock,
@@ -336,32 +336,7 @@ const Contact = () => {
         </div>
       </section>
 
-      {/* B-Tech Branding Section */}
-      <section className="py-8 bg-neutral-100 border-t border-neutral-200">
-        <div className="container">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-3 text-neutral-500">
-              <span>Powered by</span>
-              <a 
-                href="https://facebook.com/btechsolutions.io" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="hover:scale-110 transition-transform duration-200"
-                title="B-Tech Solutions"
-              >
-                <img 
-                  src={btechIcon} 
-                  alt="B-Tech Solutions" 
-                  className="w-8 h-8 opacity-80 hover:opacity-100 transition-opacity duration-200"
-                />
-              </a>
-            </div>
-            <p className="text-xs text-neutral-400 mt-2">
-              Développement et maintenance assurés par B-Tech Solutions
-            </p>
-          </div>
-        </div>
-      </section>
+      
     </div>
   );
 };

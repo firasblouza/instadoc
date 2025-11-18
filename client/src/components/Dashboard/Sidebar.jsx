@@ -95,12 +95,12 @@ const Sidebar = ({ isSidebarOpen, setSidebarOpen }) => {
         <div className="flex items-center justify-center p-4 border-b border-neutral-800 h-20">
           {/* Expanded State: Full Logo */}
           <div className={`transition-all duration-300 flex justify-center ${isSidebarOpen ? "w-40 opacity-100" : "w-0 opacity-0"}`}>
-            <img src={logo} alt="InstaDoc" className="h-12" />
+            <img src={logo} alt="InstaCure" className="h-12" />
           </div>
           
           {/* Collapsed State: B-Tech Icon */}
           <div className={`transition-all duration-300 ${isSidebarOpen ? "w-0 opacity-0" : "w-12 opacity-100"}`}>
-            <img src={btechIcon} alt="B-Tech Solutions" className="h-12" />
+            <img src={logo} alt="B-Tech Solutions" className="w-full" />
           </div>
         </div>
         
@@ -192,27 +192,7 @@ const Sidebar = ({ isSidebarOpen, setSidebarOpen }) => {
               </Link>
             );
           })}
-        </div>
-        
-        {/* B-Tech Branding */}
-        <div className={`p-4 border-t border-neutral-800`}>
-          <a
-            href="https://btech-solutions.tn" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="flex items-center gap-2"
-          >
-            <img 
-              src={btechIcon} 
-              alt="B-Tech Solutions" 
-              className="w-8 h-8 opacity-80 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0"
-            />
-            <div className={`overflow-hidden transition-all duration-300 ${isSidebarOpen ? "w-full opacity-100" : "w-0 opacity-0"}`}>
-              <p className="text-xs text-neutral-500 whitespace-nowrap">Powered by</p>
-              <p className="font-medium text-neutral-300 whitespace-nowrap">B-Tech Solutions</p>
-            </div>
-          </a>
-        </div>
+        </div>  
       </aside>
     </>
   );

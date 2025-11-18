@@ -4,6 +4,7 @@ const IO_PORT = process.env.IO_PORT || 3000;
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const path = require("path");
 const app = express();
 const dbConnect = require("./config/db");
 const mongoose = require("mongoose");
@@ -154,9 +155,29 @@ app.use("/notifications", require("./api/routes/notificationRoutes"));
 app.use("/blogs", require("./api/routes/blogRoutes"));
 app.use("/seo", require("./api/routes/seoRoutes"));
 
-app.use((req, res) => {
-  res.status(404).send("404 Not Found");
-});
+// Serve static files from React app in production
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../../client/dist")));
+  
+  // Catch all handler: send back React's index.html file for client-side routing
+  app.get("*", (req, res) => {
+    // Don't serve index.html for API routes
+    const apiRoutes = ["/register", "/login", "/refresh", "/logout", "/admin", "/doctors", 
+                      "/medicines", "/users", "/appointments", "/labs", "/ratings", 
+                      "/notifications", "/blogs", "/seo", "/uploads", "/api"];
+    const isApiRoute = apiRoutes.some(route => req.path.startsWith(route));
+    
+    if (isApiRoute) {
+      return res.status(404).json({ message: "API route not found" });
+    }
+    res.sendFile(path.join(__dirname, "../../client/dist/index.html"));
+  });
+} else {
+  // Development: return 404 for non-API routes
+  app.use((req, res) => {
+    res.status(404).send("404 Not Found");
+  });
+}
 
 mongoose.connection.once("open", () => {
   console.log("Connected to MongoDB");

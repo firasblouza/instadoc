@@ -141,7 +141,7 @@ export const NotificationProvider = ({ children }) => {
     const baseNotifications = [
       {
         _id: "1",
-        title: "Bienvenue sur InstaDoc",
+        title: "Bienvenue sur InstaCure",
         message: "Votre compte a été créé avec succès. Découvrez toutes les fonctionnalités disponibles.",
         type: "welcome",
         isRead: false,

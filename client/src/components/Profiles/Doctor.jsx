@@ -708,7 +708,7 @@ const Doctor = () => {
                       Appeler
                     </button>
             <button
-                      onClick={() => window.open(`mailto:${doctor.email}?subject=Demande d'information - InstaDoc`, '_blank')}
+                      onClick={() => window.open(`mailto:${doctor.email}?subject=Demande d'information - InstaCure`, '_blank')}
                       className="btn-secondary w-full"
             >
                       <FaEnvelope className="mr-2" />

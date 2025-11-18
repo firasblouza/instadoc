@@ -57,7 +57,7 @@ const Login = () => {
             {/* Mobile Logo & Header */}
             <div className="text-center mb-8">
               <div className="flex items-center justify-center mb-6">
-                <img src={logo} alt="InstaDoc" className="h-16" />
+                <img src={logo} alt="InstaCure" className="h-16" />
               </div>
               <h1 className="heading-2 text-neutral-800 mb-2">Bienvenue</h1>
               <p className="text-neutral-600">Connectez-vous à votre compte</p>
@@ -198,7 +198,7 @@ const Login = () => {
                     <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
                       Rejoignez{' '}
                       <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
-                        InstaDoc
+                        InstaCure
                       </span>
                     </h2>
                     
@@ -256,7 +256,7 @@ const Login = () => {
                       <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center">
                         <FaUser className="text-white text-lg" />
                       </div>
-                      <img src={logo} alt="InstaDoc" className="h-10" />
+                      <img src={logo} alt="InstaCure" className="h-10" />
                     </div>
                     <h1 className="text-3xl font-bold text-neutral-800 mb-2">Connexion</h1>
                     <p className="text-base text-neutral-600">Accédez à votre espace personnel</p>

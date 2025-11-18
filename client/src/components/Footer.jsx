@@ -82,7 +82,7 @@ const Footer = () => {
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center">
                   <FaUserMd className="text-white text-xl" />
                 </div>
-                <h3 className="text-2xl font-bold">InstaDoc</h3>
+                <h3 className="text-2xl font-bold">InstaCure</h3>
               </div>
               <p className="text-neutral-300 leading-relaxed mb-6">
                 Votre plateforme de télémédecine de confiance. Connectez-vous instantanément 
@@ -163,10 +163,10 @@ const Footer = () => {
                 <div className="flex items-center gap-3">
                   <FaEnvelope className="text-primary-400 flex-shrink-0" />
                   <a 
-                    href="mailto:contact@instadoc.com" 
+                    href="mailto:contact@InstaCure.com" 
                     className="text-neutral-300 hover:text-primary-400 transition-colors duration-200"
                   >
-                    contact@instadoc.com
+                    contact@InstaCure.com
                   </a>
                 </div>
               </div>
@@ -234,7 +234,7 @@ const Footer = () => {
           <div className="py-8 border-t border-neutral-700">
             <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
               <div className="flex flex-wrap items-center gap-6 text-sm text-neutral-400">
-                <p>&copy; {currentYear} InstaDoc. Tous droits réservés.</p>
+                <p>&copy; {currentYear} InstaCure. Tous droits réservés.</p>
                 <div className="flex gap-4">
                   {legalLinks.map((link, index) => (
                     <Link
@@ -248,28 +248,7 @@ const Footer = () => {
                 </div>
               </div>
               
-              <div className="flex items-center justify-center lg:justify-between gap-6 text-sm text-neutral-400">
-                <div className="flex items-center gap-3">
-                  <span>Fait avec</span>
-                  <FaHeart className="text-red-400 animate-pulse" />
-                  <span>en Tunisie</span>
-                  <span className="mx-2">•</span>
-                  <span>Powered by</span>
-                  <a 
-                    href="https://facebook.com/btechsolutions.io" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="hover:scale-110 transition-transform duration-200"
-                    title="B-Tech Solutions"
-                  >
-                    <img 
-                      src={btechIcon} 
-                      alt="B-Tech Solutions" 
-                      className="w-7 h-7 opacity-80 hover:opacity-100 transition-opacity duration-200"
-                    />
-                  </a>
-                </div>
-              </div>
+              
             </div>
           </div>
         </div>

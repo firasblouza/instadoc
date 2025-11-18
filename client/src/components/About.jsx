@@ -67,7 +67,7 @@ const About = ({ aboutRef }) => {
                 </span>
               </h2>
               <p className="body-large">
-                Chez InstaDoc, nous aspirons à améliorer la santé et le bien-être de tous 
+                Chez InstaCure, nous aspirons à améliorer la santé et le bien-être de tous 
                 en faisant de la consultation médicale un processus fluide, accessible et fiable.
               </p>
             </div>

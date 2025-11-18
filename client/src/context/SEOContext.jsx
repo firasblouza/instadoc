@@ -40,33 +40,33 @@ export const SEOProvider = ({ children }) => {
   const getFallbackSEO = (pageName) => {
     const fallbacks = {
       home: {
-        title: "InstaDoc - Plateforme de Télémédecine",
-        description: "InstaDoc est votre plateforme de télémédecine en Tunisie. Consultez des médecins qualifiés en ligne, trouvez des médicaments et laboratoires, et gérez votre santé facilement.",
-        keywords: "télémédecine, consultation médicale, médecin en ligne, santé, Tunisie, InstaDoc"
+        title: "InstaCure - Plateforme de Télémédecine",
+        description: "InstaCure est votre plateforme de télémédecine en Tunisie. Consultez des médecins qualifiés en ligne, trouvez des médicaments et laboratoires, et gérez votre santé facilement.",
+        keywords: "télémédecine, consultation médicale, médecin en ligne, santé, Tunisie, InstaCure"
       },
       doctors: {
-        title: "Médecins - InstaDoc",
-        description: "Découvrez nos médecins qualifiés sur InstaDoc. Trouvez le spécialiste qu'il vous faut pour votre consultation médicale en ligne.",
+        title: "Médecins - InstaCure",
+        description: "Découvrez nos médecins qualifiés sur InstaCure. Trouvez le spécialiste qu'il vous faut pour votre consultation médicale en ligne.",
         keywords: "médecins, spécialistes, consultation médicale, télémédecine"
       },
       medicines: {
-        title: "Médicaments - InstaDoc",
-        description: "Consultez notre catalogue de médicaments sur InstaDoc. Informations détaillées et prix des médicaments disponibles.",
+        title: "Médicaments - InstaCure",
+        description: "Consultez notre catalogue de médicaments sur InstaCure. Informations détaillées et prix des médicaments disponibles.",
         keywords: "médicaments, pharmacie, prix, catalogue, santé"
       },
       labs: {
-        title: "Laboratoires - InstaDoc",
+        title: "Laboratoires - InstaCure",
         description: "Trouvez les laboratoires d'analyses médicales près de chez vous. Informations de contact et localisation des laboratoires partenaires.",
         keywords: "laboratoires, analyses médicales, examens, santé"
       },
       blog: {
-        title: "Blog Santé - InstaDoc",
-        description: "Découvrez nos articles de santé et conseils médicaux sur le blog InstaDoc. Restez informé sur votre santé.",
+        title: "Blog Santé - InstaCure",
+        description: "Découvrez nos articles de santé et conseils médicaux sur le blog InstaCure. Restez informé sur votre santé.",
         keywords: "blog santé, conseils médicaux, articles santé, bien-être"
       },
       contact: {
-        title: "Contact - InstaDoc",
-        description: "Contactez l'équipe InstaDoc pour toute question ou assistance. Nous sommes là pour vous aider.",
+        title: "Contact - InstaCure",
+        description: "Contactez l'équipe InstaCure pour toute question ou assistance. Nous sommes là pour vous aider.",
         keywords: "contact, support, assistance, aide"
       }
     };
@@ -111,7 +111,7 @@ export const SEOProvider = ({ children }) => {
       'og:description': seoData.description,
       'og:image': seoData.image,
       'og:type': 'website',
-      'og:site_name': 'InstaDoc'
+      'og:site_name': 'InstaCure'
     };
 
     Object.entries(ogTags).forEach(([property, content]) => {

@@ -72,7 +72,7 @@ const Navbar = () => {
             <Link to="/" className="flex items-center group">
               <img 
                 src={logo} 
-                alt="InstaDoc Logo" 
+                alt="InstaCure Logo" 
                 className="h-10 sm:h-12 group-hover:scale-105 transition-transform duration-200"
               />
               </Link>

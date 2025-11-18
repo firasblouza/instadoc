@@ -223,7 +223,7 @@ const createNotificationForEvent = async (eventType, data) => {
       case "user_welcome":
         notificationData = {
           userId: data.userId,
-          title: "Bienvenue sur InstaDoc",
+          title: "Bienvenue sur InstaCure",
           message: "Votre compte a été créé avec succès. Découvrez toutes nos fonctionnalités!",
           type: "welcome",
           priority: "medium",

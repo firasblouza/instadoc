@@ -95,49 +95,49 @@ const userData = {
 
 const ratings = [
   {
-    user: "Firas Blouza",
+    user: "Tasnim Benslema",
     rating: "3.5",
     comment:
       "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A quia cumque necessitatibus veniam quaerat molestias cupiditate molestiae vel aliquid possimus."
   },
   {
-    user: "Firas Blouza",
+    user: "Tasnim Benslema",
     rating: "3.5",
     comment:
       "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A quia cumque necessitatibus veniam quaerat molestias cupiditate molestiae vel aliquid possimus."
   },
   {
-    user: "Firas Blouza",
+    user: "Tasnim Benslema",
     rating: "3.5",
     comment:
       "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A quia cumque necessitatibus veniam quaerat molestias cupiditate molestiae vel aliquid possimus."
   },
   {
-    user: "Firas Blouza",
+    user: "Tasnim Benslema",
     rating: "3.5",
     comment:
       "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A quia cumque necessitatibus veniam quaerat molestias cupiditate molestiae vel aliquid possimus."
   },
   {
-    user: "Firas Blouza",
+    user: "Tasnim Benslema",
     rating: "3.5",
     comment:
       "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A quia cumque necessitatibus veniam quaerat molestias cupiditate molestiae vel aliquid possimus."
   },
   {
-    user: "Firas Blouza",
+    user: "Tasnim Benslema",
     rating: "3.5",
     comment:
       "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A quia cumque necessitatibus veniam quaerat molestias cupiditate molestiae vel aliquid possimus."
   },
   {
-    user: "Firas Blouza",
+    user: "Tasnim Benslema",
     rating: "3.5",
     comment:
       "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A quia cumque necessitatibus veniam quaerat molestias cupiditate molestiae vel aliquid possimus."
   },
   {
-    user: "Firas Blouza",
+    user: "Tasnim Benslema",
     rating: "3.5",
     comment:
       "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A quia cumque necessitatibus veniam quaerat molestias cupiditate molestiae vel aliquid possimus."

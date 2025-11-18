@@ -391,10 +391,10 @@ const ManageSEO = () => {
                 <div>
                   <h3 className="text-xl font-semibold text-neutral-900 mb-6">Paramètres Généraux</h3>
                   <div className="grid md:grid-cols-2 gap-6">
-                    {renderTextField("siteTitle", "Titre du Site", "InstaDoc - Plateforme de Télémédecine", 60)}
+                    {renderTextField("siteTitle", "Titre du Site", "InstaCure - Plateforme de Télémédecine", 60)}
                     {renderTextField("siteDescription", "Description du Site", "Description courte du site", 160, 3)}
                     {renderKeywordsField("siteKeywords", "Mots-clés Généraux", "télémédecine, santé, médecins")}
-                    {renderTextField("canonicalUrl", "URL Canonique", "https://instadoc.com")}
+                    {renderTextField("canonicalUrl", "URL Canonique", "https://InstaCure.com")}
                   </div>
                 </div>
 
@@ -559,7 +559,7 @@ const ManageSEO = () => {
                       {seoData.siteTitle || "Titre du Site"}
                     </h4>
                     <p className="text-green-700 text-sm">
-                      {seoData.canonicalUrl || "https://instadoc.com"}
+                      {seoData.canonicalUrl || "https://InstaCure.com"}
                     </p>
                     <p className="text-neutral-600 text-sm">
                       {seoData.siteDescription || "Description du site"}

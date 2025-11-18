@@ -154,7 +154,7 @@ const seoSchema = new mongoose.Schema(
       default: `User-agent: *
 Allow: /
 
-Sitemap: https://instadoc.com/sitemap.xml`
+Sitemap: https://InstaCure.com/sitemap.xml`
     },
     
     // Social Media SEO
