@@ -6,6 +6,7 @@ import axios from "../../../api/axios";
 import useLogout from "../../../hooks/useLogout";
 import useAccessToken from "../../../hooks/useAccessToken";
 import LoadingButton from "../../LoadingButton";
+import { useToast } from "../../Notifications/ToastContainer";
 
 const Settings = () => {
   const [pwData, setPwData] = useState({
@@ -18,6 +19,7 @@ const Settings = () => {
   const navigate = useNavigate();
   const logout = useLogout();
   const { accessToken, decodedToken } = useAccessToken();
+  const { showSuccess, showError } = useToast();
 
   const [statusMessage, setStatusMessage] = useState({
     message: "",
@@ -58,7 +60,7 @@ const Settings = () => {
         const path = decodedToken.UserInfo.role === "doctor" ? "doctors" : "users";
         
         const response = await axios.put(
-          `/${path}/${decodedToken.UserInfo.id}`,
+          `/${path}/password/${decodedToken.UserInfo.id}`,
           {
             oldPassword: pwData.oldPassword,
             newPassword: pwData.newPassword
@@ -76,6 +78,7 @@ const Settings = () => {
             message: "Mot de passe modifié avec succès",
             error: false
           });
+          showSuccess("Mot de passe modifié avec succès!");
           setPwData({
             oldPassword: "",
             newPassword: "",
@@ -85,10 +88,12 @@ const Settings = () => {
         }
       }
     } catch (error) {
+      const errorMessage = error.response?.data?.message || "Erreur lors de la modification du mot de passe";
       setStatusMessage({
-        message: "Erreur lors de la modification du mot de passe",
+        message: errorMessage,
         error: true
       });
+      showError(errorMessage);
     } finally {
       setSaving(false);
     }
