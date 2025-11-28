@@ -701,7 +701,7 @@ const Doctor = () => {
                       Réserver consultation
                     </button>
                     <button 
-                      onClick={() => window.open(`tel:${doctor.phoneNumber || '+21621745331'}`, '_self')}
+                      onClick={() => window.open(`tel:${doctor.phoneNumber || '+21699247160'}`, '_self')}
                       className="btn-secondary w-full"
                     >
                       <FaPhone className="mr-2" />

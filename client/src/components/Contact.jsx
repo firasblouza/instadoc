@@ -12,7 +12,6 @@ import {
   FaLinkedin,
   FaGithub
 } from "react-icons/fa";
-import { btechIcon } from "../assets";
 import { useToast } from "./Notifications/ToastContainer";
 import LoadingButton from "./LoadingButton";
 import usePageSEO from "../hooks/usePageSEO";
@@ -69,14 +68,14 @@ const Contact = () => {
     {
       icon: FaMapMarkerAlt,
       title: "Adresse",
-      content: "Cité Ibn Khaldoun, Tunis, Tunisie",
-      action: () => window.open('https://maps.google.com/?q=Cité+Ibn+Khaldoun+Tunis', '_blank')
+      content: "El Manar, Tunis, Tunisie",
+      action: () => window.open('https://maps.google.com/?q=El+Manar+1+Tunis', '_blank')
     },
     {
       icon: FaPhone,
       title: "Téléphone",
-      content: "+216 21 745 331",
-      action: () => window.open('tel:+21621745331', '_self')
+      content: "+216 99 247 160",
+      action: () => window.open('tel:+21699247160', '_self')
     },
     {
       icon: FaEnvelope,

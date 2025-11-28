@@ -16,7 +16,6 @@ import {
 } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { useToast } from "./Notifications/ToastContainer";
-import { btechIcon } from "../assets";
 
 const Footer = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
