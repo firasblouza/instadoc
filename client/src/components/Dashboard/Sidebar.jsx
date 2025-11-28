@@ -4,7 +4,7 @@ import getTabs from "./Tabs";
 import useAccessToken from "../../hooks/useAccessToken";
 import axios from "../../api/axios";
 import { FaChevronLeft } from "react-icons/fa";
-import { logo, btechIcon } from "../../assets";
+import { logo } from "../../assets";
 import AuthContext from "../../context/AuthContext";
 
 /* eslint-disable react/prop-types */

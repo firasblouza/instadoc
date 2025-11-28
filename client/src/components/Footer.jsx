@@ -145,7 +145,7 @@ const Footer = () => {
                 <div className="flex items-start gap-3">
                   <FaMapMarkerAlt className="text-primary-400 mt-1 flex-shrink-0" />
                   <div>
-                    <p className="text-neutral-300">Cité Ibn Khaldoun</p>
+                    <p className="text-neutral-300">El Manar</p>
                     <p className="text-neutral-300">Tunis, Tunisie</p>
                   </div>
                 </div>
@@ -153,10 +153,10 @@ const Footer = () => {
                 <div className="flex items-center gap-3">
                   <FaPhone className="text-primary-400 flex-shrink-0" />
                   <a 
-                    href="tel:+21621745331" 
+                    href="tel:+21699247160" 
                     className="text-neutral-300 hover:text-primary-400 transition-colors duration-200"
                   >
-                    +216 21 745 331
+                    +216 99 247 160
                   </a>
                 </div>
                 
@@ -176,9 +176,9 @@ const Footer = () => {
                 <h5 className="font-medium mb-4 text-white">Suivez-nous</h5>
                 <div className="flex gap-3">
                   {[
-                    { icon: FaFacebook, href: "https://www.facebook.com/firas.blouza", color: "hover:text-blue-400" },
-                    { icon: FaLinkedin, href: "https://www.linkedin.com/in/firas-blouza-a5a785243/", color: "hover:text-blue-500" },
-                    { icon: FaGithub, href: "https://www.github.com/firasblouza", color: "hover:text-gray-400" },
+                    { icon: FaFacebook, href: "https://www.facebook.com/", color: "hover:text-blue-400" },
+                    { icon: FaLinkedin, href: "https://www.linkedin.com/", color: "hover:text-blue-500" },
+                    { icon: FaGithub, href: "https://www.github.com/", color: "hover:text-gray-400" },
                     { icon: FaTwitter, href: "#", color: "hover:text-blue-300" },
                     { icon: FaInstagram, href: "#", color: "hover:text-pink-400" }
                   ].map((social, index) => (

@@ -15,8 +15,6 @@ import DrRight from "./DrRight.png";
 import Doctor3 from "./Doctor3.png";
 import verified from "./verified.png";
 import team from "./team.png";
-import btechLogoLight from "./BTECH-LOGO-LIGHT.png";
-import btechIcon from "./BTECH-ICON.png";
 
 export {
   close,
@@ -36,6 +34,4 @@ export {
   Doctor3,
   verified,
   team,
-  btechLogoLight,
-  btechIcon
 };

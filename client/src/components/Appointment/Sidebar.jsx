@@ -6,7 +6,6 @@ import {
   FaTimes
 } from "react-icons/fa";
 import AuthContext from "../../context/AuthContext";
-import BTechBranding from "../BTechBranding";
 
 import axios from "../../api/axios";
 
@@ -227,7 +226,6 @@ const Sidebar = ({ appointment, isOpen, role, notes, setNotes, socket, handleSid
            {role !== 'doctor' && (
             <p className="text-xs text-center text-neutral-500 md:hidden">Seul le médecin peut terminer la consultation.</p>
           )}
-          <BTechBranding variant="dark" className="justify-center" />
         </div>
       </div>
     </nav>
